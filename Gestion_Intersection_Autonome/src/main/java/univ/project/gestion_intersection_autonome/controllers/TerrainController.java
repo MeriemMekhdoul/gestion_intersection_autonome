@@ -23,7 +23,7 @@ public class TerrainController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
         // Créer l'objet Terrain (il est déjà initialisé avec la grille)
-        terrain = new Terrain();
+        terrain = new Terrain(25,25);
 
         // Dessiner la grille dans le Pane
         dessinerGrille();
@@ -31,7 +31,7 @@ public class TerrainController implements Initializable {
 
     private void dessinerGrille(){
         char[][] grille = terrain.getGrille();
-        int tailleCellule = 50;
+        int tailleCellule = 10;
 
         for (int i=0; i < terrain.getHauteur();i++){
             for (int j = 0; j < terrain.getLargeur(); j++) {
@@ -41,6 +41,8 @@ public class TerrainController implements Initializable {
                 // Définir la couleur en fonction du contenu de la cellule ('R' pour route, '.' pour espace vide)
                 if (grille[i][j] == 'R') {
                     rect.setFill(Color.GRAY);  // Route en gris
+                } else if (grille[i][j] == 'I') {
+                    rect.setFill(Color.YELLOW);  // Intersection en jaune
                 } else {
                     rect.setFill(Color.GREEN);  // Espace vide en vert
                 }

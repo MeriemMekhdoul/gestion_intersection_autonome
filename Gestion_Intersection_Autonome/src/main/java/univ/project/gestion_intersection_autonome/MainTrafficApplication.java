@@ -14,7 +14,7 @@ public class MainTrafficApplication extends Application {
 
 
         FXMLLoader fxmlLoader = new FXMLLoader(MainTrafficApplication.class.getResource("Terrain.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
+        Scene scene = new Scene(fxmlLoader.load(), 400, 300);
         stage.setTitle("Mon Terrain");
         stage.setScene(scene);
         stage.show();
