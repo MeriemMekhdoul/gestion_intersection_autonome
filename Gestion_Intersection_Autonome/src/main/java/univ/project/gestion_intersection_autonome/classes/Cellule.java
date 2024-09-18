@@ -17,27 +17,59 @@ public class Cellule {
 
     private boolean occupee ;
 
-    //constructeur
-    public Cellule {
-
-        this.idVoiture= idVoiture;
-
-        typeZone=null;
-
-        valide=false;
-
-        occupee=false;
-
+    // Constructeur par défaut
+    public Cellule() {
+        this.idVoiture = 0 ;
+        this.typeZone = null;
+        this.valide = false;
+        this.occupee = false;
     }
 
+    // Constructeur avec paramètres
+    public Cellule(int idVoiture, TypeZone typeZone, boolean valide, boolean occupee) {
+        this.idVoiture = idVoiture;
+        this.typeZone = typeZone;
+        this.valide = valide;
+        this.occupee = occupee;
+    }
 
-    //set idVoiture
-    public void getIdVoiture (){};
-    //get idVoiture
-    public int getIdVoiture (){return idVoiture};
+    // Getters et Setters
 
+    public int getIdVoiture() {
+        return idVoiture;
+    }
 
+    public void setIdVoiture(int idVoiture) {
+        this.idVoiture = idVoiture;
+    }
 
+    public TypeZone getTypeZone() {
+        return typeZone;
+    }
 
+    public void setTypeZone(TypeZone typeZone) {
+        this.typeZone = typeZone;
+    }
 
+    public boolean estValide() {
+        return valide;
+    }
+
+    public void estValide(boolean valide) {
+        this.valide = valide;
+    }
+
+    public boolean estOccupee() {
+        return occupee;
+    }
+
+    public void setOccupee(boolean occupee) {
+        this.occupee = occupee;
+    }
 }
+
+
+
+
+
+                }
