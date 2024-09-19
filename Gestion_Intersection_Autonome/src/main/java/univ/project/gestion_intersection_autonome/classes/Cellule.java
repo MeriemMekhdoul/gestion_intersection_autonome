@@ -3,12 +3,6 @@ package univ.project.gestion_intersection_autonome.classes;
 import java.util.*;
 
 public class Cellule {
-
-    public enum TypeZone {
-        CONFLIT,
-        COMMUNICATION
-    }
-
     private int idVoiture;
 
     private TypeZone typeZone ;
@@ -72,4 +66,4 @@ public class Cellule {
 
 
 
-                }
+

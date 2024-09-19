@@ -8,7 +8,7 @@ public class Terrain {
 
     private List<int[]> entrees;  // Liste pour les entrées (positions des cellules)
 
-    //private cellule[][] grille;
+    private Cellule[][] grille_c;
     private int largeur;
     private int hauteur;
 
@@ -32,6 +32,7 @@ public class Terrain {
         this.largeur = _largeur;
         this.hauteur = _hauteur;
         this.grille = new char[largeur][hauteur];
+        this.grille_c = new Cellule[largeur][hauteur];
         entrees = new ArrayList<>();
 
         initialiserGrilleVide();
@@ -61,6 +62,7 @@ public class Terrain {
     }
 
     // Méthode pour générer aléatoirement des routes et intersections
+    // NOTE : si on décide de garder un seul terrain statique cette méthode n'est plus utile
     private void genererRoutes() {
         Random random = new Random();
 
