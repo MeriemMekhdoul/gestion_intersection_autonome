@@ -2,6 +2,8 @@ package univ.project.gestion_intersection_autonome.classes;
 
 import java.util.*;
 
+import static com.almasb.fxgl.core.math.FXGLMath.random;
+
 
 public class Terrain {
     //private char[][] grille;
@@ -38,9 +40,11 @@ public class Terrain {
         entrees = new ArrayList<>();
 
         initialiserGrilleVide();
-        genererRoutes();
+        genererGrille(6 ,10);
 
+        afficherGrille();
     }
+
     public List<int[]> getEntrees() { return entrees;}
 
     /*public char[][] getGrille() {
@@ -67,125 +71,109 @@ public class Terrain {
         }
     }
 
-    // Méthode pour générer aléatoirement des routes et intersections
-    // NOTE : si on décide de garder un seul terrain statique cette méthode n'est plus utile
-    private void genererRoutes() {
+    private void genererLigne(int x) {  // Remplir une route horizontale dans la grille
+        for (int i = 0; i < largeur; i++) {
+
+            grille_c[x][i].estValide(true);
+            grille_c[x + 1][i].estValide(true);
+            grille_c[x][i].setTypeZone(TypeZone.ROUTE);
+            grille_c[x + 1][i].setTypeZone(TypeZone.ROUTE);
+        }
+
+        // Vérifier si les positions sont valides avant d'ajouter les entrées
+        if (x + 1 < hauteur) {
+            entrees.add(new int[]{x + 1, 0});
+        }
+        entrees.add(new int[]{x, largeur - 1});
+    }
+
+    private void genererColonne(int y) {  // Remplir une route verticale dans la grille
+        for (int i = 0; i < hauteur; i++) {
+            // Gérer les intersections
+            if (grille_c[i][y].estValide()) {
+                //if (i + 1 < hauteur && y + 1 < largeur) {
+                    grille_c[i][y].setTypeZone(TypeZone.CONFLIT);
+                    grille_c[i][y + 1].setTypeZone(TypeZone.CONFLIT);
+                    grille_c[i + 1][y].setTypeZone(TypeZone.CONFLIT);
+                    grille_c[i + 1][y + 1].setTypeZone(TypeZone.CONFLIT);
+
+                    // Vérifier les indices avant de définir les zones de communication
+                    //if (y - 1 >= 0 && i - 1 >= 0) {
+                        grille_c[i][y - 1].setTypeZone(TypeZone.COMMUNICATION);
+                        grille_c[i + 1][y - 1].setTypeZone(TypeZone.COMMUNICATION);
+                        grille_c[i - 1][y].setTypeZone(TypeZone.COMMUNICATION);
+                        grille_c[i - 1][y + 1].setTypeZone(TypeZone.COMMUNICATION);
+                    //}
+                    //if (i + 2 < hauteur && y + 2 < largeur) {
+                        grille_c[i][y + 2].setTypeZone(TypeZone.COMMUNICATION);
+                        grille_c[i + 1][y + 2].setTypeZone(TypeZone.COMMUNICATION);
+                        grille_c[i + 2][y].setTypeZone(TypeZone.COMMUNICATION);
+                        grille_c[i + 2][y + 1].setTypeZone(TypeZone.COMMUNICATION);
+                    //}
+                //}
+                i++;  // Sauter la ligne d'après
+            } else {
+                grille_c[i][y].estValide(true);
+                if (y + 1 < largeur) {
+                    grille_c[i][y + 1].estValide(true);
+                }
+                if(grille_c[i][y].getTypeZone()==null){
+                    grille_c[i][y].setTypeZone(TypeZone.ROUTE);
+                    grille_c[i][y + 1].setTypeZone(TypeZone.ROUTE);
+                }
+            }
+        }
+
+        // Ajouter des entrées si les indices sont valides
+        if (y + 1 < largeur) {
+            entrees.add(new int[]{0, y});
+            entrees.add(new int[]{hauteur - 1, y + 1});
+        }
+    }
+
+    private void genererGrille(int espace_min, int espace_max){
         Random random = new Random();
-
-        // Générer le nombre de routes horizontales et verticales
-        int nbr_rh = random.nextInt(4) + 1;  // Entre 1 et 4 routes horizontales
-        int nbr_rv = random.nextInt(4) + 1;  // Entre 1 et 4 routes verticales
-
-
-        // Générer les positions des routes horizontales
-        Set<Integer> positionsHorizontales = new HashSet<>(); // Utiliser un set pour éviter les doublons
-        while (positionsHorizontales.size() < nbr_rh) {
-            int pos = random.nextInt(4,hauteur - 6);
-
-            /*System.out.println("pos H = ");
-            System.out.println(pos);*/
-
-            //  Vérifier que l'écart entre deux routes est d'au moins 4 cases
-            boolean estValide = true;
-            for (int p : positionsHorizontales) {
-                if (Math.abs(p - pos) < 6) {
-                    estValide = false;
-                    System.out.println("pos rejected");
-                    break;
-                }
-            }
-
-            // Si la position est valide, on l'ajoute
-            if (estValide) {
-                positionsHorizontales.add(pos);
-
-                // Remplir la liste des entrées
-                entrees.add(new int[] {pos+1,0});
-                entrees.add(new int[] {pos, largeur-1});
-            }
+        int x_pos = random.nextInt(4,hauteur/2);
+        while(x_pos + 5 < hauteur){
+            genererLigne(x_pos);
+            x_pos += random.nextInt(espace_min,espace_max);
         }
 
-        // Dessiner les routes horizontales
-        for (int pos : positionsHorizontales) {
-            if (pos + 1 < hauteur) {  // Vérifier que pos + 1 n'est pas hors limites
-                for (int i = 0; i < largeur; i++) {
-                    /*grille[pos][i] = 'R';
-                    grille[pos + 1][i] = 'R';*/
-
-                    grille_c[pos][i].estValide(true);
-                    grille_c[pos + 1][i].estValide(true);
-                    grille_c[pos][i].setTypeZone(TypeZone.ROUTE);
-                    grille_c[pos + 1][i].setTypeZone(TypeZone.ROUTE);
-                }
-            }
+        int y_pos = random.nextInt(4,largeur/2);
+        while(y_pos + 5 < largeur){
+            genererColonne(y_pos);
+            y_pos += random.nextInt(espace_min,espace_max);
         }
+    }
 
-        // Générer les positions des routes verticales - même logique de vérification
-        Set<Integer> positionsVerticales = new HashSet<>();
-        while (positionsVerticales.size() < nbr_rv) {
-            int pos = random.nextInt(4,largeur - 6);  // Position aléatoire dans les limites de la grille
-            /*System.out.println("pos V= ");
-            System.out.println(pos);*/
-            // Vérifier si cette position respecte un espacement d'au moins 4 cases avec les autres routes
-            boolean estValide = true;
-            for (int p : positionsVerticales) {
-                if (Math.abs(p - pos) < 6) {  // Vérifie que l'écart est d'au moins 4 cases
-                    estValide = false;
-                    System.out.println("pos rejected");
-                    break;
-                }
-            }
-
-            // Si la position est valide, on l'ajoute
-            if (estValide) {
-                positionsVerticales.add(pos);
-
-                // Remplir la liste des entrées
-                entrees.add(new int[] {0,pos});
-                entrees.add(new int[] {hauteur-1, pos+1});
-            }
-        }
-
-        // Dessiner les routes verticales
-        for (int pos : positionsVerticales) {
-            if (pos + 1 < largeur) {  // Vérifier que pos + 1 n'est pas hors limites-- vérification inutile
-                for (int i = 0; i < hauteur; i++) {
-                    // Gérer les intersections
-                   /* if (grille[i][pos] == 'R') {
-                        grille[i][pos] = 'I';  // 'I' pour intersection
-                        grille[i][pos + 1] = 'I';
-                    } else {
-                        grille[i][pos] = 'R';  // Si pas d'intersection, route normale
-                        grille[i][pos + 1] = 'R';
-                    } */
-
-                    // Gérer les intersections (grille_c)
-                    if (grille_c[i][pos].estValide()) {
-                        grille_c[i][pos].setTypeZone(TypeZone.CONFLIT);  // la zone de conflit
-                        grille_c[i][pos + 1].setTypeZone(TypeZone.CONFLIT);
-                        grille_c[i+1][pos].setTypeZone(TypeZone.CONFLIT);
-                        grille_c[i+1][pos + 1].setTypeZone(TypeZone.CONFLIT);
-
-                        grille_c[i][pos-1].setTypeZone(TypeZone.COMMUNICATION);
-                        grille_c[i+1][pos-1].setTypeZone(TypeZone.COMMUNICATION);
-                        grille_c[i-1][pos].setTypeZone(TypeZone.COMMUNICATION);
-                        grille_c[i-1][pos+1].setTypeZone(TypeZone.COMMUNICATION);
-                        grille_c[i][pos+2].setTypeZone(TypeZone.COMMUNICATION);
-                        grille_c[i+1][pos+2].setTypeZone(TypeZone.COMMUNICATION);
-                        grille_c[i+2][pos].setTypeZone(TypeZone.COMMUNICATION);
-                        grille_c[i+2][pos+1].setTypeZone(TypeZone.COMMUNICATION);
-
-                        i++; // sauter la ligne d'après
-                    } else {
-                        grille_c[i][pos].estValide(true);  // Si pas d'intersection, route normale
-                        grille_c[i][pos + 1].estValide(true);
-                        grille_c[i][pos].setTypeZone(TypeZone.ROUTE);
-                        grille_c[i][pos + 1].setTypeZone(TypeZone.ROUTE);
+    //inutile mais juste pour debug
+    public void afficherGrille() {
+        for (int i = 0; i < hauteur; i++) {
+            for (int j = 0; j < largeur; j++) {
+                if (!grille_c[i][j].estValide()) {
+                    System.out.print(". ");  // Afficher un point pour une cellule non valide
+                } else {
+                    // Afficher selon le type de zone
+                    switch (grille_c[i][j].getTypeZone()) {
+                        case COMMUNICATION:
+                            System.out.print("M ");  // Communication
+                            break;
+                        case CONFLIT:
+                            System.out.print("C ");  // Conflit
+                            break;
+                        case ROUTE:
+                            System.out.print("R ");  // Route
+                            break;
+                        default:
+                            System.out.print("? ");  // Pour gérer un cas inconnu
+                            break;
                     }
                 }
             }
+            System.out.println();  // Passer à la ligne suivante après chaque ligne de la grille
         }
     }
+
 
 
 }

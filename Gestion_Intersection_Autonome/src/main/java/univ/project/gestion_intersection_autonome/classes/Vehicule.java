@@ -2,12 +2,7 @@ package univ.project.gestion_intersection_autonome.classes;
 
 import java.util.Random;
 
-public class Vehicule implements Runnable
-{
-
-    // Énumérations
-    public enum TypeVehicule { VOITURE, URGENCE, BUS }
-    public enum Direction { NORD, SUD, EST, OUEST }
+public class Vehicule implements Runnable {
 
     // Données membres
     private final int id; // sécurise en empêchant toute modification

@@ -3,6 +3,8 @@ package univ.project.gestion_intersection_autonome.controllers;
 import univ.project.gestion_intersection_autonome.classes.Cellule;
 import univ.project.gestion_intersection_autonome.classes.Simulation;
 import univ.project.gestion_intersection_autonome.classes.Terrain;
+
+
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.Pane;
@@ -19,16 +21,13 @@ public class TerrainController implements Initializable {
     //par la suite je vais changer la pane en un élément grid c'est plus logique et pratique
 
     private Terrain terrain;
-    //private Simulation simulation;
 
     @Override
-    //fonction qui s'execute lors du lancement de l'app (lancement de cette page-là donc le terrain initial)
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Dessiner la grille dans le Pane
         dessinerGrille();
     }
 
-    public TerrainController(Simulation s){
+    public TerrainController(Simulation s){ //constructeur
         terrain = s.getTerrain();
     }
 
@@ -53,12 +52,13 @@ public class TerrainController implements Initializable {
                 // Définir la couleur en fonction du contenu de la cellule ('R' pour route, '.' pour espace vide)
                 if (grille_c[i][j].estValide()) {
                     rect.setFill(Color.GRAY);  // Route en gris
-                } else if (grille_c[i][j].getTypeZone() == TypeZone.CONFLIT) {
-                    rect.setFill(Color.RED);  // Intersection en jaune
-                } else if (grille_c[i][j].getTypeZone() == TypeZone.COMMUNICATION){
-                    rect.setFill(Color.YELLOW);  // Espace vide en vert
-                } else {
-                    rect.setFill(Color.GREEN);
+                    if (grille_c[i][j].getTypeZone() == TypeZone.CONFLIT) {
+                        rect.setFill(Color.RED);
+                    } else if (grille_c[i][j].getTypeZone() == TypeZone.COMMUNICATION) {
+                        rect.setFill(Color.YELLOW);  // Intersection en jaune
+                    }
+                }else {
+                    rect.setFill(Color.GREEN); // Espace vide en vert
                 }
 
                 rect.setStroke(Color.BLACK);  // Bordure noire pour mieux voir les cellules

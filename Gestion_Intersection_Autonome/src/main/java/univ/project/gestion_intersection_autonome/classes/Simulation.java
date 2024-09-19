@@ -37,7 +37,7 @@ public class Simulation {
             int[] entree = entrees.get(i % entrees.size());
             Random random ;
             random = new Random();
-            Vehicule.TypeVehicule type = Vehicule.TypeVehicule.values()[random.nextInt(Vehicule.TypeVehicule.values().length)];
+            TypeVehicule type = TypeVehicule.values()[random.nextInt(TypeVehicule.values().length)];
             Vector2D positionDepart = new Vector2D(entree[0], entree[1]); // Position de départ à l'entrée
             Vector2D positionArrivee = new Vector2D(random.nextInt(terrain.getLargeur()), random.nextInt(terrain.getHauteur()));
 
