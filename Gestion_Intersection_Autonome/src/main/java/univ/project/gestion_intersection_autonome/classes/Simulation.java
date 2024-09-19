@@ -25,7 +25,7 @@ public class Simulation {
         List<int[]> entrees = terrain.getEntrees(); // Récupérer les entrées du terrain
 
         for (int i = 0; i < nombre; i++) {
-            // Récupérer une entrée dans l'ordre ou aléatoirement
+            // Récupérer une entrée
             int[] entree = entrees.get(i % entrees.size());
             Random random ;
             random = new Random();

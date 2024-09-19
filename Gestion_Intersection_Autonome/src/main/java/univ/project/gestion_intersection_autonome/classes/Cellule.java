@@ -3,6 +3,7 @@ package univ.project.gestion_intersection_autonome.classes;
 import java.util.*;
 
 public class Cellule {
+
     private int idVoiture;
 
     private TypeZone typeZone ;
