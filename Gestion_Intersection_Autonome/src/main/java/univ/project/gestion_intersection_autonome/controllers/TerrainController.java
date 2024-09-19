@@ -1,6 +1,7 @@
 package univ.project.gestion_intersection_autonome.controllers;
 
 import univ.project.gestion_intersection_autonome.classes.Cellule;
+import univ.project.gestion_intersection_autonome.classes.Simulation;
 import univ.project.gestion_intersection_autonome.classes.Terrain;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -18,21 +19,29 @@ public class TerrainController implements Initializable {
     //par la suite je vais changer la pane en un élément grid c'est plus logique et pratique
 
     private Terrain terrain;
-
+    //private Simulation simulation;
 
     @Override
     //fonction qui s'execute lors du lancement de l'app (lancement de cette page-là donc le terrain initial)
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
-        // Créer l'objet Terrain (il est déjà initialisé avec la grille)
-        terrain = new Terrain(25,25);
-
         // Dessiner la grille dans le Pane
         dessinerGrille();
     }
 
+    public TerrainController(Simulation s){
+        terrain = s.getTerrain();
+    }
+
+    public void setTerrain(Terrain terrain) {
+        this.terrain = terrain;
+    }
+
+    public Terrain getTerrain() {
+        return terrain;
+    }
+
     private void dessinerGrille(){
-        char[][] grille = terrain.getGrille();
+        //char[][] grille = terrain.getGrille();
         Cellule[][] grille_c = terrain.getGrille_c();
         int tailleCellule = 10; //param fixe en dehors ??
 
