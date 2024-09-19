@@ -1,11 +1,14 @@
 package univ.project.gestion_intersection_autonome.controllers;
 
+import univ.project.gestion_intersection_autonome.classes.Cellule;
+import univ.project.gestion_intersection_autonome.classes.Simulation;
 import univ.project.gestion_intersection_autonome.classes.Terrain;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import univ.project.gestion_intersection_autonome.classes.TypeZone;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -16,22 +19,31 @@ public class TerrainController implements Initializable {
     //par la suite je vais changer la pane en un élément grid c'est plus logique et pratique
 
     private Terrain terrain;
-
+    //private Simulation simulation;
 
     @Override
     //fonction qui s'execute lors du lancement de l'app (lancement de cette page-là donc le terrain initial)
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
-        // Créer l'objet Terrain (il est déjà initialisé avec la grille)
-        terrain = new Terrain(25,25);
-
         // Dessiner la grille dans le Pane
         dessinerGrille();
     }
 
+    public TerrainController(Simulation s){
+        terrain = s.getTerrain();
+    }
+
+    public void setTerrain(Terrain terrain) {
+        this.terrain = terrain;
+    }
+
+    public Terrain getTerrain() {
+        return terrain;
+    }
+
     private void dessinerGrille(){
-        char[][] grille = terrain.getGrille();
-        int tailleCellule = 10;
+        //char[][] grille = terrain.getGrille();
+        Cellule[][] grille_c = terrain.getGrille_c();
+        int tailleCellule = 10; //param fixe en dehors ??
 
         for (int i=0; i < terrain.getHauteur();i++){
             for (int j = 0; j < terrain.getLargeur(); j++) {
@@ -39,12 +51,14 @@ public class TerrainController implements Initializable {
                 Rectangle rect = new Rectangle(j * tailleCellule, i * tailleCellule, tailleCellule, tailleCellule);
 
                 // Définir la couleur en fonction du contenu de la cellule ('R' pour route, '.' pour espace vide)
-                if (grille[i][j] == 'R') {
+                if (grille_c[i][j].estValide()) {
                     rect.setFill(Color.GRAY);  // Route en gris
-                } else if (grille[i][j] == 'I') {
-                    rect.setFill(Color.YELLOW);  // Intersection en jaune
+                } else if (grille_c[i][j].getTypeZone() == TypeZone.CONFLIT) {
+                    rect.setFill(Color.RED);  // Intersection en jaune
+                } else if (grille_c[i][j].getTypeZone() == TypeZone.COMMUNICATION){
+                    rect.setFill(Color.YELLOW);  // Espace vide en vert
                 } else {
-                    rect.setFill(Color.GREEN);  // Espace vide en vert
+                    rect.setFill(Color.GREEN);
                 }
 
                 rect.setStroke(Color.BLACK);  // Bordure noire pour mieux voir les cellules
