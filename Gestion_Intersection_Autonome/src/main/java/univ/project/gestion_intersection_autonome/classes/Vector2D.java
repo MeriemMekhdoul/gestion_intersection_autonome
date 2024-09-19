@@ -7,8 +7,8 @@ public class Vector2D
 
     // Constructeur par défaut
     public Vector2D() {
-        this.x = 0;
-        this.y = 0;
+        this.x = 1;
+        this.y = 1;
     }
 
     // Constructeur paramétré

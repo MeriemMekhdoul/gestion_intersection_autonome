@@ -39,6 +39,7 @@ public class Terrain {
         genererRoutes();
 
     }
+    public List<int[]> getEntrees() { return entrees;}
 
     public char[][] getGrille() {
         return grille;

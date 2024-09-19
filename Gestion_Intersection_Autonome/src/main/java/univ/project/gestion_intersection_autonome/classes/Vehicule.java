@@ -20,12 +20,12 @@ public class Vehicule implements Runnable
     private boolean enMouvement;
 
     // Constructeur par défaut
-    public Vehicule() {
+    public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee) {
         this.id = idCompteur++; // incrément automatique
         this.type = TypeVehicule.VOITURE;
-        this.position = new Vector2D(0,0);
-        this.positionDepart = new Vector2D(0,0);
-        this.positionArrivee = new Vector2D(0,0);
+        this.position = new Vector2D(1,1);
+        this.positionDepart = new Vector2D(1,1);
+        this.positionArrivee = new Vector2D(1,1);
     }
 
     // Constructeur paramétré
@@ -67,7 +67,7 @@ public class Vehicule implements Runnable
 
         move(direction); //avancer le véhicule
 
-        System.out.println("Véhicule"+ id +"de type"+ type + "se déplacer en direction"+ direction+"vers"+ position); //afficher la position actuelle du véhicule
+        System.out.println("Véhicule" + id + "de type" + type + "se déplacer en direction" + direction + "vers" + position); //afficher la position actuelle du véhicule
 
         try {
             Thread.sleep(100); // Pause entre chaque mouvement
