@@ -1,7 +1,10 @@
 package univ.project.gestion_intersection_autonome.classes;
 
-public class Vehicule
+import java.util.Random;
+
+public class Vehicule implements Runnable
 {
+
     // Énumérations
     public enum TypeVehicule { VOITURE, URGENCE, BUS }
     public enum Direction { NORD, SUD, EST, OUEST }
@@ -13,7 +16,8 @@ public class Vehicule
     private Vector2D positionDepart;
     private Vector2D positionArrivee;
 
-    private static int idCompteur = 1; // génère un ID pour chaque véhicule
+    private static int idCompteur = 1;// génère un ID pour chaque véhicule
+    private boolean enMouvement;
 
     // Constructeur par défaut
     public Vehicule() {
@@ -31,6 +35,7 @@ public class Vehicule
         this.position = position;
         this.positionDepart = positionDepart;
         this.positionArrivee = positionArrivee;
+        this.enMouvement = true;
     }
 
     // Méthodes
@@ -51,6 +56,27 @@ public class Vehicule
                 break;
         }
     }
+    //lancer le thread
+
+    @Override
+    public void run() {
+
+        Random random = new Random();
+
+        Direction direction = Direction.values()[random.nextInt(Direction.values().length)]; //direction aléatoire
+
+        move(direction); //avancer le véhicule
+
+        System.out.println("Véhicule"+ id +"de type"+ type + "se déplacer en direction"+ direction+"vers"+ position); //afficher la position actuelle du véhicule
+
+        try {
+            Thread.sleep(100); // Pause entre chaque mouvement
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
     public void sendRequest() { }
 
