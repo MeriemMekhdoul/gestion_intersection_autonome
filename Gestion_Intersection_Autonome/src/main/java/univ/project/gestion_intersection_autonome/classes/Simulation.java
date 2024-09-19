@@ -16,9 +16,9 @@ public class Simulation {
 
     public Simulation () { //constructeur par défaut
 
-            terrain = new Terrain(25,25);
+        terrain = new Terrain(25,25);
 
-            vehicules = new ArrayList<>();
+        vehicules = new ArrayList<>();
 
 
         //genererVehiculesAleatoires(5); // Générer 5 véhicules
@@ -28,6 +28,7 @@ public class Simulation {
         return terrain;
     }
     //Générer aléatoirement des véhicules
+
     public void genererVehiculesAleatoires(int nombre){
         List<int[]> entrees = terrain.getEntrees(); // Récupérer les entrées du terrain
 
@@ -62,11 +63,13 @@ public class Simulation {
         terrainController.setTerrain(terrain);
     }
 }
-public static void main(String[] args) {
-                Simulation simulation = new Simulation();
-                simulation.lancerSimulation(); // Lancer la simulation
-            }
-        }
+/*public static void main(String[] args) {
+    Simulation simulation = new Simulation();
+    simulation.lancerSimulation(); // Lancer la simulation
+}
+*/
+
+
 
 
 

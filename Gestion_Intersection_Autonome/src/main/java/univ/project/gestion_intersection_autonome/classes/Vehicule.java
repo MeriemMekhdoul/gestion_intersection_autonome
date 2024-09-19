@@ -70,7 +70,7 @@ public class Vehicule implements Runnable
         System.out.println("Véhicule" + id + "de type" + type + "se déplacer en direction" + direction + "vers" + position); //afficher la position actuelle du véhicule
 
         try {
-            Thread.sleep(100); // Pause entre chaque mouvement
+            Thread.sleep(1000); // Pause entre chaque mouvement
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
