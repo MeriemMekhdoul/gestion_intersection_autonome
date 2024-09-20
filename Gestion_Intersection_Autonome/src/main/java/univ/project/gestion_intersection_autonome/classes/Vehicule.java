@@ -18,9 +18,9 @@ public class Vehicule implements Runnable {
     public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee) {
         this.id = idCompteur++; // incrément automatique
         this.type = TypeVehicule.VOITURE;
-        this.position = new Vector2D(1,1);
-        this.positionDepart = new Vector2D(1,1);
-        this.positionArrivee = new Vector2D(1,1);
+        this.position = new Vector2D(0,0);
+        this.positionDepart = new Vector2D(0,0);
+        this.positionArrivee = new Vector2D(new Random().nextInt(26),new Random().nextInt(26));
     }
 
     // Constructeur paramétré
@@ -51,24 +51,38 @@ public class Vehicule implements Runnable {
                 break;
         }
     }
-    //lancer le thread
+
+    // se déplacer automatiquement vers la destination
+    public void seDeplacerVersDestination()
+    {
+        if (position.getX() < positionArrivee.getX()) {
+            move(Direction.EST);
+        } else if (position.getX() > positionArrivee.getX()) {
+            move(Direction.OUEST);
+        } else if (position.getY() < positionArrivee.getY()) {
+            move(Direction.SUD);
+        } else if (position.getY() > positionArrivee.getY()) {
+            move(Direction.NORD);
+        }
+    }
 
     @Override
-    public void run() {
+    public void run()
+    {
+        while (!position.equals(positionArrivee))
+        {
+            seDeplacerVersDestination();
+            System.out.println("Véhicule " + id + " de type " + type + " se déplace en direction de " + positionArrivee + ". Position actuelle : " + position);
+//            System.out.println("Véhicule " + id + " de type " + type + " se déplace en direction " + direction + " vers la position " + position);
 
-        Random random = new Random();
-
-        Direction direction = Direction.values()[random.nextInt(Direction.values().length)]; //direction aléatoire
-
-        move(direction); //avancer le véhicule
-
-        System.out.println("Véhicule" + id + "de type" + type + "se déplacer en direction" + direction + "vers" + position); //afficher la position actuelle du véhicule
-
-        try {
-            Thread.sleep(1000); // Pause entre chaque mouvement
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            try {
+                Thread.sleep(1000); // Pause entre chaque mouvement
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+
+        System.out.println("Véhicule " + id + " est arrivé à destination en " + positionArrivee);
     }
 
 
