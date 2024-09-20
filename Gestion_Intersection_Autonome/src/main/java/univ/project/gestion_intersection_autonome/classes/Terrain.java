@@ -40,16 +40,13 @@ public class Terrain {
         entrees = new ArrayList<>();
 
         initialiserGrilleVide();
-        genererGrille(6 ,10);
+        genererGrille(8 ,20);
 
         afficherGrille();
     }
 
     public List<int[]> getEntrees() { return entrees;}
 
-    /*public char[][] getGrille() {
-        return grille;
-    }*/
 
     public Cellule[][] getGrille_c() { return grille_c; }
 
@@ -133,15 +130,19 @@ public class Terrain {
 
     private void genererGrille(int espace_min, int espace_max){
         Random random = new Random();
-        int x_pos = random.nextInt(4,hauteur/2);
-        while(x_pos + 5 < hauteur){
+        int x_pos = random.nextInt(4,hauteur/4);
+        int routeGeneree = 0;
+        while((x_pos + 5 < hauteur) && (routeGeneree<4)){
             genererLigne(x_pos);
+            routeGeneree++;
             x_pos += random.nextInt(espace_min,espace_max);
         }
 
-        int y_pos = random.nextInt(4,largeur/2);
-        while(y_pos + 5 < largeur){
+        routeGeneree = 0;
+        int y_pos = random.nextInt(4,largeur/4);
+        while((y_pos + 5 < largeur) && (routeGeneree<4)){
             genererColonne(y_pos);
+            routeGeneree++;
             y_pos += random.nextInt(espace_min,espace_max);
         }
     }

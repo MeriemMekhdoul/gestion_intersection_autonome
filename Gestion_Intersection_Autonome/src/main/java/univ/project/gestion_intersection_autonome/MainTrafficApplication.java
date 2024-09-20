@@ -16,7 +16,7 @@ public class MainTrafficApplication extends Application {
     public void start(Stage stage) throws IOException {
 
         Simulation simulation = new Simulation();
-        simulation.genererVehiculesAleatoires(1);
+        simulation.genererVehiculesAleatoires(2);
 
         FXMLLoader fxmlLoader = new FXMLLoader(MainTrafficApplication.class.getResource("Terrain.fxml"));
         fxmlLoader.setControllerFactory(obj -> new TerrainController(simulation));
