@@ -45,4 +45,15 @@ public class Vector2D
         }
         this.y = y;
     }
+
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
+    }
+
+    @Override
+    public boolean equals (Object object) {
+        if (!(object instanceof Vector2D other)) return false; // vérifie si on compare bien deux vectors
+        return this.x == other.x && this.y == other.y;
+    }
 }
