@@ -20,16 +20,13 @@ import java.util.ResourceBundle;
 
 public class TerrainController implements Initializable {
     @FXML
-    private Pane initialGrid;
-    //par la suite je vais changer la pane en un élément grid c'est plus logique et pratique
-    @FXML
     private GridPane grilleInitiale;
     private Terrain terrain;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        _dessinerGrille();
+        dessinerGrille();
     }
 
     public TerrainController(Simulation s) { //constructeur
@@ -45,36 +42,7 @@ public class TerrainController implements Initializable {
     }
 
     private void dessinerGrille() {
-        //char[][] grille = terrain.getGrille();
-        Cellule[][] grille_c = terrain.getGrille_c();
-        int tailleCellule = 10; //param fixe en dehors ??
-
-        for (int i = 0; i < terrain.getHauteur(); i++) {
-            for (int j = 0; j < terrain.getLargeur(); j++) {
-                // Créer un rectangle pour chaque cellule
-                Rectangle rect = new Rectangle(j * tailleCellule, i * tailleCellule, tailleCellule, tailleCellule);
-
-                // Définir la couleur en fonction du contenu de la cellule ('R' pour route, '.' pour espace vide)
-                if (grille_c[i][j].estValide()) {
-                    rect.setFill(Color.GRAY);  // Route en gris
-                    if (grille_c[i][j].getTypeZone() == TypeZone.CONFLIT) {
-                        rect.setFill(Color.RED);
-                    } else if (grille_c[i][j].getTypeZone() == TypeZone.COMMUNICATION) {
-                        rect.setFill(Color.YELLOW);  // Intersection en jaune
-                    }
-                } else {
-                    rect.setFill(Color.GREEN); // Espace vide en vert
-                }
-
-                rect.setStroke(Color.BLACK);  // Bordure noire pour mieux voir les cellules
-                initialGrid.getChildren().add(rect);  // Ajouter le rectangle au Pane
-            }
-        }
-
-    }
-
-    private void _dessinerGrille() {
-        Cellule[][] grille_c = terrain.getGrille_c();
+        Cellule[][] grille_c = terrain.getGrille();
         int tailleCellule = 10; //param fixe en dehors ??
 
         // Vider la grille avant de dessiner si elle contient déjà des éléments

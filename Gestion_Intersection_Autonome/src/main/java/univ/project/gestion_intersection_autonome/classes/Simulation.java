@@ -1,6 +1,7 @@
 package univ.project.gestion_intersection_autonome.classes;
 
 import univ.project.gestion_intersection_autonome.controllers.TerrainController;
+import univ.project.gestion_intersection_autonome.controllers.VehiculeController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class Simulation {
             Vector2D positionArrivee = new Vector2D(random.nextInt(terrain.getLargeur()), random.nextInt(terrain.getHauteur()));
 
             Vehicule vehicule = new Vehicule(type, positionDepart, positionArrivee);
+            VehiculeController vehiculeController = new VehiculeController(vehicule, terrain);
             vehicules.add(vehicule);
         }
     }

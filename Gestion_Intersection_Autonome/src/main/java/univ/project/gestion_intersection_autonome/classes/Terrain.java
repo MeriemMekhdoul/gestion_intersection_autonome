@@ -6,38 +6,30 @@ import static com.almasb.fxgl.core.math.FXGLMath.random;
 
 
 public class Terrain {
-    //private char[][] grille;
 
     private List<int[]> entrees;  // Liste pour les entrées (positions des cellules)
+    private List<Vector2D> sorties;
+    private List<Vector2D> _entrees;
 
-    private Cellule[][] grille_c;
+    private Cellule[][] grille;
     private int largeur;
     private int hauteur;
 
     // Constructeur par défaut
     public Terrain() {
-        this.largeur = 6;  // Largeur de la grille
-        this.hauteur = 6;  // Hauteur de la grille
-        //essai avec des caractères à la place des cellules
-        /*grille = new char[][] {
-                {'.', '.', 'R', 'R', '.', '.'},
-                {'.', '.', 'R', 'R', '.', '.'},
-                {'R', 'R', 'R', 'R', 'R', 'R'},
-                {'R', 'R', 'R', 'R', 'R', 'R'},
-                {'.', '.', 'R', 'R', '.', '.'},
-                {'.', '.', 'R', 'R', '.', '.'}
-        };*/
-        entrees = new ArrayList<>();
+        _entrees = new ArrayList<>();
+        sorties = new ArrayList<>();
     }
 
     public Terrain(int _largeur, int _hauteur){
         this.largeur = _largeur;
         this.hauteur = _hauteur;
-        //this.grille = new char[largeur][hauteur];
 
-        this.grille_c = new Cellule[largeur][hauteur];
+        this.grille = new Cellule[largeur][hauteur];
 
         entrees = new ArrayList<>();
+        _entrees = new ArrayList<>();
+        sorties = new ArrayList<>();
 
         initialiserGrilleVide();
         genererGrille(8 ,20);
@@ -46,9 +38,11 @@ public class Terrain {
     }
 
     public List<int[]> getEntrees() { return entrees;}
+    public List<Vector2D> get_entrees() { return _entrees;}
+    public List<Vector2D> getSorties() { return sorties;}
 
 
-    public Cellule[][] getGrille_c() { return grille_c; }
+    public Cellule[][] getGrille() { return grille; }
 
     public int getLargeur() {
         return largeur;
@@ -62,8 +56,7 @@ public class Terrain {
     private void initialiserGrilleVide() {
         for (int i = 0; i < hauteur; i++) {
             for (int j = 0; j < largeur; j++) {
-                //grille[i][j] = '.';  // '.' représente un espace vide
-                grille_c[i][j] = new Cellule();
+                grille[i][j] = new Cellule();
             }
         }
     }
@@ -71,52 +64,56 @@ public class Terrain {
     private void genererLigne(int x) {  // Remplir une route horizontale dans la grille
         for (int i = 0; i < largeur; i++) {
 
-            grille_c[x][i].estValide(true);
-            grille_c[x + 1][i].estValide(true);
-            grille_c[x][i].setTypeZone(TypeZone.ROUTE);
-            grille_c[x + 1][i].setTypeZone(TypeZone.ROUTE);
+            grille[x][i].estValide(true);
+            grille[x + 1][i].estValide(true);
+            grille[x][i].setTypeZone(TypeZone.ROUTE);
+            grille[x + 1][i].setTypeZone(TypeZone.ROUTE);
         }
 
         // Vérifier si les positions sont valides avant d'ajouter les entrées
-        if (x + 1 < hauteur) {
+        //if (x + 1 < hauteur) {
             entrees.add(new int[]{x + 1, 0});
-        }
+            _entrees.add(new Vector2D(x + 1,0));
         entrees.add(new int[]{x, largeur - 1});
+        _entrees.add(new Vector2D(x,largeur - 1));
+        sorties.add(new Vector2D(x,0));
+        sorties.add(new Vector2D(x + 1,largeur - 1));
+        //}
     }
 
     private void genererColonne(int y) {  // Remplir une route verticale dans la grille
         for (int i = 0; i < hauteur; i++) {
             // Gérer les intersections
-            if (grille_c[i][y].estValide()) {
+            if (grille[i][y].estValide()) {
                 //if (i + 1 < hauteur && y + 1 < largeur) {
-                    grille_c[i][y].setTypeZone(TypeZone.CONFLIT);
-                    grille_c[i][y + 1].setTypeZone(TypeZone.CONFLIT);
-                    grille_c[i + 1][y].setTypeZone(TypeZone.CONFLIT);
-                    grille_c[i + 1][y + 1].setTypeZone(TypeZone.CONFLIT);
+                    grille[i][y].setTypeZone(TypeZone.CONFLIT);
+                    grille[i][y + 1].setTypeZone(TypeZone.CONFLIT);
+                    grille[i + 1][y].setTypeZone(TypeZone.CONFLIT);
+                    grille[i + 1][y + 1].setTypeZone(TypeZone.CONFLIT);
 
                     // Vérifier les indices avant de définir les zones de communication
                     //if (y - 1 >= 0 && i - 1 >= 0) {
-                        grille_c[i][y - 1].setTypeZone(TypeZone.COMMUNICATION);
-                        grille_c[i + 1][y - 1].setTypeZone(TypeZone.COMMUNICATION);
-                        grille_c[i - 1][y].setTypeZone(TypeZone.COMMUNICATION);
-                        grille_c[i - 1][y + 1].setTypeZone(TypeZone.COMMUNICATION);
+                        grille[i][y - 1].setTypeZone(TypeZone.COMMUNICATION);
+                        grille[i + 1][y - 1].setTypeZone(TypeZone.COMMUNICATION);
+                        grille[i - 1][y].setTypeZone(TypeZone.COMMUNICATION);
+                        grille[i - 1][y + 1].setTypeZone(TypeZone.COMMUNICATION);
                     //}
                     //if (i + 2 < hauteur && y + 2 < largeur) {
-                        grille_c[i][y + 2].setTypeZone(TypeZone.COMMUNICATION);
-                        grille_c[i + 1][y + 2].setTypeZone(TypeZone.COMMUNICATION);
-                        grille_c[i + 2][y].setTypeZone(TypeZone.COMMUNICATION);
-                        grille_c[i + 2][y + 1].setTypeZone(TypeZone.COMMUNICATION);
+                        grille[i][y + 2].setTypeZone(TypeZone.COMMUNICATION);
+                        grille[i + 1][y + 2].setTypeZone(TypeZone.COMMUNICATION);
+                        grille[i + 2][y].setTypeZone(TypeZone.COMMUNICATION);
+                        grille[i + 2][y + 1].setTypeZone(TypeZone.COMMUNICATION);
                     //}
                 //}
                 i++;  // Sauter la ligne d'après
             } else {
-                grille_c[i][y].estValide(true);
+                grille[i][y].estValide(true);
                 if (y + 1 < largeur) {
-                    grille_c[i][y + 1].estValide(true);
+                    grille[i][y + 1].estValide(true);
                 }
-                if(grille_c[i][y].getTypeZone()==null){
-                    grille_c[i][y].setTypeZone(TypeZone.ROUTE);
-                    grille_c[i][y + 1].setTypeZone(TypeZone.ROUTE);
+                if(grille[i][y].getTypeZone()==null){
+                    grille[i][y].setTypeZone(TypeZone.ROUTE);
+                    grille[i][y + 1].setTypeZone(TypeZone.ROUTE);
                 }
             }
         }
@@ -151,11 +148,11 @@ public class Terrain {
     public void afficherGrille() {
         for (int i = 0; i < hauteur; i++) {
             for (int j = 0; j < largeur; j++) {
-                if (!grille_c[i][j].estValide()) {
+                if (!grille[i][j].estValide()) {
                     System.out.print(". ");  // Afficher un point pour une cellule non valide
                 } else {
                     // Afficher selon le type de zone
-                    switch (grille_c[i][j].getTypeZone()) {
+                    switch (grille[i][j].getTypeZone()) {
                         case COMMUNICATION:
                             System.out.print("M ");  // Communication
                             break;
