@@ -16,6 +16,7 @@ public class MainTrafficApplication extends Application {
     public void start(Stage stage) throws IOException {
 
         Simulation simulation = new Simulation();
+        simulation.genererVehiculesAleatoires(1);
 
         FXMLLoader fxmlLoader = new FXMLLoader(MainTrafficApplication.class.getResource("Terrain.fxml"));
         fxmlLoader.setControllerFactory(obj -> new TerrainController(simulation));
@@ -33,6 +34,8 @@ public class MainTrafficApplication extends Application {
         stage.setTitle("Mon Terrain");
         stage.setScene(scene);
         stage.show();
+
+        simulation.lancerSimulation();
     }
 
     public static void main(String[] args) {

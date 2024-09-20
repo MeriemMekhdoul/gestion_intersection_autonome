@@ -9,39 +9,37 @@ import java.util.Random;
 public class Simulation {
 
     private Terrain terrain;
-
+    private ArrayList<Vehicule> vehicules;
     private TerrainController terrainController;
 
-    private ArrayList<Vehicule> vehicules;
-
-    public Simulation () { //constructeur par défaut
-
-        terrain = new Terrain(25,25);
-
+    //constructeur par défaut
+    public Simulation() {
+        terrain = new Terrain(25, 25);
         vehicules = new ArrayList<>();
-
-
-        //genererVehiculesAleatoires(5); // Générer 5 véhicules
     }
 
-    public Terrain getTerrain(){
+    public Terrain getTerrain() {
         return terrain;
     }
-    //Générer aléatoirement des véhicules
 
-    public void genererVehiculesAleatoires(int nombre){
+//    public List<Vehicule> getVehicules() {
+//        return vehicules;
+//    }
+
+    //Générer aléatoirement des véhicules
+    public void genererVehiculesAleatoires(int nombre) {
         List<int[]> entrees = terrain.getEntrees(); // Récupérer les entrées du terrain
 
         for (int i = 0; i < nombre; i++) {
             // Récupérer une entrée
             int[] entree = entrees.get(i % entrees.size());
-            Random random ;
+            Random random;
             random = new Random();
             TypeVehicule type = TypeVehicule.values()[random.nextInt(TypeVehicule.values().length)];
             Vector2D positionDepart = new Vector2D(entree[0], entree[1]); // Position de départ à l'entrée
             Vector2D positionArrivee = new Vector2D(random.nextInt(terrain.getLargeur()), random.nextInt(terrain.getHauteur()));
 
-            Vehicule vehicule = new Vehicule(type,  positionDepart, positionArrivee);
+            Vehicule vehicule = new Vehicule(type, positionDepart, positionArrivee);
             vehicules.add(vehicule);
         }
     }
@@ -63,12 +61,6 @@ public class Simulation {
         terrainController.setTerrain(terrain);
     }
 }
-/*public static void main(String[] args) {
-    Simulation simulation = new Simulation();
-    simulation.lancerSimulation(); // Lancer la simulation
-}
-*/
-
 
 
 
