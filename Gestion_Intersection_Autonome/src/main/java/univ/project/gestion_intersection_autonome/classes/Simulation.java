@@ -34,8 +34,11 @@ public class Simulation {
 
         for (int i = 0; i < nombre; i++) {
             // Récupérer une entrée et une sortie
-            Vector2D positionDepart = entrees.get(i % entrees.size());
-            Vector2D positionArrivee = sorties.get(i % sorties.size());
+            Vector2D positionDepart = entrees.get(i);
+            Vector2D positionArrivee = sorties.get(sorties.size() - i - 1);
+
+            System.out.println("posD.x = " + positionDepart.getX() + "posD.y = " + positionDepart.getY());
+            System.out.println("posA.x = " + positionArrivee.getX() + "posA.y = " + positionArrivee.getY());
 
             Random random = new Random();
             TypeVehicule type = TypeVehicule.values()[random.nextInt(TypeVehicule.values().length)];

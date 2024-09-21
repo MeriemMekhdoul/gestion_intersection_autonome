@@ -152,4 +152,16 @@ public class Terrain {
         }
     }
 
+    public void afficherEntreesEtSorties() {
+        System.out.println("Entrées:");
+        for (Vector2D entree : entrees) {
+            System.out.println("Entrée: (" + entree.getX() + ", " + entree.getY() + ")");
+        }
+
+        System.out.println("Sorties:");
+        for (Vector2D sortie : sorties) {
+            System.out.println("Sortie: (" + sortie.getX() + ", " + sortie.getY() + ")");
+        }
+    }
+
 }

@@ -19,10 +19,10 @@ public class Vehicule implements Runnable {
     // Constructeur par défaut
     public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee) {
         this.id = idCompteur++; // incrément automatique
-        this.type = TypeVehicule.VOITURE;
-        this.position = new Vector2D(0,0);
-        this.positionDepart = new Vector2D(0,0);
-        this.positionArrivee = new Vector2D(new Random().nextInt(26),new Random().nextInt(26));
+        this.type = type; //TypeVehicule.VOITURE;
+        this.position = positionDepart;
+        this.positionDepart = positionDepart; //new Vector2D(0,0);
+        this.positionArrivee = positionArrivee; //new Vector2D(new Random().nextInt(26),new Random().nextInt(26));
     }
 
     // Constructeur paramétré
@@ -121,8 +121,8 @@ public class Vehicule implements Runnable {
             positionDepart = posD; */
             //boucleDeplacement(terrain);
 
-            seDeplacerVersDestination();
             System.out.println("Véhicule " + id + " de type " + type + " se déplace en direction de " + positionArrivee + ". Position actuelle : " + position);
+            seDeplacerVersDestination();
 //            System.out.println("Véhicule " + id + " de type " + type + " se déplace en direction " + direction + " vers la position " + position);
 
             try {
