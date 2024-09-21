@@ -29,16 +29,16 @@ public class Simulation {
 
     //Générer aléatoirement des véhicules
     public void genererVehiculesAleatoires(int nombre) {
-        List<int[]> entrees = terrain.getEntrees(); // Récupérer les entrées du terrain
+        List<Vector2D> entrees = terrain.getEntrees(); // Récupérer les entrées du terrain
+        List<Vector2D> sorties = terrain.getSorties(); // Récupérer les sorties du terrain
 
         for (int i = 0; i < nombre; i++) {
-            // Récupérer une entrée
-            int[] entree = entrees.get(i % entrees.size());
-            Random random;
-            random = new Random();
+            // Récupérer une entrée et une sortie
+            Vector2D positionDepart = entrees.get(i % entrees.size());
+            Vector2D positionArrivee = sorties.get(i % sorties.size());
+
+            Random random = new Random();
             TypeVehicule type = TypeVehicule.values()[random.nextInt(TypeVehicule.values().length)];
-            Vector2D positionDepart = new Vector2D(entree[0], entree[1]); // Position de départ à l'entrée
-            Vector2D positionArrivee = new Vector2D(random.nextInt(terrain.getLargeur()), random.nextInt(terrain.getHauteur()));
 
             Vehicule vehicule = new Vehicule(type, positionDepart, positionArrivee);
             VehiculeController vehiculeController = new VehiculeController(vehicule, terrain);
