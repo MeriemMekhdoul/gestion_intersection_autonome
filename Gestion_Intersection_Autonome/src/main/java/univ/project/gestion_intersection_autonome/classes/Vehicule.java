@@ -97,19 +97,47 @@ public class Vehicule implements Runnable {
     */
 
     // se déplacer automatiquement vers la destination
-    public void seDeplacerVersDestination()
+    //prendre en compte les positions possibles et se déplacer vers la plus optimale selon la destination du véhicule
+    public void seDeplacerVersDestination(Vector2D[]positionsPossibles)
 
     {
-        if (position.getX() < positionArrivee.getX()) {
-            move(Direction.EST);
-        } else if (position.getX() > positionArrivee.getX()) {
+        // choisir la meilleure position à prendre pour atteindre la destination
+        Vector2D posoptimale=choisirPositionOptimale(positionsPossibles);
+        if (posoptimale.getX() < position.getX()) {
             move(Direction.OUEST);
-        } else if (position.getY() < positionArrivee.getY()) {
-            move(Direction.SUD);
-        } else if (position.getY() > positionArrivee.getY()) {
+        } else if (posoptimale.getX() > position.getX()) {
+            move(Direction.EST);
+        } else if (posoptimale.getY() < position.getY()) {
             move(Direction.NORD);
+        } else if (posoptimale.getY() > position.getY()) {
+            move(Direction.SUD);
         }
     }
+    //methode qui determine la position par laquelle le véhicule passe selon le chemin le plus court , prend un paramètre un tableau de Vector2D contenant les positions possible (lien avec VC?)
+    public Vector2D choisirPositionOptimale(Vector2D[] positionsPossibles) {
+        //position optimale initialisé par le premier Vector2D du tableau ; valeur par défaut
+        Vector2D posoptimale = positionsPossibles[0];
+        //calculer distance entre premiere position et la position de destination , celle ci est stockée dans la variable distanceMin
+        double distanceMin = DistanceVersDestination(posoptimale);
+
+        // Parcourir toutes les positions possibles et choisir celle qui est la plus proche a la position de destinantion (la distance la plus courte)
+        for (Vector2D position : positionsPossibles) {
+            double distance = DistanceVersDestination(position);
+            if (distance < distanceMin) {
+                posoptimale = position;
+                distanceMin = distance;
+            }
+
+        }
+        return posoptimale;
+    }
+    // Algorithme pour calculer la distance vers la destination ; formule de la distance euclidienne.
+    private double DistanceVersDestination(Vector2D position) {
+        return Math.sqrt(Math.pow(positionArrivee.getX() - position.getX(), 2) +
+                Math.pow(positionArrivee.getY() - position.getY(), 2));
+    }
+
+
 
     @Override
     public void run()
@@ -122,7 +150,7 @@ public class Vehicule implements Runnable {
             //boucleDeplacement(terrain);
 
             System.out.println("Véhicule " + id + " de type " + type + " se déplace en direction de " + positionArrivee + ". Position actuelle : " + position);
-            seDeplacerVersDestination();
+            seDeplacerVersDestination(); //lien avec vc
 //            System.out.println("Véhicule " + id + " de type " + type + " se déplace en direction " + direction + " vers la position " + position);
 
             try {
