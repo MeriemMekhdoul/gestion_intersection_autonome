@@ -1,18 +1,14 @@
 package univ.project.gestion_intersection_autonome.classes;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-public class Vehicule implements Runnable {
-/** Rajouter la fonction qui prend les 3 positions possibles et choisir la direction optimale parmi ces choix et move la voiture **/
+public class Vehicule {
     // Données membres
     private final int id; // sécurise en empêchant toute modification
-    private TypeVehicule type;
+    private TypeVehicule type;  //final non ?
     private Vector2D position;
     private Vector2D positionDepart;
     private Vector2D positionArrivee;
-
     private static int idCompteur = 1;// génère un ID pour chaque véhicule
     private boolean enMouvement;
 
@@ -21,8 +17,9 @@ public class Vehicule implements Runnable {
         this.id = idCompteur++; // incrément automatique
         this.type = type; //TypeVehicule.VOITURE;
         this.position = positionDepart;
-        this.positionDepart = positionDepart; //new Vector2D(0,0);
-        this.positionArrivee = positionArrivee; //new Vector2D(new Random().nextInt(26),new Random().nextInt(26));
+        this.positionDepart = positionDepart;
+        this.positionArrivee = positionArrivee;
+
     }
 
     // Constructeur paramétré
@@ -36,73 +33,29 @@ public class Vehicule implements Runnable {
     }
 
     // Méthodes
-    public void move(Direction direction)
-    {
+    public void move(Direction direction) {
         switch (direction) { // La position (0,0) se situe dans le coin supérieur gauche
-            case NORD:
+            case NORD -> {
                 position.setY(position.getY() - 1);
-                break;
-            case SUD:
+            }
+            case SUD -> {
                 position.setY(position.getY() + 1);
-                break;
-            case EST:
+            }
+            case EST -> {
                 position.setX(position.getX() + 1);
-                break;
-            case OUEST:
+            }
+            case OUEST -> {
                 position.setX(position.getX() - 1);
-                break;
-        }
-    }
-/*
-    public void boucleDeplacement(Terrain terrain){
-        boolean valide = false;
-        List<Direction> contraintes = new ArrayList<>();
-
-        while(!valide){
-            Direction D = seDeplacerVersDestination(contraintes);
-            valide = validerDirection(D, terrain);
-            if (!valide){
-                contraintes.add(D);
-            } else {
-                move(D);
-                valide = true;
             }
         }
     }
-
-    public boolean validerDirection(Direction D, Terrain terrain){
-        Vector2D posPotentielle = new Vector2D();
-        switch (D) { // La position (0,0) se situe dans le coin supérieur gauche
-            case NORD:
-                posPotentielle.setY(position.getY() - 1);
-                break;
-            case SUD:
-                posPotentielle.setY(position.getY() + 1);
-                break;
-            case EST:
-                posPotentielle.setX(position.getX() + 1);
-                break;
-            case OUEST:
-                posPotentielle.setX(position.getX() - 1);
-                break;
-        }
-        if (posPotentielle.getX()< terrain.getLargeur() && posPotentielle.getX()> 0 ){
-            if (posPotentielle.getY() < terrain.getHauteur() && posPotentielle.getY() > 0 ) {
-                if(terrain.getGrille()[posPotentielle.getY()][posPotentielle.getX()].estValide())
-                    return  true;
-            }
-        }
-        return false;
-    }
-    */
 
     // se déplacer automatiquement vers la destination
     //prendre en compte les positions possibles et se déplacer vers la plus optimale selon la destination du véhicule
-    public void seDeplacerVersDestination(Vector2D[]positionsPossibles)
-
-    {
+    public void seDeplacerVersDestination(List<Vector2D> positionsPossibles) {
         // choisir la meilleure position à prendre pour atteindre la destination
-        Vector2D posoptimale=choisirPositionOptimale(positionsPossibles);
+        Vector2D posoptimale = choisirPositionOptimale(positionsPossibles);
+
         if (posoptimale.getX() < position.getX()) {
             move(Direction.OUEST);
         } else if (posoptimale.getX() > position.getX()) {
@@ -113,56 +66,35 @@ public class Vehicule implements Runnable {
             move(Direction.SUD);
         }
     }
-    //methode qui determine la position par laquelle le véhicule passe selon le chemin le plus court , prend un paramètre un tableau de Vector2D contenant les positions possible (lien avec VC?)
-    public Vector2D choisirPositionOptimale(Vector2D[] positionsPossibles) {
-        //position optimale initialisé par le premier Vector2D du tableau ; valeur par défaut
-        Vector2D posoptimale = positionsPossibles[0];
-        //calculer distance entre premiere position et la position de destination , celle ci est stockée dans la variable distanceMin
+
+    //methode qui determine la position par laquelle le véhicule passe selon le chemin le plus court , prend un paramètre un tableau de Vector2D contenant les positions possibles
+    public Vector2D choisirPositionOptimale(List<Vector2D> positionsPossibles) {
+        //position optimale initialisée par le premier Vector2D du tableau
+        // valeur par défaut
+        Vector2D posoptimale = positionsPossibles.get(0);
+        //calculer distance entre premiere position et la position de destination, celle-ci est stockée dans la variable distanceMin
         double distanceMin = DistanceVersDestination(posoptimale);
 
-        // Parcourir toutes les positions possibles et choisir celle qui est la plus proche a la position de destinantion (la distance la plus courte)
+        // Parcourir toutes les positions possibles et choisir celle qui est la plus proche a la position de destination (la distance la plus courte)
         for (Vector2D position : positionsPossibles) {
             double distance = DistanceVersDestination(position);
             if (distance < distanceMin) {
                 posoptimale = position;
                 distanceMin = distance;
             }
-
         }
         return posoptimale;
     }
+
     // Algorithme pour calculer la distance vers la destination ; formule de la distance euclidienne.
     private double DistanceVersDestination(Vector2D position) {
         return Math.sqrt(Math.pow(positionArrivee.getX() - position.getX(), 2) +
                 Math.pow(positionArrivee.getY() - position.getY(), 2));
     }
 
-
-
-    @Override
-    public void run()
-    {
-        while (!position.equals(positionArrivee))
-        {
-            /* Terrain terrain = new Terrain(25,25);
-            Vector2D posD = new Vector2D(terrain.get_entrees().get(3).getX(),terrain.get_entrees().get(3).getY());
-            positionDepart = posD; */
-            //boucleDeplacement(terrain);
-
-            System.out.println("Véhicule " + id + " de type " + type + " se déplace en direction de " + positionArrivee + ". Position actuelle : " + position);
-            seDeplacerVersDestination(); //lien avec vc
-//            System.out.println("Véhicule " + id + " de type " + type + " se déplace en direction " + direction + " vers la position " + position);
-
-            try {
-                Thread.sleep(1000); // Pause entre chaque mouvement
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        System.out.println("Véhicule " + id + " est arrivé à destination en " + positionArrivee);
+    public boolean estArrivee() {
+        return position.equals(positionArrivee);
     }
-
 
 
     public void sendRequest() { }
@@ -206,4 +138,5 @@ public class Vehicule implements Runnable {
     public void setPositionArrivee(Vector2D positionArrivee) {
         this.positionArrivee = positionArrivee;
     }
+
 }

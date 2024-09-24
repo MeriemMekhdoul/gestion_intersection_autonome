@@ -9,23 +9,22 @@ import java.util.Random;
 
 public class Simulation {
 
-    private Terrain terrain;
+    private final Terrain terrain;
     private ArrayList<Vehicule> vehicules;
     private TerrainController terrainController;
+    private ArrayList<VehiculeController> controleurs;
 
     //constructeur par défaut
     public Simulation() {
         terrain = new Terrain(25, 25);
         vehicules = new ArrayList<>();
+        controleurs = new ArrayList<>();
     }
 
     public Terrain getTerrain() {
         return terrain;
     }
 
-//    public List<Vehicule> getVehicules() {
-//        return vehicules;
-//    }
 
     //Générer aléatoirement des véhicules
     public void genererVehiculesAleatoires(int nombre) {
@@ -37,15 +36,21 @@ public class Simulation {
             Vector2D positionDepart = entrees.get(i);
             Vector2D positionArrivee = sorties.get(sorties.size() - i - 1);
 
-            System.out.println("posD.x = " + positionDepart.getX() + "posD.y = " + positionDepart.getY());
-            System.out.println("posA.x = " + positionArrivee.getX() + "posA.y = " + positionArrivee.getY());
+            System.out.println("posD" + positionDepart );
+            System.out.println("posA" + positionArrivee);
 
             Random random = new Random();
             TypeVehicule type = TypeVehicule.values()[random.nextInt(TypeVehicule.values().length)];
 
             Vehicule vehicule = new Vehicule(type, positionDepart, positionArrivee);
-            VehiculeController vehiculeController = new VehiculeController(vehicule, terrain);
+
+            Cellule cell = terrain.getCellule(positionDepart); //l'objet n'est pas nécessaire ?
+            cell.setOccupee(true);
+            cell.setIdVoiture(vehicule.getId());
+
+            VehiculeController vehiculeController = new VehiculeController(vehicule, terrain, terrainController);
             vehicules.add(vehicule);
+            controleurs.add(vehiculeController);
         }
     }
 
@@ -53,10 +58,10 @@ public class Simulation {
     public void lancerSimulation() {
         ArrayList<Thread> threads = new ArrayList<>();
 
-        for (Vehicule vehicule : vehicules) {
-            Thread thread = new Thread(vehicule);
+        for (VehiculeController controller : controleurs) {
+            Thread thread = new Thread(controller);
             threads.add(thread);
-            thread.start(); // Lancer chaque véhicule dans un thread
+            thread.start(); // Lancer chaque contrôleur dans un thread
         }
 
     }

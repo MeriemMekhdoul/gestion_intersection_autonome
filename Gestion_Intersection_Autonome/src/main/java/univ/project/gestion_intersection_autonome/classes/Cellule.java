@@ -1,16 +1,11 @@
 package univ.project.gestion_intersection_autonome.classes;
 
-import java.util.*;
-
 public class Cellule {
-
     private int idVoiture;
-
     private TypeZone typeZone ;
-
     private boolean valide ;
-
     private boolean occupee ;
+    private final boolean[] directionsAutorisees = new boolean[4]; // N, E, S, O
 
     // Constructeur par défaut
     public Cellule() {
@@ -60,6 +55,18 @@ public class Cellule {
 
     public void setOccupee(boolean occupee) {
         this.occupee = occupee;
+    }
+
+    // Méthode pour définir les directions autorisées
+     public void setDirectionsAutorisees(boolean nord, boolean est, boolean sud, boolean ouest) {
+        directionsAutorisees[0] = nord;
+        directionsAutorisees[1] = est;
+        directionsAutorisees[2] = sud;
+        directionsAutorisees[3] = ouest;
+    }
+
+    public boolean[] getDirectionsAutorisees() {
+        return directionsAutorisees;
     }
 }
 

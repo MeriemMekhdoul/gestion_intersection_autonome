@@ -2,14 +2,10 @@ package univ.project.gestion_intersection_autonome.classes;
 
 import java.util.*;
 
-import static com.almasb.fxgl.core.math.FXGLMath.random;
-
-
 public class Terrain {
-
     private Cellule[][] grille;
-    private List<Vector2D> sorties;
-    private List<Vector2D> entrees;
+    private final List<Vector2D> sorties;
+    private final List<Vector2D> entrees;
     private int largeur;
     private int hauteur;
 
@@ -31,6 +27,7 @@ public class Terrain {
         genererGrille(8 ,20);
 
         afficherGrille();
+        afficherEntreesEtSorties();
     }
 
     public List<Vector2D> getEntrees() { return entrees;}
@@ -48,103 +45,117 @@ public class Terrain {
 
     // Méthode pour initialiser la grille avec des espaces vides
     private void initialiserGrilleVide() {
-        for (int i = 0; i < hauteur; i++) {
-            for (int j = 0; j < largeur; j++) {
+        for (int i = 0; i < largeur; i++) {
+            for (int j = 0; j < hauteur; j++) {
                 grille[i][j] = new Cellule();
             }
         }
     }
 
-    private void genererLigne(int x) {  // Remplir une route horizontale dans la grille
+    private void genererLigne(int y) {  // Remplir une route horizontale dans la grille
         for (int i = 0; i < largeur; i++) {
-            grille[x][i].estValide(true);
-            grille[x + 1][i].estValide(true);
-            grille[x][i].setTypeZone(TypeZone.ROUTE);
-            grille[x + 1][i].setTypeZone(TypeZone.ROUTE);
+            grille[i][y].estValide(true);
+            grille[i][y + 1].estValide(true);
+
+            grille[i][y].setTypeZone(TypeZone.ROUTE);
+            grille[i][y + 1].setTypeZone(TypeZone.ROUTE);
+
+            grille[i][y].setDirectionsAutorisees(false,false,false,true);
+            grille[i][y + 1].setDirectionsAutorisees(false,true,false,false);
         }
-        entrees.add(new Vector2D(x + 1,0));
-        entrees.add(new Vector2D(x,largeur - 1));
-        sorties.add(new Vector2D(x,0));
-        sorties.add(new Vector2D(x + 1,largeur - 1));
+        entrees.add(new Vector2D(0,y + 1));
+        entrees.add(new Vector2D(largeur - 1, y));
+        sorties.add(new Vector2D(0, y));
+        sorties.add(new Vector2D(largeur - 1, y + 1));
     }
 
-    private void genererColonne(int y) {  // Remplir une route verticale dans la grille
+//peut être améliorée ...
+    private void genererColonne(int x) {  // Remplir une route verticale dans la grille
         for (int i = 0; i < hauteur; i++) {
             // Gérer les intersections
-            if (grille[i][y].estValide()) {
-                    grille[i][y].setTypeZone(TypeZone.CONFLIT);
-                    grille[i][y + 1].setTypeZone(TypeZone.CONFLIT);
-                    grille[i + 1][y].setTypeZone(TypeZone.CONFLIT);
-                    grille[i + 1][y + 1].setTypeZone(TypeZone.CONFLIT);
+            if (grille[x][i].estValide()) {
+                grille[x][i].setTypeZone(TypeZone.CONFLIT);
+                grille[x + 1][i].setTypeZone(TypeZone.CONFLIT);
+                grille[x][i + 1].setTypeZone(TypeZone.CONFLIT);
+                grille[x + 1][i + 1].setTypeZone(TypeZone.CONFLIT);
 
-                    grille[i][y - 1].setTypeZone(TypeZone.COMMUNICATION);
-                    grille[i + 1][y - 1].setTypeZone(TypeZone.COMMUNICATION);
-                    grille[i - 1][y].setTypeZone(TypeZone.COMMUNICATION);
-                    grille[i - 1][y + 1].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x][i].setDirectionsAutorisees(false,false,true,true);
+                grille[x + 1][i].setDirectionsAutorisees(true,false,false,true);
+                grille[x][i + 1].setDirectionsAutorisees(false,true,true,false);
+                grille[x + 1][i + 1].setDirectionsAutorisees(true,true,false,false);
 
-                    grille[i][y + 2].setTypeZone(TypeZone.COMMUNICATION);
-                    grille[i + 1][y + 2].setTypeZone(TypeZone.COMMUNICATION);
-                    grille[i + 2][y].setTypeZone(TypeZone.COMMUNICATION);
-                    grille[i + 2][y + 1].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x - 1][i].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x - 1][i + 1].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x][i - 1].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x + 1][i - 1].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x + 2][i].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x + 2][i + 1].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x][i + 2].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x + 1][i + 2].setTypeZone(TypeZone.COMMUNICATION);
+
+                grille[x - 1][i].setDirectionsAutorisees(false,false,false,true);
+                grille[x - 1][i + 1].setDirectionsAutorisees(false,true,false,false);
+                grille[x][i - 1].setDirectionsAutorisees(false,false,true,false);
+                grille[x + 1][i - 1].setDirectionsAutorisees(true,false,false,false);
+                grille[x + 1][i + 2].setDirectionsAutorisees(true,false,false,false);
+                grille[x + 2][i].setDirectionsAutorisees(false,false,false,true);
+                grille[x + 2][i + 1].setDirectionsAutorisees(false,true,false,false);
+                grille[x][i + 2].setDirectionsAutorisees(false,false,true,false);
 
                 i++;  // Sauter la ligne d'après
             } else {
-                grille[i][y].estValide(true);
-                grille[i][y + 1].estValide(true);
+                grille[x][i].estValide(true);
+                grille[x + 1][i].estValide(true);
 
-                if(grille[i][y].getTypeZone()==null){
-                    grille[i][y].setTypeZone(TypeZone.ROUTE);
-                    grille[i][y + 1].setTypeZone(TypeZone.ROUTE);
+                if(grille[x][i].getTypeZone() == null){
+                    grille[x][i].setTypeZone(TypeZone.ROUTE);
+                    grille[x + 1][i].setTypeZone(TypeZone.ROUTE);
+
+                    grille[x][i].setDirectionsAutorisees(false,false,true,false);
+                    grille[x + 1][i].setDirectionsAutorisees(true,false,false,false);
                 }
             }
         }
 
-        entrees.add(new Vector2D(0,y));
-        entrees.add(new Vector2D(hauteur - 1,y + 1));
-        sorties.add(new Vector2D(0,y + 1));
-        sorties.add(new Vector2D(hauteur - 1, y));
+        entrees.add(new Vector2D(x, 0));
+        entrees.add(new Vector2D(x + 1, hauteur - 1));
+        sorties.add(new Vector2D(x + 1, 0));
+        sorties.add(new Vector2D(x, hauteur - 1));
     }
 
+    // mettre espace_min et espace_max comme constantes en dehors de la methode
     private void genererGrille(int espace_min, int espace_max){
         Random random = new Random();
-        int x_pos = random.nextInt(4,hauteur/4);
+        int y_pos = random.nextInt(4,hauteur/4);
         int routeGeneree = 0;
-        while((x_pos + 5 < hauteur) && (routeGeneree<4)){
-            genererLigne(x_pos);
-            routeGeneree++;
-            x_pos += random.nextInt(espace_min,espace_max);
-        }
-
-        routeGeneree = 0;
-        int y_pos = random.nextInt(4,largeur/4);
-        while((y_pos + 5 < largeur) && (routeGeneree<4)){
-            genererColonne(y_pos);
+        while((y_pos + 5 < hauteur) && (routeGeneree<4)){
+            genererLigne(y_pos);
             routeGeneree++;
             y_pos += random.nextInt(espace_min,espace_max);
         }
+
+        routeGeneree = 0;
+        int x_pos = random.nextInt(4,largeur/4);
+        while((x_pos + 5 < largeur) && (routeGeneree<4)){
+            genererColonne(x_pos);
+            routeGeneree++;
+            x_pos += random.nextInt(espace_min,espace_max);
+        }
     }
 
-    //inutile mais juste pour debug
+    //inutile, seulement pour debug
     public void afficherGrille() {
-        for (int i = 0; i < hauteur; i++) {
-            for (int j = 0; j < largeur; j++) {
-                if (!grille[i][j].estValide()) {
+        for (int i = 0; i < largeur; i++) {
+            for (int j = 0; j < hauteur; j++) {
+                if (!grille[j][i].estValide()) {
                     System.out.print(". ");  // Afficher un point pour une cellule non valide
                 } else {
                     // Afficher selon le type de zone
-                    switch (grille[i][j].getTypeZone()) {
-                        case COMMUNICATION:
-                            System.out.print("M ");  // Communication
-                            break;
-                        case CONFLIT:
-                            System.out.print("C ");  // Conflit
-                            break;
-                        case ROUTE:
-                            System.out.print("R ");  // Route
-                            break;
-                        default:
-                            System.out.print("? ");  // Pour gérer un cas inconnu
-                            break;
+                    switch (grille[j][i].getTypeZone()) {
+                        case COMMUNICATION -> System.out.print("M ");  // Communication
+                        case CONFLIT -> System.out.print("C ");  // Conflit
+                        case ROUTE -> System.out.print("R ");  // Route
+                        default -> System.out.print("? ");  // Pour gérer un cas inconnu
                     }
                 }
             }
@@ -155,13 +166,30 @@ public class Terrain {
     public void afficherEntreesEtSorties() {
         System.out.println("Entrées:");
         for (Vector2D entree : entrees) {
-            System.out.println("Entrée: (" + entree.getX() + ", " + entree.getY() + ")");
+            System.out.println("Entrée: " + entree);
         }
 
         System.out.println("Sorties:");
         for (Vector2D sortie : sorties) {
-            System.out.println("Sortie: (" + sortie.getX() + ", " + sortie.getY() + ")");
+            System.out.println("Sortie: " + sortie);
         }
     }
 
+    // Cette méthode vérifie si une cellule à la position donnée est valide et praticable (est une route)
+    public boolean estCelluleValide(Vector2D position) {
+        int x = position.getX();
+        int y = position.getY();
+
+        // Vérifier que la position est dans les bornes de la grille
+        if (x >= 0 && x < largeur && y >= 0 && y < hauteur) {
+            Cellule cellule = grille[x][y];  // Obtenir la cellule à cette position
+
+            // Vérifier si la cellule est valide (par exemple, une route ou hors terrain)
+            return cellule.estValide();
+        }
+        return false;  // Si hors limites ou non valide
+    }
+    public Cellule getCellule(Vector2D position) {
+        return grille[position.getY()][position.getX()];
+    }
 }
