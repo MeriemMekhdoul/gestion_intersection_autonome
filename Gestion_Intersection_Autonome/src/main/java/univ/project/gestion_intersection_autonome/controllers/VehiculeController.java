@@ -1,10 +1,14 @@
 package univ.project.gestion_intersection_autonome.controllers;
 
 import javafx.application.Platform;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import univ.project.gestion_intersection_autonome.classes.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class VehiculeController implements Runnable {
     private final Vehicule vehicule;
@@ -12,11 +16,13 @@ public class VehiculeController implements Runnable {
     private final TerrainController terrainController;
     private Vector2D anciennePosition;
     private Vector2D nouvellePosition;
+    private Rectangle vehiculeRectangle; // référence du rectangle du véhicule
 
     public VehiculeController(Vehicule vehicule, Terrain terrain, TerrainController terrainController) {
         this.vehicule = vehicule;
         this.terrain = terrain;
         this.terrainController = terrainController;
+        this.vehiculeRectangle = creerRectangleVehicule(vehicule.getType());
     }
 
     public void deplacement()
@@ -74,7 +80,7 @@ public class VehiculeController implements Runnable {
             deplacement();
 
             Platform.runLater(() -> { // runLater permet la maj de la partie graphique sur le thread principal
-                terrainController.updateCellule(anciennePosition,nouvellePosition);
+                terrainController.updateCellule(anciennePosition,nouvellePosition, vehiculeRectangle);
             });
 
             try {
@@ -84,5 +90,27 @@ public class VehiculeController implements Runnable {
             }
         }
         System.out.println("Le véhicule " + vehicule.getId() + " est arrivé à destination !");
+    }
+
+    private Rectangle creerRectangleVehicule(TypeVehicule typeVehicule)
+    {
+        List<Color> listeCouleurs = Arrays.asList(Color.HOTPINK, Color.DEEPPINK, Color.ORANGE, Color.LIME, Color.MAGENTA, Color.CYAN, Color.PURPLE, Color.GOLD);
+        int couleurRandom = new Random().nextInt(listeCouleurs.size());
+
+        switch (typeVehicule)
+        {
+            case VOITURE -> {
+                return new Rectangle(10, 10, listeCouleurs.get(couleurRandom));
+            }
+/*            case URGENCE -> {
+                return new Rectangle(50, 50, Color.BLUE); // voir plus tard pour alterner rouge / bleu
+            }
+            case BUS -> {
+                return new Rectangle(10, 10, Color.BLUE); // voir plus tard
+            }*/
+            default -> {
+                return new Rectangle(10, 10, listeCouleurs.get(couleurRandom));
+            }
+        }
     }
 }
