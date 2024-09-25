@@ -1,5 +1,6 @@
 package univ.project.gestion_intersection_autonome.controllers;
 
+import javafx.application.Platform;
 import univ.project.gestion_intersection_autonome.classes.*;
 
 import java.util.ArrayList;
@@ -18,17 +19,19 @@ public class VehiculeController implements Runnable {
         this.terrainController = terrainController;
     }
 
-    public void deplacement() {
-        List<Vector2D> cellulesPotentielles = getCellulesAutour();
+    public void deplacement()
+    {
+        anciennePosition = vehicule.getPosition().copy(); // on stocke une copie de l'objet sinon cela passe une référence
 
-        anciennePosition = vehicule.getPosition();
         Cellule cell1 = terrain.getCellule(anciennePosition);
         cell1.setOccupee(false);
         cell1.setIdVoiture(0);
 
+        List<Vector2D> cellulesPotentielles = getCellulesAutour();
         vehicule.seDeplacerVersDestination(cellulesPotentielles);
 
-        nouvellePosition = vehicule.getPosition();
+        nouvellePosition = vehicule.getPosition().copy();
+
         Cellule cell2 = terrain.getCellule(nouvellePosition);
         cell2.setOccupee(true);
         cell2.setIdVoiture(vehicule.getId());
@@ -62,11 +65,17 @@ public class VehiculeController implements Runnable {
 
         return cellulesPotentielles;
     }
+
     @Override
-    public void run() {
-        while (!vehicule.estArrivee()) {
+    public void run()
+    {
+        while (!vehicule.estArrivee())
+        {
             deplacement();
-            terrainController.updateCellule(anciennePosition,nouvellePosition);
+
+            Platform.runLater(() -> { // runLater permet la maj de la partie graphique sur le thread principal
+                terrainController.updateCellule(anciennePosition,nouvellePosition);
+            });
 
             try {
                 Thread.sleep(1000); // Pause entre chaque mouvement
