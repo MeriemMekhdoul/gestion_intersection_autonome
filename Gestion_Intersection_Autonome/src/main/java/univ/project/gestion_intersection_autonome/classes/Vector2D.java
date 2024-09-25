@@ -1,5 +1,7 @@
 package univ.project.gestion_intersection_autonome.classes;
 
+import java.util.Objects;
+
 public class Vector2D
 {
     private int x;
@@ -46,6 +48,11 @@ public class Vector2D
         this.y = y;
     }
 
+    // permet d'obtenir une copie de l'objet sachant que les objets en java sont passés par référence
+    public Vector2D copy() {
+        return new Vector2D(this.x, this.y);
+    }
+
     @Override
     public String toString() {
         return "(" + x + ", " + y + ")";
@@ -56,4 +63,11 @@ public class Vector2D
         if (!(object instanceof Vector2D other)) return false; // vérifie si on compare bien deux vectors
         return this.x == other.x && this.y == other.y;
     }
+
+    // permet de vérifier le hash de l'objet, sinon erreur lors de la vérification des positions dans la map de vectors2D
+    @Override
+    public int hashCode () {
+        return Objects.hash(x, y);
+    }
+
 }
