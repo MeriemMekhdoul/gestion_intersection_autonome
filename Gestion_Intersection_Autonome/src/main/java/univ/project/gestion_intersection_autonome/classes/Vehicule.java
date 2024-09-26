@@ -1,6 +1,10 @@
 package univ.project.gestion_intersection_autonome.classes;
 
+import kotlin.Pair;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Vehicule {
     // Données membres
@@ -33,38 +37,27 @@ public class Vehicule {
     }
 
     // Méthodes
-    public void move(Direction direction) {
-        switch (direction) { // La position (0,0) se situe dans le coin supérieur gauche
-            case NORD -> {
-                position.setY(position.getY() - 1);
-            }
-            case SUD -> {
-                position.setY(position.getY() + 1);
-            }
-            case EST -> {
-                position.setX(position.getX() + 1);
-            }
-            case OUEST -> {
-                position.setX(position.getX() - 1);
-            }
-        }
+    public void move(Vector2D pos) {
+        position.setX(pos.getX());
+        position.setY(pos.getY());
     }
 
     // se déplacer automatiquement vers la destination
     //prendre en compte les positions possibles et se déplacer vers la plus optimale selon la destination du véhicule
-    public void seDeplacerVersDestination(List<Vector2D> positionsPossibles) {
+    public Vector2D seDeplacerVersDestination(List<Vector2D> positionsPossibles) {
         // choisir la meilleure position à prendre pour atteindre la destination
         Vector2D posoptimale = choisirPositionOptimale(positionsPossibles);
 
         if (posoptimale.getX() < position.getX()) {
-            move(Direction.OUEST);
+            return posoptimale;
         } else if (posoptimale.getX() > position.getX()) {
-            move(Direction.EST);
+            return posoptimale;
         } else if (posoptimale.getY() < position.getY()) {
-            move(Direction.NORD);
+            return posoptimale;
         } else if (posoptimale.getY() > position.getY()) {
-            move(Direction.SUD);
+            return posoptimale;
         }
+        return null; //revoir ici
     }
 
     //methode qui determine la position par laquelle le véhicule passe selon le chemin le plus court , prend un paramètre un tableau de Vector2D contenant les positions possibles

@@ -190,6 +190,6 @@ public class Terrain {
         return false;  // Si hors limites ou non valide
     }
     public Cellule getCellule(Vector2D position) {
-        return grille[position.getY()][position.getX()];
+        return grille[position.getX()][position.getY()];
     }
 }
