@@ -1,10 +1,6 @@
 package univ.project.gestion_intersection_autonome.classes;
 
-import kotlin.Pair;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Vehicule {
     // Données membres
