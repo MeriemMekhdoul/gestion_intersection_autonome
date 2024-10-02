@@ -33,7 +33,7 @@ public class VehiculeController implements Runnable {
             deplacement();
             if (!majAffichageFaite) {
                 mettreAJourGraphique();
-                pauseEntreMouvements(3000);
+                pauseEntreMouvements(1000);
             } else majAffichageFaite = false;
         }
         System.out.println("Le véhicule " + vehicule.getId() + " est arrivé à destination !");
@@ -92,7 +92,7 @@ public class VehiculeController implements Runnable {
         if (vehiculesDestinataires.size() == 0){
             System.out.println("aucun vehicule en attente donc j'entre dans l'intersection");
             //send message "Engagée" ????
-            intersection.editConfig(vehicule,'E');
+            intersection.editConfig(vehicule,EtatVehicule.ENGAGE);
             avancerIntersection(deplacements);
             //quand on arrive a la fin (la sortie de la zone) on envoie un message de sortie et on supprime l'objet vehicule de la config de l'intersection
             //si on envoie un msg de sortie à l'intersection, ça sera un signal pour supprimer la voiture de sa config et ne pas faire l'action içi

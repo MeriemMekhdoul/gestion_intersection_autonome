@@ -28,14 +28,14 @@ public class Intersection {
         configuration.supprimerVehicule(v);
     }
 
-    public void editConfig(Vehicule v, Character etat) {
+    public void editConfig(Vehicule v, EtatVehicule etat) {
         configuration.editEtat(v.getId(),etat);
     }
 
     public ArrayList<Vehicule> getVehiculesEnAttente() {
         ArrayList<Vehicule> vehiculeEnAttente = new ArrayList<>();
         for (Vehicule v : configuration.getVehicules()) {
-            if (configuration.getEtat(v.getId()) == 'A')
+            if (configuration.getEtat(v.getId()) == EtatVehicule.ATTENTE)
                 vehiculeEnAttente.add(v);
         }
         return vehiculeEnAttente;

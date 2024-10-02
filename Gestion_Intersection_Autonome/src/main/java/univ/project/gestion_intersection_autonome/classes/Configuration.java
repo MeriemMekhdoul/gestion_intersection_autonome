@@ -5,7 +5,7 @@ import java.util.*;
 public class Configuration {
     private List<Vehicule> vehicules;
     private Map<Vehicule, Message> tempsArrivee;
-    private Map<Integer,Character> etatVehicule; //on stocke l'id du véhicule et "A" pour "attente", "E" pour "engagé" - ajouter une énum ?
+    private Map<Integer,EtatVehicule> etatVehicule; //on stocke l'id du véhicule et "A" pour "attente", "E" pour "engagé" - ajouter une énum ?
 
     public Configuration(){
         vehicules = new ArrayList<>();
@@ -19,10 +19,10 @@ public class Configuration {
 
     public void nouveauVehicule(Vehicule v, Message m){
         tempsArrivee.put(v,m);
-        etatVehicule.put(v.getId(),'A');
+        etatVehicule.put(v.getId(),EtatVehicule.ENGAGE);
     }
 
-    public void editEtat(Integer id, Character etat) {
+    public void editEtat(Integer id, EtatVehicule etat) {
         // Si le véhicule existe dans la carte, on met à jour son état
         if (etatVehicule.containsKey(id)) {
             etatVehicule.put(id, etat); // Mise à jour de l'état du véhicule
@@ -32,7 +32,7 @@ public class Configuration {
         }
     }
 
-    public Character getEtat(Integer id) throws NoSuchElementException {
+    public EtatVehicule getEtat(Integer id) throws NoSuchElementException {
         if (!etatVehicule.containsKey(id)) {
             throw new NoSuchElementException("L'identifiant du véhicule " + id + " est introuvable dans la liste des états.");
         }
