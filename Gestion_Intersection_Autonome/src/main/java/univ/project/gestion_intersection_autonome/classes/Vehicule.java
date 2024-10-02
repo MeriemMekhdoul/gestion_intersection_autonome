@@ -1,5 +1,6 @@
 package univ.project.gestion_intersection_autonome.classes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Vehicule {
@@ -12,7 +13,7 @@ public class Vehicule {
     private static int idCompteur = 1;// génère un ID pour chaque véhicule
     private boolean enMouvement;
 
-    // Constructeur par défaut
+    // Constructeur paramétré
     public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee) {
         this.id = idCompteur++; // incrément automatique
         this.type = type; //TypeVehicule.VOITURE;
@@ -22,41 +23,14 @@ public class Vehicule {
 
     }
 
-    // Constructeur paramétré
-    public Vehicule(TypeVehicule type, Vector2D position, Vector2D positionDepart, Vector2D positionArrivee) {
-        this.id = idCompteur++;
-        this.type = type;
-        this.position = position;
-        this.positionDepart = positionDepart;
-        this.positionArrivee = positionArrivee;
-        this.enMouvement = true;
-    }
-
     // Méthodes
     public void move(Vector2D pos) {
         position.setX(pos.getX());
         position.setY(pos.getY());
     }
 
-    // se déplacer automatiquement vers la destination
-    //prendre en compte les positions possibles et se déplacer vers la plus optimale selon la destination du véhicule
-    public Vector2D seDeplacerVersDestination(List<Vector2D> positionsPossibles) {
-        // choisir la meilleure position à prendre pour atteindre la destination
-        Vector2D posoptimale = choisirPositionOptimale(positionsPossibles);
-
-        if (posoptimale.getX() < position.getX()) {
-            return posoptimale;
-        } else if (posoptimale.getX() > position.getX()) {
-            return posoptimale;
-        } else if (posoptimale.getY() < position.getY()) {
-            return posoptimale;
-        } else if (posoptimale.getY() > position.getY()) {
-            return posoptimale;
-        }
-        return null; //revoir ici
-    }
-
-    //methode qui determine la position par laquelle le véhicule passe selon le chemin le plus court , prend un paramètre un tableau de Vector2D contenant les positions possibles
+    //methode qui determine la position par laquelle le véhicule passe selon le chemin le plus court, prend un paramètre un tableau de Vector2D contenant les positions possibles
+    /** On doit rajouter une condition pour prendre en compte le cas d'une impasse si deux chemins ont la même distance **/
     public Vector2D choisirPositionOptimale(List<Vector2D> positionsPossibles) {
         //position optimale initialisée par le premier Vector2D du tableau
         // valeur par défaut
@@ -85,8 +59,10 @@ public class Vehicule {
         return position.equals(positionArrivee);
     }
 
-
     public void sendRequest() { }
+    public void envoieMessage(Message m, ArrayList<Vehicule> vehiculesDestinataires){
+
+    }
 
     public void openRequest() { }
 

@@ -27,9 +27,11 @@ public class Message {
 
         this.objet = null;
 
-        this.itineraire = new ArrayList<>() ; }
+        this.itineraire = new ArrayList<>() ;
+    }
+
     //constructeur parametre
-    public Message(int t, Vehicule v1, ArrayList<Vehicule>v2, Objetmessage objet, ArrayList<Vector2D> itineraire ){
+    public Message(int t, Vehicule v1, ArrayList<Vehicule>v2, Objetmessage objet, ArrayList<Vector2D> itineraire){
 
         this.t=t;
 

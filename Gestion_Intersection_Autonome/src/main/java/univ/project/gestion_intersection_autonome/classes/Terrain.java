@@ -6,6 +6,7 @@ public class Terrain {
     private Cellule[][] grille;
     private final List<Vector2D> sorties;
     private final List<Vector2D> entrees;
+    private final List<Intersection> intersections;
     private int largeur;
     private int hauteur;
 
@@ -13,6 +14,7 @@ public class Terrain {
     public Terrain() {
         entrees = new ArrayList<>();
         sorties = new ArrayList<>();
+        intersections = new ArrayList<>();
     }
     public Terrain(int _largeur, int _hauteur){
         this.largeur = _largeur;
@@ -22,6 +24,7 @@ public class Terrain {
 
         entrees = new ArrayList<>();
         sorties = new ArrayList<>();
+        intersections = new ArrayList<>();
 
         initialiserGrilleVide();
         genererGrille(8 ,20);
@@ -73,7 +76,10 @@ public class Terrain {
     private void genererColonne(int x) {  // Remplir une route verticale dans la grille
         for (int i = 0; i < hauteur; i++) {
             // Gérer les intersections
-            if (grille[x][i].estValide()) {
+            if (grille[x][i].estValide()) { //créer une intersection
+
+                creerIntersection(x,i);
+
                 grille[x][i].setTypeZone(TypeZone.CONFLIT);
                 grille[x + 1][i].setTypeZone(TypeZone.CONFLIT);
                 grille[x][i + 1].setTypeZone(TypeZone.CONFLIT);
@@ -191,5 +197,27 @@ public class Terrain {
     }
     public Cellule getCellule(Vector2D position) {
         return grille[position.getX()][position.getY()];
+    }
+    public Intersection getIntersection(Vector2D position){
+        for (Intersection intersection : intersections) {
+            if (intersection.contientCellule(position))
+                return intersection;
+        }
+        throw new NoSuchElementException("Aucune intersection ne contient la cellule à la position " + position);
+    }
+
+    public void creerIntersection(int x, int i){
+        ArrayList<Vector2D> cellulesComm = new ArrayList<>();
+        cellulesComm.add(new Vector2D(x-1,i+0));
+        cellulesComm.add(new Vector2D(x-1,i+1));
+        cellulesComm.add(new Vector2D(x+0,i-1));
+        cellulesComm.add(new Vector2D(x+1,i-1));
+        cellulesComm.add(new Vector2D(x+2,i+0));
+        cellulesComm.add(new Vector2D(x+2,i+1));
+        cellulesComm.add(new Vector2D(x+0,i+2));
+        cellulesComm.add(new Vector2D(x+1,i+2));
+
+        Intersection intersection = new Intersection(cellulesComm);
+        intersections.add(intersection);
     }
 }

@@ -33,7 +33,7 @@ public class VehiculeController implements Runnable {
             deplacement();
             if (!majAffichageFaite) {
                 mettreAJourGraphique();
-                pauseEntreMouvements(1000);
+                pauseEntreMouvements(3000);
             } else majAffichageFaite = false;
         }
         System.out.println("Le véhicule " + vehicule.getId() + " est arrivé à destination !");
@@ -43,6 +43,7 @@ public class VehiculeController implements Runnable {
         anciennePosition = vehicule.getPosition().copy();
 
         // if cell1 est communication appeler gestion intersection sinon exécuter normalement
+        // ET si on va entrer dans une intersection et pas en sortir
         if(estDansCommunication(anciennePosition) && entreeIntersection){
             System.out.println("je suis dans le if comm");
             //appeler gestion intersection qui va generer un tableau de déplacements,
@@ -56,8 +57,8 @@ public class VehiculeController implements Runnable {
             deplacerHorsIntersection();
             //mettre à jour l'attribut "entree" pour savoir si on arrive de nouveau dans une intersection ou pas
             if (estDansCommunication(nouvellePosition)) {
-                entreeIntersection = true;
                 System.out.println("je m'apprête à entrer dans une nouvelle intersection");
+                entreeIntersection = true;
             }
         }
     }
@@ -65,21 +66,45 @@ public class VehiculeController implements Runnable {
         System.out.println("Déplacement hors intersection");
 /** Il faut vérifier que la case ou on va ne dépasse pas le tableau **/
         List<Vector2D> cellulesPotentielles = getCellulesAutour(vehicule.getPosition());
-        Vector2D positionSuivante = vehicule.seDeplacerVersDestination(cellulesPotentielles);
+        Vector2D positionSuivante = vehicule.choisirPositionOptimale(cellulesPotentielles);
         vehicule.move(positionSuivante);
         // Afficher les informations de déplacement
         System.out.println("Le véhicule " + vehicule.getId() + " se déplace vers : " + vehicule.getPosition());
         mettreAJourCellules();
     }
-    private void entrerIntersection() {
-        System.out.println("Entrée dans une intersection");
-        List<Vector2D> deplacements = gestionIntersection();
-        System.out.println("Itinéraire dans l'intersection : " + deplacements);
-        avancerIntersection(deplacements);
 
-        //puis appeler la gestion des priorités et des conflits
-        //l'envoie des messages est géré içi (I guess ?)
+    private void entrerIntersection() {
+        Intersection intersection = terrain.getIntersection(anciennePosition);
+
+        System.out.println("Entrée dans une intersection");
+        ArrayList<Vector2D> deplacements = gestionIntersection();
+        System.out.println("Itinéraire dans l'intersection : " + deplacements);
+
+        Message message = new Message();
+        //Rajouter un nv constructeur
+        message.setObjet(Objetmessage.INFORMATION);
+        message.setv1(vehicule);
+        message.setItineraire(deplacements);
+
+        intersection.addV(vehicule,message); //l'ajouter a la config
+
+        ArrayList<Vehicule> vehiculesDestinataires = intersection.getVehiculesEnAttente(); //les véhicules qui ne sont pas engagés
+        if (vehiculesDestinataires.size() == 0){
+            System.out.println("aucun vehicule en attente donc j'entre dans l'intersection");
+            //send message "Engagée" ????
+            intersection.editConfig(vehicule,'E');
+            avancerIntersection(deplacements);
+            //quand on arrive a la fin (la sortie de la zone) on envoie un message de sortie et on supprime l'objet vehicule de la config de l'intersection
+            //si on envoie un msg de sortie à l'intersection, ça sera un signal pour supprimer la voiture de sa config et ne pas faire l'action içi
+            intersection.suppV(vehicule);
+            System.out.println("j'ai supp le vehicule de la config");
+        } else {
+            message.setv2(vehiculesDestinataires);
+            vehicule.envoieMessage(message,vehiculesDestinataires);  //gestion des signaux !!!
+            //entrer dans le mode négociation, calculs et gestion des priorités
+        }
     }
+
     private boolean estDansCommunication(Vector2D position) {
         return terrain.getCellule(position).getTypeZone() == TypeZone.COMMUNICATION;
     }
@@ -97,15 +122,15 @@ public class VehiculeController implements Runnable {
 
         return cellulesPotentielles;
     }
-    public List<Vector2D> gestionIntersection(){
-        List<Vector2D> deplacements = new ArrayList<>();
+    public ArrayList<Vector2D> gestionIntersection(){
+        ArrayList<Vector2D> deplacements = new ArrayList<>();
         //tant que je ne suis pas dans une cellule de communication je continue sinon j'arrête et je renvoie mon tableau
         List<Vector2D> cellulesPotentielles = getCellulesAutour(vehicule.getPosition());
-        Vector2D posSuivante = vehicule.seDeplacerVersDestination(cellulesPotentielles);
+        Vector2D posSuivante = vehicule.choisirPositionOptimale(cellulesPotentielles);
         deplacements.add(posSuivante);
         while (!estDansCommunication(posSuivante)) {
             cellulesPotentielles = getCellulesAutour(posSuivante);
-            posSuivante = vehicule.seDeplacerVersDestination(cellulesPotentielles);
+            posSuivante = vehicule.choisirPositionOptimale(cellulesPotentielles);
             deplacements.add(posSuivante);
         }
         return deplacements;

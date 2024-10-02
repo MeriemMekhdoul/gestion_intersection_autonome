@@ -31,7 +31,7 @@ public class MainTrafficApplication extends Application {
         stage.setScene(scene);
         stage.show();
 
-        simulation.genererVehiculesAleatoires(2);
+        simulation.genererVehiculesAleatoires(4);
         simulation.lancerSimulation();
     }
 
