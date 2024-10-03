@@ -1,11 +1,15 @@
 package univ.project.gestion_intersection_autonome.classes;
 
+import javafx.application.Platform;
 import univ.project.gestion_intersection_autonome.controllers.TerrainController;
 import univ.project.gestion_intersection_autonome.controllers.VehiculeController;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Simulation {
 
@@ -13,57 +17,81 @@ public class Simulation {
     private ArrayList<Vehicule> vehicules;
     private TerrainController terrainController;
     private ArrayList<VehiculeController> controleurs;
+    private ScheduledExecutorService scheduler;
 
     //constructeur par défaut
     public Simulation() {
         terrain = new Terrain(25, 25);
         vehicules = new ArrayList<>();
         controleurs = new ArrayList<>();
+        scheduler = Executors.newScheduledThreadPool(1);
     }
 
     public Terrain getTerrain() {
         return terrain;
     }
 
+    //Générer aléatoirement un véhicule
+    public void genererVehiculeAleatoire()
+    {
+        if (vehicules.size() >= 3) {
+//            System.out.println("Limite de véhicules atteinte");
+            return;
+        }
 
-    //Générer aléatoirement des véhicules
-    public void genererVehiculesAleatoires(int nombre) {
         List<Vector2D> entrees = terrain.getEntrees(); // Récupérer les entrées du terrain
         List<Vector2D> sorties = terrain.getSorties(); // Récupérer les sorties du terrain
 
-        for (int i = 0; i < nombre; i++) {
-            // Récupérer une entrée et une sortie
-            Vector2D positionDepart = entrees.get(i);
-            Vector2D positionArrivee = sorties.get(sorties.size() - i - 1);
-
-            System.out.println("posD" + positionDepart );
-            System.out.println("posA" + positionArrivee);
-
-            Random random = new Random();
-            TypeVehicule type = TypeVehicule.values()[random.nextInt(TypeVehicule.values().length)];
-
-            Vehicule vehicule = new Vehicule(type, positionDepart, positionArrivee);
-
-            Cellule cell = terrain.getCellule(positionDepart); //l'objet n'est pas nécessaire ?
-            cell.setOccupee(true);
-            cell.setIdVoiture(vehicule.getId());
-
-            VehiculeController vehiculeController = new VehiculeController(vehicule, terrain, terrainController);
-            vehicules.add(vehicule);
-            controleurs.add(vehiculeController);
+        // vérification du remplissage des entrées et sorties
+        if (entrees.isEmpty() || sorties.isEmpty()) {
+            System.err.println("Erreur : Aucune entrée ou sortie de disponible !");
+            return;
         }
+
+        Vector2D positionDepart = entrees.get(new Random().nextInt(entrees.size()));
+        Vector2D positionArrivee = sorties.get(new Random().nextInt(sorties.size()));
+
+        // en cas de modification des listes après lancement
+        if (sorties.contains(positionDepart)) {
+            System.err.println("Erreur : Position de départ ne peut pas être une sortie : " + positionDepart);
+            return;
+        }
+
+        System.out.println("Départ : " + positionDepart + " | Arrivée : " + positionArrivee);
+
+        TypeVehicule type = TypeVehicule.values()[new Random().nextInt(TypeVehicule.values().length)];
+
+        Vehicule vehicule = new Vehicule(type, positionDepart, positionArrivee);
+
+        Cellule cellule = terrain.getCellule(positionDepart);
+        cellule.setOccupee(true);
+        cellule.setIdVoiture(vehicule.getId());
+
+        VehiculeController vehiculeController = new VehiculeController(vehicule, terrain, terrainController);
+        vehicules.add(vehicule);
+        controleurs.add(vehiculeController);
+
+        Thread thread = new Thread(vehiculeController);
+        thread.start();
+        System.out.println("Véhicule ajouté");
     }
 
     // Lancer les véhicules dans des threads
-    public void lancerSimulation() {
-        ArrayList<Thread> threads = new ArrayList<>();
+    public void lancerSimulation()
+    {
+        scheduler.scheduleAtFixedRate(() -> {
+            Platform.runLater(() -> {
+                genererVehiculeAleatoire();
+            });
+        }, 0, 1, TimeUnit.SECONDS); // Ajoute un véhicule toutes les secondes
+    }
 
-        for (VehiculeController controller : controleurs) {
-            Thread thread = new Thread(controller);
-            threads.add(thread);
-            thread.start(); // Lancer chaque contrôleur dans un thread
-        }
+    // suppression du véhicule de la liste des vehicules et controlleurs
+    public void supprimerVehicule(Vehicule vehicule, VehiculeController vehiculeController) {
+        vehicules.remove(vehicule);
+        controleurs.remove(vehiculeController);
 
+        Platform.runLater(this::genererVehiculeAleatoire);
     }
 
     public void setTerrainController(TerrainController terrainController) {
