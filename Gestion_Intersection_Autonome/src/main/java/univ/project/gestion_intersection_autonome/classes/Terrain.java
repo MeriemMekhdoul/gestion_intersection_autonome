@@ -189,7 +189,17 @@ public class Terrain {
         }
         return false;  // Si hors limites ou non valide
     }
-    public Cellule getCellule(Vector2D position) {
-        return grille[position.getY()][position.getX()];
+
+    public Cellule getCellule(Vector2D position)
+    {
+        int x = position.getX();
+        int y = position.getY();
+
+        if (x >= 0 && x < largeur && y >= 0 && y < hauteur) {
+            return grille[position.getY()][position.getX()];
+        }
+        else {
+            throw new IndexOutOfBoundsException("Position hors limite : " + position);
+        }
     }
 }
