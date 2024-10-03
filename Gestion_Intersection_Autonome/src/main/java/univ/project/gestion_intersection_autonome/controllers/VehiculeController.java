@@ -17,7 +17,7 @@ public class VehiculeController implements Runnable {
     private final TerrainController terrainController;
     private Vector2D anciennePosition;
     private Vector2D nouvellePosition;
-    private Shape vehiculeShape; // référence de la forme du véhicule
+    private final Shape vehiculeShape; // référence de la forme du véhicule
     private boolean entreeIntersection = true; // pour savoir si on rentre ou on sort d'une intersection
     private boolean majAffichageFaite = false;
 
@@ -79,7 +79,7 @@ public class VehiculeController implements Runnable {
 
     private void deplacerHorsIntersection() {
         System.out.println("Déplacement hors intersection");
-/** Il faut vérifier que la case ou on va ne dépasse pas le tableau **/
+        /** Il faut vérifier que la case ou on va ne dépasse pas le tableau **/
         List<Vector2D> cellulesPotentielles = getCellulesAutour(vehicule.getPosition());
         Vector2D positionSuivante = vehicule.choisirPositionOptimale(cellulesPotentielles);
         vehicule.move(positionSuivante);
@@ -104,7 +104,7 @@ public class VehiculeController implements Runnable {
         intersection.addV(vehicule,message); //l'ajouter a la config
 
         ArrayList<Vehicule> vehiculesDestinataires = intersection.getVehiculesEnAttente(); //les véhicules qui ne sont pas engagés
-        if (vehiculesDestinataires.size() == 0){
+        if (vehiculesDestinataires.isEmpty()){
             System.out.println("aucun vehicule en attente donc j'entre dans l'intersection");
             //send message "Engagée" ????
             intersection.editConfig(vehicule,EtatVehicule.ENGAGE);
@@ -125,8 +125,8 @@ public class VehiculeController implements Runnable {
     }
 
 // Retournes les positions des cellules ou la voiture peut se déplacer en vérifiant leur accessibilité et ne pas faire marche arrière
-    public List<Vector2D> getCellulesAutour(){
-        Vector2D positionActuelle = vehicule.getPosition();
+    public List<Vector2D> getCellulesAutour(Vector2D positionActuelle)
+    {
         List<Vector2D> cellulesPotentielles = new ArrayList<>();
         Cellule celluleActuelle = terrain.getGrille()[positionActuelle.getX()][positionActuelle.getY()];
         boolean[] directionsAutorisees = celluleActuelle.getDirectionsAutorisees();
@@ -186,7 +186,7 @@ public class VehiculeController implements Runnable {
     }
 
     private void mettreAJourGraphique() {
-        Platform.runLater(() -> terrainController.updateCellule(anciennePosition, nouvellePosition, vehiculeRectangle));
+        Platform.runLater(() -> terrainController.updateCellule(anciennePosition, nouvellePosition, vehiculeShape));
     }
 
     private void pauseEntreMouvements(int millisecondes) {

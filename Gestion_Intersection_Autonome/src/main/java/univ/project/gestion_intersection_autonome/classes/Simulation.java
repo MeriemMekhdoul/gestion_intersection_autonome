@@ -34,7 +34,7 @@ public class Simulation {
     //Générer aléatoirement un véhicule
     public void genererVehiculeAleatoire()
     {
-        if (vehicules.size() >= 3) {
+        if (vehicules.size() >= 1) {
 //            System.out.println("Limite de véhicules atteinte");
             return;
         }
