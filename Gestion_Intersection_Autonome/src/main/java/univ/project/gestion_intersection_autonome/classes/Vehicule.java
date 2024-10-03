@@ -1,5 +1,6 @@
 package univ.project.gestion_intersection_autonome.classes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Vehicule {
@@ -12,59 +13,19 @@ public class Vehicule {
     private static int idCompteur = 1;// génère un ID pour chaque véhicule
     private boolean enMouvement;
 
-    // Constructeur par défaut
+    // Constructeur paramétré
     public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee) {
         this.id = idCompteur++; // incrément automatique
         this.type = type;
         this.position = positionDepart.copy();
         this.positionDepart = positionDepart.copy();
         this.positionArrivee = positionArrivee.copy();
-
-    }
-
-    // Constructeur paramétré
-    public Vehicule(TypeVehicule type, Vector2D position, Vector2D positionDepart, Vector2D positionArrivee) {
-        this.id = idCompteur++;
-        this.type = type;
-        this.position = position.copy();
-        this.positionDepart = positionDepart.copy();
-        this.positionArrivee = positionArrivee.copy();
-        this.enMouvement = true;
     }
 
     // Méthodes
-    public void move(Direction direction) {
-        switch (direction) { // La position (0,0) se situe dans le coin supérieur gauche
-            case NORD -> {
-                position.setY(position.getY() - 1);
-            }
-            case SUD -> {
-                position.setY(position.getY() + 1);
-            }
-            case EST -> {
-                position.setX(position.getX() + 1);
-            }
-            case OUEST -> {
-                position.setX(position.getX() - 1);
-            }
-        }
-    }
-
-    // se déplacer automatiquement vers la destination
-    //prendre en compte les positions possibles et se déplacer vers la plus optimale selon la destination du véhicule
-    public void seDeplacerVersDestination(List<Vector2D> positionsPossibles) {
-        // choisir la meilleure position à prendre pour atteindre la destination
-        Vector2D posoptimale = choisirPositionOptimale(positionsPossibles);
-
-        if (posoptimale.getX() < position.getX()) {
-            move(Direction.OUEST);
-        } else if (posoptimale.getX() > position.getX()) {
-            move(Direction.EST);
-        } else if (posoptimale.getY() < position.getY()) {
-            move(Direction.NORD);
-        } else if (posoptimale.getY() > position.getY()) {
-            move(Direction.SUD);
-        }
+    public void move(Vector2D pos) {
+        position.setX(pos.getX());
+        position.setY(pos.getY());
     }
 
     //methode qui determine la position par laquelle le véhicule passe selon le chemin le plus court , prend un paramètre un tableau de Vector2D contenant les positions possibles
@@ -103,8 +64,11 @@ public class Vehicule {
         return position.equals(positionArrivee);
     }
 
-
     public void sendRequest() { }
+
+    public void envoieMessage(Message m, ArrayList<Vehicule> vehiculesDestinataires){
+
+    }
 
     public void openRequest() { }
 
