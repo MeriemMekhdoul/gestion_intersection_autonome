@@ -1,10 +1,12 @@
 package univ.project.gestion_intersection_autonome.classes;
 
+import java.util.ArrayList;
 import java.util.List;
-
+import java.io.*;
+import java.net.*;
 public class Vehicule {
     // Données membres
-    private final int id; // sécurise en empêchant toute modification
+    private  final int id; // sécurise en empêchant toute modification
     private TypeVehicule type;  //final non ?
     private Vector2D position;
     private Vector2D positionDepart;
@@ -21,16 +23,27 @@ public class Vehicule {
         this.positionArrivee = positionArrivee;
 
     }
+    private Socket socket;
+    private static PrintWriter out; // Flux de sortie pour envoyer des messages
+    private static BufferedReader in;  // Flux d'entrée pour recevoir des messages
 
     // Constructeur paramétré
-    public Vehicule(TypeVehicule type, Vector2D position, Vector2D positionDepart, Vector2D positionArrivee) {
+    public Vehicule(TypeVehicule type, Vector2D position, Vector2D positionDepart, Vector2D positionArrivee,Socket socket) throws IOException {
         this.id = idCompteur++;
         this.type = type;
         this.position = position;
         this.positionDepart = positionDepart;
         this.positionArrivee = positionArrivee;
         this.enMouvement = true;
+        String host = "";
+        int port = 0;
+        this.socket = new Socket(host, port);
+
+        // Initialize the input and output streams
+        this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.out = new PrintWriter(socket.getOutputStream(), true);
     }
+
 
     // Méthodes
     public void move(Vector2D pos) {
@@ -85,17 +98,71 @@ public class Vehicule {
         return position.equals(positionArrivee);
     }
 
+    //utilisation de sockets pour l'envoi de messages d'un vehicule à un ou plusieurs autres vehicules
+    //methode pour envoyer un message
 
-    public void sendRequest() { }
+    public static void sendMessage(Message message, Vehicule v1,ArrayList<Vehicule>v2) {
+        StringBuilder messageStr = new StringBuilder();
+        StringBuilder idr = new StringBuilder();
+        messageStr.append(message.getT())
+                .append(",")
+                .append(message.getobjet())
+                .append(",")
+                .append(message.getItineraire());
+            
 
-    public void openRequest() { }
+        // Ajouter les IDs des récepteurs
+        for (Vehicule v : message.getv2()) {
+            idr.append(v.getId()).append(","); // Ajout de l'ID du récepteur
 
+            
+        }
+        if (in == null) {
+            System.err.println("Error: Input stream is not initialized for receiving messages.");
+            return;
+        }
+        if (out != null) {
+            out.println(messageStr); // Envoie le message via le flux de sortie du socket
 
+            out.flush(); // Assure que le message est bien envoyé
+        }
+        System.out.println("Voiture " + v1.id +" a envoyé le message "+ messageStr + " à "+  idr);
+    }
+    //methode pour recevoir un message
+    public static void receiveMessage(Message message,ArrayList<Vehicule>v2) {
+        String receivedMessage;
+        StringBuilder idr = new StringBuilder();
+        for (Vehicule v : message.getv2()) {
+            idr.append(v.getId()).append(","); // Ajout de l'ID du récepteur
+
+        }
+
+        try {
+            while ((receivedMessage = in.readLine()) != null) {
+                // Traitement du message reçu
+                System.out.println("Véhicule " + idr + " a reçu: " + receivedMessage);
+
+                //appeler la méthode qui traite le message
+                processMessage(receivedMessage);
+            }
+        } catch (IOException e) {
+            e.printStackTrace(); // si ya erreur , on imprime la trace de la pile d'exécution dans la console
+        }
+    }
+
+    // Méthode pour traiter le message reçu
+    private static void processMessage(String message) {
+        // Décomposer le message
+        String[] parties = message.split(",");
+        //gerer le comportement apres la reception du message
+    }
     // Getters et setters
     public int getId() {
         return id;
     }
-
+    public int setId(int id) {
+        return id;
+    }
     public TypeVehicule getType() {
         return type;
     }

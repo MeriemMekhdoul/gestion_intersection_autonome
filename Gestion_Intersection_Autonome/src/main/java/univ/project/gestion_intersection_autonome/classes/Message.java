@@ -7,17 +7,18 @@ public class Message {
 
     private int t ;
 
-    private Vehicule v1 ;
+    private Vehicule v1 ; //emetteur
 
-    private ArrayList<Vehicule>v2 ;
+    private ArrayList<Vehicule>v2 ;//recepteur(s)
 
-    private Objetmessage objet ;
+    private static Objetmessage objet ;
 
-    private ArrayList<Vector2D> itineraire ;
+    private static ArrayList<Vector2D>itineraire;
+
 
     //constructeur par défaut
 
-    public Message(){
+    public Message(int i, Vehicule v1, ArrayList<Vehicule> v2){
 
         this.t = 0 ;
 
@@ -27,9 +28,12 @@ public class Message {
 
         this.objet = null;
 
-        this.itineraire = new ArrayList<>() ; }
+        this.itineraire = new ArrayList<>() ;
+
+
+    }
     //constructeur parametre
-    public Message(int t, Vehicule v1, ArrayList<Vehicule>v2, Objetmessage objet, ArrayList<Vector2D> itineraire ){
+    public Message(int t, Vehicule v1, ArrayList<Vehicule>v2, Objetmessage objet, ArrayList<Vector2D> itineraire){
 
         this.t=t;
 
@@ -40,6 +44,7 @@ public class Message {
         this.objet=objet;
 
         this.itineraire=itineraire;
+
 
     }
     //setters et getters
@@ -56,13 +61,12 @@ public class Message {
     public ArrayList<Vehicule> getv2() {return v2;}
 
     public void setItineraire(ArrayList<Vector2D>itineraire){this.itineraire=itineraire;}
-    public ArrayList<Vector2D> getItineraire() {
+    public static ArrayList<Vector2D> getItineraire() {
         return itineraire;
     }
 
     public void setObjet(Objetmessage objet){this.objet=objet;}
-    public Objetmessage getobjet() {return objet;}
-
+    public static Objetmessage getobjet() {return objet;}
 
 
 

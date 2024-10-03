@@ -72,6 +72,7 @@ public class VehiculeController implements Runnable {
         mettreAJourCellules();
     }
     private void entrerIntersection() {
+        //appeler les fonctions de  send et receive
         System.out.println("Entrée dans une intersection");
         List<Vector2D> deplacements = gestionIntersection();
         System.out.println("Itinéraire dans l'intersection : " + deplacements);
@@ -113,6 +114,7 @@ public class VehiculeController implements Runnable {
     private void avancerIntersection(List<Vector2D> deplacements) {
         for (Vector2D pos : deplacements) {
             anciennePosition = vehicule.getPosition().copy();
+            //check si la case de devant est occupé ou pas ; en mouvement ou pas
             vehicule.move(pos);
             // Afficher les informations de déplacement
             System.out.println("Le véhicule " + vehicule.getId() + " se déplace vers : " + vehicule.getPosition());
