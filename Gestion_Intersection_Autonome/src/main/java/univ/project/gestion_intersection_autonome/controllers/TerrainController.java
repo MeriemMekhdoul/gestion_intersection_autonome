@@ -2,6 +2,7 @@ package univ.project.gestion_intersection_autonome.controllers;
 
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Shape;
 import univ.project.gestion_intersection_autonome.classes.*;
 
 
@@ -19,12 +20,15 @@ public class TerrainController implements Initializable {
     @FXML
     private GridPane grilleInitiale;
     private Terrain terrain;
+    private Simulation simulation;
 
     private Map<Vector2D, StackPane> mapStackPanes = new HashMap<>(); // stackspanes de chaque élément de la grille
 
-    public TerrainController(Simulation s) { //constructeur
-        terrain = s.getTerrain();
+    public TerrainController(Simulation simulation) { //constructeur
+        this.simulation = simulation;
+        terrain = simulation.getTerrain();
     }
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         dessinerGrille();
@@ -79,17 +83,35 @@ public class TerrainController implements Initializable {
         }
     }
 
-    public void updateCellule(Vector2D anciennePosition, Vector2D nouvellePosition, Rectangle vehiculeRectangle) {
-        // retirer le véhicule à l'ancienne position
-        StackPane ancienneCellule = mapStackPanes.get(anciennePosition);
-        if (ancienneCellule != null) {
-            ancienneCellule.getChildren().remove(vehiculeRectangle); // suppression
-        }
+    public void updateCellule(Vector2D anciennePosition, Vector2D nouvellePosition, Shape vehiculeShape)
+    {
+        effacerVehicule(anciennePosition, vehiculeShape);
+        dessinerVehicule(nouvellePosition, vehiculeShape);
+    }
 
-        // ajouter la voiture
-        StackPane nouvelleCellule = mapStackPanes.get(nouvellePosition);
-        if (nouvelleCellule != null) {
-            nouvelleCellule.getChildren().add(vehiculeRectangle); // affichage
+    public void dessinerVehicule(Vector2D position, Shape vehiculeShape)
+    {
+        StackPane cellule = mapStackPanes.get(position);
+
+        if (cellule != null) {
+            if (!cellule.getChildren().contains(vehiculeShape)) {
+                cellule.getChildren().add(vehiculeShape);
+            } else {
+                System.out.println("Véhicule déjà présent dans la cellule : " + position); // à supprimer après vérif case occupée
+            }
         }
+    }
+
+    public void effacerVehicule(Vector2D position, Shape vehiculeShape)
+    {
+        StackPane cellule = mapStackPanes.get(position);
+
+        if (cellule != null) {
+            cellule.getChildren().remove(vehiculeShape);
+        }
+    }
+
+    public Simulation getSimulation() {
+        return simulation;
     }
 }
