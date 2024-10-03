@@ -15,10 +15,10 @@ public class Vehicule {
     // Constructeur par défaut
     public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee) {
         this.id = idCompteur++; // incrément automatique
-        this.type = type; //TypeVehicule.VOITURE;
-        this.position = positionDepart;
-        this.positionDepart = positionDepart;
-        this.positionArrivee = positionArrivee;
+        this.type = type;
+        this.position = positionDepart.copy();
+        this.positionDepart = positionDepart.copy();
+        this.positionArrivee = positionArrivee.copy();
 
     }
 
@@ -26,9 +26,9 @@ public class Vehicule {
     public Vehicule(TypeVehicule type, Vector2D position, Vector2D positionDepart, Vector2D positionArrivee) {
         this.id = idCompteur++;
         this.type = type;
-        this.position = position;
-        this.positionDepart = positionDepart;
-        this.positionArrivee = positionArrivee;
+        this.position = position.copy();
+        this.positionDepart = positionDepart.copy();
+        this.positionArrivee = positionArrivee.copy();
         this.enMouvement = true;
     }
 
@@ -68,7 +68,14 @@ public class Vehicule {
     }
 
     //methode qui determine la position par laquelle le véhicule passe selon le chemin le plus court , prend un paramètre un tableau de Vector2D contenant les positions possibles
-    public Vector2D choisirPositionOptimale(List<Vector2D> positionsPossibles) {
+    public Vector2D choisirPositionOptimale(List<Vector2D> positionsPossibles)
+    {
+        // dans le cas où le véhicule est en bordure
+        if (positionsPossibles == null || positionsPossibles.isEmpty()) {
+            System.out.println("Aucune position valide pour le véhicule.");
+            return position; // renvoie la position actuelle si aucune position trouvée
+        }
+
         //position optimale initialisée par le premier Vector2D du tableau
         // valeur par défaut
         Vector2D posoptimale = positionsPossibles.get(0);
