@@ -202,7 +202,7 @@ public class Terrain {
         int y = position.getY();
 
         if (x >= 0 && x < largeur && y >= 0 && y < hauteur) {
-            return grille[position.getY()][position.getX()];
+            return grille[position.getX()][position.getY()];
         }
         else {
             throw new IndexOutOfBoundsException("Position hors limite : " + position);
