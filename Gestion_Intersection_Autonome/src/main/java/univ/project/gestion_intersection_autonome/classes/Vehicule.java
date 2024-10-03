@@ -6,35 +6,25 @@ import java.io.*;
 import java.net.*;
 public class Vehicule {
     // Données membres
-    private  final int id; // sécurise en empêchant toute modification
+    private final int id; // sécurise en empêchant toute modification
     private TypeVehicule type;  //final non ?
     private Vector2D position;
     private Vector2D positionDepart;
     private Vector2D positionArrivee;
     private static int idCompteur = 1;// génère un ID pour chaque véhicule
     private boolean enMouvement;
-
-    // Constructeur par défaut
-    public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee) {
-        this.id = idCompteur++; // incrément automatique
-        this.type = type; //TypeVehicule.VOITURE;
-        this.position = positionDepart;
-        this.positionDepart = positionDepart;
-        this.positionArrivee = positionArrivee;
-
-    }
     private Socket socket;
     private static PrintWriter out; // Flux de sortie pour envoyer des messages
     private static BufferedReader in;  // Flux d'entrée pour recevoir des messages
 
+
     // Constructeur paramétré
-    public Vehicule(TypeVehicule type, Vector2D position, Vector2D positionDepart, Vector2D positionArrivee,Socket socket) throws IOException {
-        this.id = idCompteur++;
+    public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee) {
+        this.id = idCompteur++; // incrément automatique
         this.type = type;
-        this.position = position;
-        this.positionDepart = positionDepart;
-        this.positionArrivee = positionArrivee;
-        this.enMouvement = true;
+        this.position = positionDepart.copy();
+        this.positionDepart = positionDepart.copy();
+        this.positionArrivee = positionArrivee.copy();
         String host = "";
         int port = 0;
         this.socket = new Socket(host, port);
@@ -42,7 +32,7 @@ public class Vehicule {
         // Initialize the input and output streams
         this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.out = new PrintWriter(socket.getOutputStream(), true);
-    }
+     }
 
 
     // Méthodes
@@ -51,26 +41,15 @@ public class Vehicule {
         position.setY(pos.getY());
     }
 
-    // se déplacer automatiquement vers la destination
-    //prendre en compte les positions possibles et se déplacer vers la plus optimale selon la destination du véhicule
-    public Vector2D seDeplacerVersDestination(List<Vector2D> positionsPossibles) {
-        // choisir la meilleure position à prendre pour atteindre la destination
-        Vector2D posoptimale = choisirPositionOptimale(positionsPossibles);
-
-        if (posoptimale.getX() < position.getX()) {
-            return posoptimale;
-        } else if (posoptimale.getX() > position.getX()) {
-            return posoptimale;
-        } else if (posoptimale.getY() < position.getY()) {
-            return posoptimale;
-        } else if (posoptimale.getY() > position.getY()) {
-            return posoptimale;
-        }
-        return null; //revoir ici
-    }
-
     //methode qui determine la position par laquelle le véhicule passe selon le chemin le plus court , prend un paramètre un tableau de Vector2D contenant les positions possibles
-    public Vector2D choisirPositionOptimale(List<Vector2D> positionsPossibles) {
+    public Vector2D choisirPositionOptimale(List<Vector2D> positionsPossibles)
+    {
+        // dans le cas où le véhicule est en bordure
+        if (positionsPossibles == null || positionsPossibles.isEmpty()) {
+            System.out.println("Aucune position valide pour le véhicule.");
+            return position; // renvoie la position actuelle si aucune position trouvée
+        }
+
         //position optimale initialisée par le premier Vector2D du tableau
         // valeur par défaut
         Vector2D posoptimale = positionsPossibles.get(0);
@@ -109,13 +88,13 @@ public class Vehicule {
                 .append(message.getobjet())
                 .append(",")
                 .append(message.getItineraire());
-            
+
 
         // Ajouter les IDs des récepteurs
         for (Vehicule v : message.getv2()) {
             idr.append(v.getId()).append(","); // Ajout de l'ID du récepteur
 
-            
+
         }
         if (in == null) {
             System.err.println("Error: Input stream is not initialized for receiving messages.");
