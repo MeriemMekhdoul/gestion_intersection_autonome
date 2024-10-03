@@ -2,7 +2,8 @@ package univ.project.gestion_intersection_autonome.controllers;
 
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Shape;
 import univ.project.gestion_intersection_autonome.classes.*;
 
 import java.util.ArrayList;
@@ -16,13 +17,13 @@ public class VehiculeController implements Runnable {
     private final TerrainController terrainController;
     private Vector2D anciennePosition;
     private Vector2D nouvellePosition;
-    private Rectangle vehiculeRectangle; // référence du rectangle du véhicule
+    private Shape vehiculeShape; // référence de la forme du véhicule
 
     public VehiculeController(Vehicule vehicule, Terrain terrain, TerrainController terrainController) {
         this.vehicule = vehicule;
         this.terrain = terrain;
         this.terrainController = terrainController;
-        this.vehiculeRectangle = creerRectangleVehicule(vehicule.getType());
+        this.vehiculeShape = creerVehiculeShape(vehicule.getType());
     }
 
     public void deplacement()
@@ -43,7 +44,7 @@ public class VehiculeController implements Runnable {
         cell2.setIdVoiture(vehicule.getId());
 
         // Afficher les informations de déplacement
-        System.out.println("Le véhicule " + vehicule.getId() + " se déplace vers : " + vehicule.getPosition());
+        System.out.println("Le véhicule " + vehicule.getId() + " se déplace en " + vehicule.getPosition() + " vers " + vehicule.getPositionArrivee());
     }
 
 // Retournes les positions des cellules ou la voiture peut se déplacer en vérifiant leur accessibilité et ne pas faire marche arrière
@@ -56,16 +57,16 @@ public class VehiculeController implements Runnable {
         boolean[] directionsAutorisees = celluleActuelle.getDirectionsAutorisees();
 
         // Remplir les cellules potentielles en fonction des directions autorisées
-        if (directionsAutorisees[0]) {
+        if (directionsAutorisees[0] && positionActuelle.getY() - 1 >= 0) {
             cellulesPotentielles.add(new Vector2D(positionActuelle.getX(), positionActuelle.getY() - 1));
         }
-        if (directionsAutorisees[1]) {
+        if (directionsAutorisees[1] && positionActuelle.getX() + 1 < terrain.getLargeur()) {
             cellulesPotentielles.add(new Vector2D(positionActuelle.getX() + 1, positionActuelle.getY()));
         }
-        if (directionsAutorisees[2]) {
+        if (directionsAutorisees[2] && positionActuelle.getY() + 1 < terrain.getHauteur()) {
             cellulesPotentielles.add(new Vector2D(positionActuelle.getX(), positionActuelle.getY() + 1));
         }
-        if (directionsAutorisees[3]) {
+        if (directionsAutorisees[3] && positionActuelle.getX() - 1 >= 0) {
             cellulesPotentielles.add(new Vector2D(positionActuelle.getX() - 1, positionActuelle.getY()));
         }
 
@@ -77,22 +78,30 @@ public class VehiculeController implements Runnable {
     {
         while (!vehicule.estArrivee())
         {
-            deplacement();
-
             Platform.runLater(() -> { // runLater permet la maj de la partie graphique sur le thread principal
-                terrainController.updateCellule(anciennePosition,nouvellePosition, vehiculeRectangle);
+                terrainController.updateCellule(anciennePosition,nouvellePosition, vehiculeShape);
             });
 
+            deplacement(); // voir si impact avant ou après l'affichage de la cellule
+
             try {
-                Thread.sleep(1000); // Pause entre chaque mouvement
+                Thread.sleep(500); // Pause entre chaque mouvement
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+
         System.out.println("Le véhicule " + vehicule.getId() + " est arrivé à destination !");
+
+        Platform.runLater(() -> {
+            terrainController.effacerVehicule(nouvellePosition, vehiculeShape);
+            System.out.println("Véhicule " + vehicule.getId() + " effacé");
+            terrainController.getSimulation().supprimerVehicule(vehicule, this);
+            System.out.println("Véhicule " + vehicule.getId() + " supprimé");
+        });
     }
 
-    private Rectangle creerRectangleVehicule(TypeVehicule typeVehicule)
+    private Shape creerVehiculeShape(TypeVehicule typeVehicule)
     {
         List<Color> listeCouleurs = Arrays.asList(Color.HOTPINK, Color.DEEPPINK, Color.ORANGE, Color.LIME, Color.MAGENTA, Color.CYAN, Color.PURPLE, Color.GOLD);
         int couleurRandom = new Random().nextInt(listeCouleurs.size());
@@ -100,16 +109,16 @@ public class VehiculeController implements Runnable {
         switch (typeVehicule)
         {
             case VOITURE -> {
-                return new Rectangle(10, 10, listeCouleurs.get(couleurRandom));
+                return new Circle(5, listeCouleurs.get(couleurRandom));
             }
 /*            case URGENCE -> {
-                return new Rectangle(50, 50, Color.BLUE); // voir plus tard pour alterner rouge / bleu
+                return new Rectangle(10, 10, Color.BLUE); // voir plus tard pour alterner rouge / bleu
             }
             case BUS -> {
                 return new Rectangle(10, 10, Color.BLUE); // voir plus tard
             }*/
             default -> {
-                return new Rectangle(10, 10, listeCouleurs.get(couleurRandom));
+                return new Circle(5, listeCouleurs.get(couleurRandom));
             }
         }
     }
