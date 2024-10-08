@@ -115,7 +115,6 @@ public class VehiculeController implements Runnable {
             System.out.println("j'ai supp le vehicule de la config");
         } else {
             message.setv2(vehiculesDestinataires);
-            vehicule.envoieMessage(message,vehiculesDestinataires);  //gestion des signaux !!!
             //entrer dans le mode négociation, calculs et gestion des priorités
         }
     }

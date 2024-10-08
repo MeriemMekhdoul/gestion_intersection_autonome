@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.*;
 import java.net.*;
-public class Vehicule {
+public class Vehicule implements VehiculeListener {
     // Données membres
     private final int id; // sécurise en empêchant toute modification
     private TypeVehicule type;  //final non ?
@@ -13,25 +13,15 @@ public class Vehicule {
     private Vector2D positionArrivee;
     private static int idCompteur = 1;// génère un ID pour chaque véhicule
     private boolean enMouvement;
-    private Socket socket;
-    private static PrintWriter out; // Flux de sortie pour envoyer des messages
-    private static BufferedReader in;  // Flux d'entrée pour recevoir des messages
 
 
     // Constructeur paramétré
-    public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee) {
+    public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee) throws IOException {
         this.id = idCompteur++; // incrément automatique
         this.type = type;
         this.position = positionDepart.copy();
         this.positionDepart = positionDepart.copy();
         this.positionArrivee = positionArrivee.copy();
-        String host = "";
-        int port = 0;
-        this.socket = new Socket(host, port);
-
-        // Initialize the input and output streams
-        this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        this.out = new PrintWriter(socket.getOutputStream(), true);
      }
 
 
@@ -80,61 +70,8 @@ public class Vehicule {
     //utilisation de sockets pour l'envoi de messages d'un vehicule à un ou plusieurs autres vehicules
     //methode pour envoyer un message
 
-    public static void sendMessage(Message message, Vehicule v1,ArrayList<Vehicule>v2) {
-        StringBuilder messageStr = new StringBuilder();
-        StringBuilder idr = new StringBuilder();
-        messageStr.append(message.getT())
-                .append(",")
-                .append(message.getobjet())
-                .append(",")
-                .append(message.getItineraire());
 
 
-        // Ajouter les IDs des récepteurs
-        for (Vehicule v : message.getv2()) {
-            idr.append(v.getId()).append(","); // Ajout de l'ID du récepteur
-
-
-        }
-        if (in == null) {
-            System.err.println("Error: Input stream is not initialized for receiving messages.");
-            return;
-        }
-        if (out != null) {
-            out.println(messageStr); // Envoie le message via le flux de sortie du socket
-
-            out.flush(); // Assure que le message est bien envoyé
-        }
-        System.out.println("Voiture " + v1.id +" a envoyé le message "+ messageStr + " à "+  idr);
-    }
-    //methode pour recevoir un message
-    public static void receiveMessage(Message message,ArrayList<Vehicule>v2) {
-        String receivedMessage;
-        StringBuilder idr = new StringBuilder();
-        for (Vehicule v : message.getv2()) {
-            idr.append(v.getId()).append(","); // Ajout de l'ID du récepteur
-
-        }
-
-        try {
-            while ((receivedMessage = in.readLine()) != null) {
-                // Traitement du message reçu
-                System.out.println("Véhicule " + idr + " a reçu: " + receivedMessage);
-
-                //appeler la méthode qui traite le message
-                processMessage(receivedMessage);
-            }
-        } catch (IOException e) {
-            e.printStackTrace(); // si ya erreur , on imprime la trace de la pile d'exécution dans la console
-        }
-    }
-
-    // Méthode pour traiter le message reçu
-    private static void processMessage(String message) {
-        // Décomposer le message
-        String[] parties = message.split(",");
-        //gerer le comportement apres la reception du message
-    }
     // Getters et setters
     public int getId() {
         return id;
@@ -172,6 +109,53 @@ public class Vehicule {
 
     public void setPositionArrivee(Vector2D positionArrivee) {
         this.positionArrivee = positionArrivee;
+    }
+    //listener
+    private List<VehiculeListener> listeners = new ArrayList<>();
+
+    // Méthode pour s'inscrire à des notifications
+    public void addListener(VehiculeListener listener) {
+        listeners.add(listener);
+    }
+
+    // Méthode pour se désinscrire
+    public void removeListener(VehiculeListener listener) {
+        listeners.remove(listener);
+    }
+
+    // Méthode pour notifier tous les écouteurs
+    private void notifyListeners(Message message) {
+        for (VehiculeListener listener : listeners) {
+            if (!listener.equals(message.getv1())) { // Ne pas notifier l'expéditeur
+                listener.onMessageReceived(message);
+            }
+        }
+    }
+    @Override
+    public String toString() {
+        return "Vehicule{" +
+                "type=" + type +
+                ", positionDepart=" + positionDepart +
+                ", positionArrivee=" + positionArrivee +
+                '}';
+    }
+
+    public void sendMessage(Message message) {
+        notifyListeners(message); // Notifie tous les observateurs
+
+}
+
+
+    @Override
+    public void onMessageReceived(Message message) {
+        // Traitement du message reçu
+        System.out.println("Le véhicule de type \"" + message.getv1().getType() + "\" et id \"" + message.getv1().getId() +
+                "\" envoie ce message : " + message.getT() + ", objet : " + message.getobjet() +
+                ", itinéraire : " + message.getItineraire());
+
+        System.out.println("Le véhicule de type \"" + this.getType() + "\" et id \"" + this.getId() + "\" a reçu ce message.");
+
+        // Ajouter des actions spécifiques en fonction du type d'objet ou du contenu du message
     }
 
 }

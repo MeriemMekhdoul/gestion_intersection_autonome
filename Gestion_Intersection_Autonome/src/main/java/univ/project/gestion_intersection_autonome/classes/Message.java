@@ -67,6 +67,13 @@ public class Message {
 
 
 
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Le véhicule de type \"").append(v1.getType()).append("\" et id \"").append(v1.getId()).append("\" ");
+        sb.append("envoie ce message : ").append(t).append(", objet : ").append(objet).append(", itinéraire : ").append(itineraire);
+        return sb.toString();
+    }
+
 
 
 

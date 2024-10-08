@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import univ.project.gestion_intersection_autonome.controllers.TerrainController;
 import univ.project.gestion_intersection_autonome.controllers.VehiculeController;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -32,8 +33,7 @@ public class Simulation {
     }
 
     //Générer aléatoirement un véhicule
-    public void genererVehiculeAleatoire()
-    {
+    public void genererVehiculeAleatoire() throws IOException {
         if (vehicules.size() >= 1) {
 //            System.out.println("Limite de véhicules atteinte");
             return;
@@ -81,7 +81,11 @@ public class Simulation {
     {
         scheduler.scheduleAtFixedRate(() -> {
             Platform.runLater(() -> {
-                genererVehiculeAleatoire();
+                try {
+                    genererVehiculeAleatoire();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             });
         }, 0, 1, TimeUnit.SECONDS); // Ajoute un véhicule toutes les secondes
     }
@@ -91,7 +95,13 @@ public class Simulation {
         vehicules.remove(vehicule);
         controleurs.remove(vehiculeController);
 
-        Platform.runLater(this::genererVehiculeAleatoire);
+        Platform.runLater(() -> {
+            try {
+                genererVehiculeAleatoire();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     public void setTerrainController(TerrainController terrainController) {
