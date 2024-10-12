@@ -134,7 +134,7 @@ public class Terrain {
         Random random = new Random();
         int y_pos = random.nextInt(4,hauteur/4);
         int routeGeneree = 0;
-        while((y_pos + 5 < hauteur) && (routeGeneree<4)){
+        while((y_pos + 5 < hauteur) && (routeGeneree < 5)){
             genererLigne(y_pos);
             routeGeneree++;
             y_pos += random.nextInt(espace_min,espace_max);
@@ -142,7 +142,7 @@ public class Terrain {
 
         routeGeneree = 0;
         int x_pos = random.nextInt(4,largeur/4);
-        while((x_pos + 5 < largeur) && (routeGeneree<4)){
+        while((x_pos + 5 < largeur) && (routeGeneree < 5)){
             genererColonne(x_pos);
             routeGeneree++;
             x_pos += random.nextInt(espace_min,espace_max);
