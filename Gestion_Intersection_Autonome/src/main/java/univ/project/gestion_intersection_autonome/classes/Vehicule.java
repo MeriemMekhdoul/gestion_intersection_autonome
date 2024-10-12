@@ -3,7 +3,7 @@ package univ.project.gestion_intersection_autonome.classes;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.*;
-import java.net.*;
+
 public class Vehicule implements VehiculeListener {
     // Données membres
     private final int id; // sécurise en empêchant toute modification
@@ -13,16 +13,25 @@ public class Vehicule implements VehiculeListener {
     private Vector2D positionArrivee;
     private static int idCompteur = 1;// génère un ID pour chaque véhicule
     private boolean enMouvement;
+    private List<Vector2D> itineraire;
 
 
     // Constructeur paramétré
-    public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee) throws IOException {
-        this.id = idCompteur++; // incrément automatique
+    public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee, Terrain terrain) throws IOException {
+        this.id = idCompteur++;
         this.type = type;
         this.position = positionDepart.copy();
         this.positionDepart = positionDepart.copy();
         this.positionArrivee = positionArrivee.copy();
-     }
+
+        // calcul de l'itinéraire
+        AStar aStar = new AStar(terrain);
+        this.itineraire = aStar.trouverChemin(positionDepart, positionArrivee);
+
+        if (itineraire.isEmpty()) {
+            throw new IllegalStateException("Aucun chemin trouvé de " + positionDepart + " à " + positionArrivee);
+        }
+    }
 
 
     // Méthodes
@@ -110,6 +119,11 @@ public class Vehicule implements VehiculeListener {
     public void setPositionArrivee(Vector2D positionArrivee) {
         this.positionArrivee = positionArrivee;
     }
+
+    public List<Vector2D> getItineraire() {
+        return itineraire;
+    }
+
     //listener
     private List<VehiculeListener> listeners = new ArrayList<>();
 
