@@ -9,6 +9,10 @@ public class Terrain {
     private final List<Intersection> intersections;
     private int largeur;
     private int hauteur;
+    private final int NOMBRE_MAX_ROUTES_HORIZONTALES = 1;
+    private final int NOMBRE_MAX_ROUTES_VERTICALES = 1;
+    private final int ESPACE_MIN = 8;
+    private final int ESPACE_MAX = 20;
 
     // Constructeur par défaut
     public Terrain() {
@@ -27,7 +31,7 @@ public class Terrain {
         intersections = new ArrayList<>();
 
         initialiserGrilleVide();
-        genererGrille(8 ,20);
+        genererGrille();
 
         afficherGrille();
         afficherEntreesEtSorties();
@@ -130,22 +134,22 @@ public class Terrain {
     }
 
     // mettre espace_min et espace_max comme constantes en dehors de la methode
-    private void genererGrille(int espace_min, int espace_max){
+    private void genererGrille(){
         Random random = new Random();
         int y_pos = random.nextInt(4,hauteur/4);
         int routeGeneree = 0;
-        while((y_pos + 5 < hauteur) && (routeGeneree < 5)){
+        while((y_pos + 5 < hauteur) && (routeGeneree < NOMBRE_MAX_ROUTES_HORIZONTALES)){
             genererLigne(y_pos);
             routeGeneree++;
-            y_pos += random.nextInt(espace_min,espace_max);
+            y_pos += random.nextInt(ESPACE_MIN, ESPACE_MAX);
         }
 
         routeGeneree = 0;
         int x_pos = random.nextInt(4,largeur/4);
-        while((x_pos + 5 < largeur) && (routeGeneree < 5)){
+        while((x_pos + 5 < largeur) && (routeGeneree < NOMBRE_MAX_ROUTES_VERTICALES)){
             genererColonne(x_pos);
             routeGeneree++;
-            x_pos += random.nextInt(espace_min,espace_max);
+            x_pos += random.nextInt(ESPACE_MIN,ESPACE_MAX);
         }
     }
 
@@ -219,13 +223,13 @@ public class Terrain {
 
     public void creerIntersection(int x, int i){
         ArrayList<Vector2D> cellulesComm = new ArrayList<>();
-        cellulesComm.add(new Vector2D(x-1,i+0));
+        cellulesComm.add(new Vector2D(x-1, i));
         cellulesComm.add(new Vector2D(x-1,i+1));
-        cellulesComm.add(new Vector2D(x+0,i-1));
+        cellulesComm.add(new Vector2D(x,i-1));
         cellulesComm.add(new Vector2D(x+1,i-1));
-        cellulesComm.add(new Vector2D(x+2,i+0));
+        cellulesComm.add(new Vector2D(x+2, i));
         cellulesComm.add(new Vector2D(x+2,i+1));
-        cellulesComm.add(new Vector2D(x+0,i+2));
+        cellulesComm.add(new Vector2D(x,i+2));
         cellulesComm.add(new Vector2D(x+1,i+2));
 
         Intersection intersection = new Intersection(cellulesComm);
