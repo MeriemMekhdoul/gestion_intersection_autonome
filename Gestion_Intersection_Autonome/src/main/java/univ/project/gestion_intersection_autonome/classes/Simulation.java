@@ -19,10 +19,12 @@ public class Simulation {
     private TerrainController terrainController;
     private ArrayList<VehiculeController> controleurs;
     private ScheduledExecutorService scheduler;
+    private final int LARGEUR_TERRAIN = 50;
+    private final int HAUTEUR_TERRAIN = 50;
 
     //constructeur par défaut
     public Simulation() {
-        terrain = new Terrain(25, 25);
+        terrain = new Terrain(LARGEUR_TERRAIN, HAUTEUR_TERRAIN);
         vehicules = new ArrayList<>();
         controleurs = new ArrayList<>();
         scheduler = Executors.newScheduledThreadPool(1);
@@ -34,7 +36,7 @@ public class Simulation {
 
     //Générer aléatoirement un véhicule
     public void genererVehiculeAleatoire() throws IOException {
-        if (vehicules.size() >= 1) {
+        if (vehicules.size() >= 50) {
 //            System.out.println("Limite de véhicules atteinte");
             return;
         }
@@ -61,7 +63,7 @@ public class Simulation {
 
         TypeVehicule type = TypeVehicule.values()[new Random().nextInt(TypeVehicule.values().length)];
 
-        Vehicule vehicule = new Vehicule(type, positionDepart, positionArrivee);
+        Vehicule vehicule = new Vehicule(type, positionDepart, positionArrivee, terrain);
 
         Cellule cellule = terrain.getCellule(positionDepart);
         cellule.setOccupee(true);
