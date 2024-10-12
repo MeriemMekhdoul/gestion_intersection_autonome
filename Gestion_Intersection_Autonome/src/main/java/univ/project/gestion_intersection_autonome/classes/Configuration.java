@@ -3,9 +3,9 @@ package univ.project.gestion_intersection_autonome.classes;
 import java.util.*;
 
 public class Configuration {
-    private List<Vehicule> vehicules;
+    private ArrayList<Vehicule> vehicules;
     private Map<Vehicule, Message> tempsArrivee;
-    private Map<Integer,EtatVehicule> etatVehicule; //on stocke l'id du véhicule et "A" pour "attente", "E" pour "engagé" - ajouter une énum ?
+    private Map<Integer,EtatVehicule> etatVehicule;
 
     public Configuration(){
         vehicules = new ArrayList<>();
@@ -13,13 +13,14 @@ public class Configuration {
         etatVehicule = new HashMap<>();
     }
 
-    public List<Vehicule> getVehicules() {
+    public ArrayList<Vehicule> getVehicules() {
         return vehicules;
     }
 
     public void nouveauVehicule(Vehicule v, Message m){
         tempsArrivee.put(v,m);
-        etatVehicule.put(v.getId(),EtatVehicule.ENGAGE);
+        etatVehicule.put(v.getId(),EtatVehicule.ENGAGE)
+        ;
     }
 
     public void editEtat(Integer id, EtatVehicule etat) {
@@ -44,5 +45,44 @@ public class Configuration {
         tempsArrivee.remove(v);
         etatVehicule.remove(v.getId());
     }
+
+    public Message getMessage(Vehicule v){
+        return tempsArrivee.get(v);
+    }
+
+    /*@Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        Configuration autre = (Configuration) obj;
+        return  Objects.equals(vehicules, autre.vehicules) &&
+                Objects.equals(tempsArrivee, autre.tempsArrivee) &&
+                Objects.equals(etatVehicule, autre.etatVehicule);
+    }*/
+
+    /**
+     * Comparer uniquement l'ordre des véhicules dans la configuration
+     * @param config : la configuration à comparer avec
+     * @return vrai si les deux configs ont les mêmes véhicules (dans l'ordre), faux sinon
+     */
+    public boolean compare(Configuration config){
+        ArrayList<Vehicule> _vehicules = config.getVehicules();
+        if (_vehicules.size() != vehicules.size())
+            return false;
+        else {
+            for (int i = 0; i < vehicules.size(); i++) {
+                if (vehicules.get(i).getId() != _vehicules.get(i).getId())
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(vehicules, tempsArrivee, etatVehicule);
+    }
+
 
 }

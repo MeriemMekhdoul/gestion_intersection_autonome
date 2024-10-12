@@ -3,6 +3,7 @@ package univ.project.gestion_intersection_autonome.classes;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.*;
+import java.util.Objects;
 
 public class Vehicule implements VehiculeListener {
     // Données membres
@@ -156,8 +157,7 @@ public class Vehicule implements VehiculeListener {
 
     public void sendMessage(Message message) {
         notifyListeners(message); // Notifie tous les observateurs
-
-}
+    }
 
 
     @Override
@@ -170,6 +170,19 @@ public class Vehicule implements VehiculeListener {
         System.out.println("Le véhicule de type \"" + this.getType() + "\" et id \"" + this.getId() + "\" a reçu ce message.");
 
         // Ajouter des actions spécifiques en fonction du type d'objet ou du contenu du message
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Vehicule vehicule = (Vehicule) obj;
+        return id == vehicule.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
 }
