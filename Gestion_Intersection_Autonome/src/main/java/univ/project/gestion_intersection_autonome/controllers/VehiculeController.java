@@ -20,6 +20,7 @@ public class VehiculeController implements Runnable {
     private final Shape vehiculeShape; // référence de la forme du véhicule
     private boolean entreeIntersection = true; // pour savoir si on rentre ou on sort d'une intersection
     private boolean majAffichageFaite = false;
+    private final int VITESSE_SIMULATION_MS = 100;
 
     public VehiculeController(Vehicule vehicule, Terrain terrain, TerrainController terrainController) {
         this.vehicule = vehicule;
@@ -29,6 +30,51 @@ public class VehiculeController implements Runnable {
     }
 
     @Override
+    public void run() {
+        List<Vector2D> itineraire = vehicule.getItineraire();
+
+        // on démarre à 1 car 0 est la position de départ (actuelle)
+        for (int i = 1; i < itineraire.size(); i++)
+        {
+            anciennePosition = vehicule.getPosition().copy();
+            nouvellePosition = itineraire.get(i);
+
+            System.out.println("Le véhicule " + vehicule.getId() + " se déplace vers : " + vehicule.getPosition() + " en direction de " + vehicule.getPositionArrivee());
+
+            // commenté car lorsqu'un véhicule quitte le terrain, sa dernière position est toujours occupée, voir pour régler ça
+
+            // vérification de l'occupation de la cellule
+//            if (terrain.getCellule(nouvellePosition).estOccupee())
+//            {
+//                System.out.println("Cellule occupée");
+//
+                  // attente libération
+//                while (terrain.getCellule(nouvellePosition).estOccupee()) {
+//                    pauseEntreMouvements(VITESSE_SIMULATION_MS);
+//                    System.out.println("Attente libération cellule");
+//                }
+//            }
+
+            vehicule.move(nouvellePosition);
+            mettreAJourCellules();
+            mettreAJourGraphique();
+            pauseEntreMouvements(VITESSE_SIMULATION_MS);
+
+            if (vehicule.estArrivee()) {
+                System.out.println("Le véhicule " + vehicule.getId() + " est arrivé à destination !");
+                break;
+            }
+        }
+
+        Platform.runLater(() -> {
+            terrainController.effacerVehicule(nouvellePosition, vehiculeShape);
+            System.out.println("Véhicule " + vehicule.getId() + " effacé");
+            terrainController.getSimulation().supprimerVehicule(vehicule, this);
+            System.out.println("Véhicule " + vehicule.getId() + " supprimé");
+        });
+    }
+
+    /*@Override
     public void run()
     {
         while (!vehicule.estArrivee())
@@ -37,7 +83,7 @@ public class VehiculeController implements Runnable {
 
             if (!majAffichageFaite) {
                 mettreAJourGraphique();
-                pauseEntreMouvements(1000);
+                pauseEntreMouvements(VITESSE_SIMULATION_MS);
             } else {
                 majAffichageFaite = false;
             }
@@ -52,7 +98,8 @@ public class VehiculeController implements Runnable {
             System.out.println("Véhicule " + vehicule.getId() + " supprimé");
         });
     }
-    
+    */
+
     public void deplacement() {
         anciennePosition = vehicule.getPosition().copy();
 
@@ -169,7 +216,7 @@ public class VehiculeController implements Runnable {
             System.out.println("Le véhicule " + vehicule.getId() + " se déplace vers : " + vehicule.getPosition());
             mettreAJourCellules();
             mettreAJourGraphique();
-            pauseEntreMouvements(1000);
+            pauseEntreMouvements(VITESSE_SIMULATION_MS);
         }
     }
 
