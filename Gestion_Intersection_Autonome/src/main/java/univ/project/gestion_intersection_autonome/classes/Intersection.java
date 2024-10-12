@@ -20,11 +20,11 @@ public class Intersection {
         return cellulesCommunication.contains(position);
     }
 
-    public void addV(Vehicule v, Message m){
+    public void ajouterVehicule(Vehicule v, Message m){
         configuration.nouveauVehicule(v,m);
     }
 
-    public void suppV(Vehicule v){
+    public void supprimerVehicule(Vehicule v){
         configuration.supprimerVehicule(v);
     }
 
