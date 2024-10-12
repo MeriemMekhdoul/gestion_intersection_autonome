@@ -10,9 +10,6 @@ import univ.project.gestion_intersection_autonome.classes.*;
 import univ.project.gestion_intersection_autonome.controllers.TerrainController;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MainTrafficApplication extends Application {
     @Override
