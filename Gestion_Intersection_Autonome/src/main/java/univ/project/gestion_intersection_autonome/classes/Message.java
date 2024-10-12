@@ -1,52 +1,39 @@
 package univ.project.gestion_intersection_autonome.classes;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Objects;
 
 
 public class Message {
-
-    private int t ;
-
+    private Instant t ;
     private Vehicule v1 ;
-
     private ArrayList<Vehicule>v2 ;
-
     private Objetmessage objet ;
-
     private ArrayList<Vector2D> itineraire ;
+    private Configuration configuration;
 
     //constructeur par défaut
-
     public Message(){
-
-        this.t = 0 ;
-
+        this.t = Instant.now();
         this.v1 = null ;
-
         this.v2 = new ArrayList<>() ;
-
         this.objet = null;
-
         this.itineraire = new ArrayList<>() ;
     }
 
     //constructeur parametre
-    public Message(int t, Vehicule v1, ArrayList<Vehicule>v2, Objetmessage objet, ArrayList<Vector2D> itineraire){
-
+    public Message(Instant t, Vehicule v1, ArrayList<Vehicule>v2, Objetmessage objet, ArrayList<Vector2D> itineraire){
         this.t=t;
-
         this.v1=v1;
-
         this.v2=v2;
-
         this.objet=objet;
-
         this.itineraire=itineraire;
-
     }
+
     //setters et getters
-    public void setT(int t){this.t=t;}
-    public int getT(){return t;}
+    public void setT(Instant t){this.t=t;}
+    public Instant getT(){return t;}
 
     public void setv1(Vehicule v1){this.v1=v1;}
     public Vehicule getv1() {
@@ -65,7 +52,12 @@ public class Message {
     public void setObjet(Objetmessage objet){this.objet=objet;}
     public Objetmessage getobjet() {return objet;}
 
-
+    public Configuration getConfiguration() {
+        return configuration;
+    }
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -74,11 +66,9 @@ public class Message {
         return sb.toString();
     }
 
-
-
-
-
-
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(t, v1, v2, objet, itineraire);
+    }
 }
 
