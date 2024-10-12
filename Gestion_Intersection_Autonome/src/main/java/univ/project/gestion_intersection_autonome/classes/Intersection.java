@@ -41,5 +41,23 @@ public class Intersection {
         return vehiculeEnAttente;
     }
 
+    public ArrayList<Vehicule> getVehiculesEngages() {
+        ArrayList<Vehicule> vehiculeEngages = new ArrayList<>();
+        for (Vehicule v : configuration.getVehicules()) {
+            if (configuration.getEtat(v.getId()) == EtatVehicule.ENGAGE)
+                vehiculeEngages.add(v);
+        }
+        return vehiculeEngages;
+    }
+    public Message getMessage(Vehicule v){
+        return configuration.getMessage(v);
+    }
+
+    public boolean aucunVehicule() {
+        return configuration.getVehicules().isEmpty();
+    }
+    public ArrayList<Vehicule> getVehicules(){
+        return configuration.getVehicules();
+    }
 
 }
