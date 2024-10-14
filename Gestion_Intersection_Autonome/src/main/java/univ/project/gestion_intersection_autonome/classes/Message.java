@@ -10,7 +10,7 @@ public class Message {
     private Vehicule v1 ;
     private ArrayList<Vehicule>v2 ;
     private Objetmessage objet ;
-    private ArrayList<Vector2D> itineraire ;
+    private static ArrayList<Vector2D> itineraire ;
     private Configuration configuration;
 
     //constructeur par défaut
@@ -45,7 +45,7 @@ public class Message {
     public ArrayList<Vehicule> getv2() {return v2;}
 
     public void setItineraire(ArrayList<Vector2D>itineraire){this.itineraire=itineraire;}
-    public ArrayList<Vector2D> getItineraire() {
+    public static ArrayList<Vector2D> getItineraire() {
         return itineraire;
     }
 

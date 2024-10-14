@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+
+
 public class VehiculeController implements Runnable {
     private final Vehicule vehicule;
     private final Terrain terrain;
@@ -33,14 +35,12 @@ public class VehiculeController implements Runnable {
         List<Vector2D> itineraire = vehicule.getItineraire();
 
         // on démarre à 1, car 0 est la position de départ (actuelle)
-        for (int i = 1; i < itineraire.size(); i++)
-        {
+        for (int i = 1; i < itineraire.size(); i++) {
             anciennePosition = vehicule.getPosition().copy();
             nouvellePosition = itineraire.get(i);
 
             // vérification de l'occupation de la cellule
-            if (terrain.getCellule(nouvellePosition).estOccupee())
-            {
+            if (terrain.getCellule(nouvellePosition).estOccupee()) {
                 System.out.println("Cellule occupée");
 
                 // attente libération
@@ -72,9 +72,8 @@ public class VehiculeController implements Runnable {
     }
 
 
-    public void deplacement()
-    {
-        if(estDansCommunication(anciennePosition) && entreeIntersection){
+    public void deplacement() {
+        if (estDansCommunication(anciennePosition) && entreeIntersection) {
             System.out.println("je suis dans une zone de communication");
             entrerIntersection();
             entreeIntersection = false; //je suis sortie de l'intersection
@@ -89,8 +88,7 @@ public class VehiculeController implements Runnable {
         }
     }
 
-    private void deplacerHorsIntersection()
-    {
+    private void deplacerHorsIntersection() {
         System.out.println("Déplacement hors intersection");
         vehicule.move(nouvellePosition);
 
@@ -112,39 +110,38 @@ public class VehiculeController implements Runnable {
         message.setv1(vehicule);
         message.setItineraire(deplacements);
 
-        intersection.ajouterVehicule(vehicule,message); //l'ajouter a la config
+        intersection.ajouterVehicule(vehicule, message); //l'ajouter a la config
 
         ArrayList<Vehicule> vehiculesEngages = intersection.getVehiculesEngages(); //les véhicules qui ne sont pas engagés
         ArrayList<Vehicule> vehiculesDansIntersection = intersection.getVehicules();
 
         if (vehiculesDansIntersection.isEmpty()) {
             //send message "Engagée" ????
-            intersection.editConfig(vehicule,EtatVehicule.ENGAGE);
+            intersection.editConfig(vehicule, EtatVehicule.ENGAGE);
             System.out.println("aucun vehicule dans l'intersection donc j'avance'");
             avancerIntersection(deplacements);
             //quand on arrive a la fin (la sortie de la zone) on envoie un message de sortie et on supprime l'objet vehicule de la config de l'intersection
             //si on envoie un msg de sortie à l'intersection, ça sera un signal pour supprimer la voiture de sa config et ne pas faire l'action içi
             intersection.supprimerVehicule(vehicule);
             System.out.println("je suis sorti de l'intersection et j'ai supp le vehicule de la config");
-        }
-        else //entrer dans le mode négociation, calculs et gestion des priorités
+        } else //entrer dans le mode négociation, calculs et gestion des priorités
         {
             //récupérer les infos (itinéraires) des autres
             ArrayList<Message> messagesVoitures = new ArrayList<>();
-            for (Vehicule v: vehiculesDansIntersection) {
+            for (Vehicule v : vehiculesDansIntersection) {
                 messagesVoitures.add(intersection.getMessage(v));
             }
 
             //ArrayList<Vehicule> vehiculesEnConflit = new ArrayList<>();
             //if (conflit(messagesVoitures,deplacements,vehiculesEnConflit))
             //{
-                //System.out.println("il y a un conflit avec certains véhicules");
+            //System.out.println("il y a un conflit avec certains véhicules");
 
-                //set up les listeners
-                //liaisonListeners(vehiculesEnConflit);
+            //set up les listeners
+            //liaisonListeners(vehiculesEnConflit);
 
-                System.out.println("je calcule mon temps d'attente");
-                int tempsAttente = calculs(messagesVoitures,deplacements,vehiculesEngages);
+            System.out.println("je calcule mon temps d'attente");
+            int tempsAttente = calculs(messagesVoitures, deplacements, vehiculesEngages);
 /*
                 //Créer un nouveau message et l'envoyer aux véhicules en conflit
                 Message messageConfig = new Message();
@@ -161,14 +158,14 @@ public class VehiculeController implements Runnable {
 
             //} else
             //{
-                //System.out.println("aucun conflit avec les autres voitures, je peux avancer directement");
-                //changer l'état de la voiture dans la config de l'intersection
-                intersection.editConfig(vehicule,EtatVehicule.ENGAGE);
-                //Envoyer un message avant de s'engager ??
+            //System.out.println("aucun conflit avec les autres voitures, je peux avancer directement");
+            //changer l'état de la voiture dans la config de l'intersection
+            intersection.editConfig(vehicule, EtatVehicule.ENGAGE);
+            //Envoyer un message avant de s'engager ??
 
-                avancerIntersection(deplacements);
-                intersection.supprimerVehicule(vehicule);
-                //à la sortie envoyer un msg de SORTIE (à qui ??) => intersection ou véhiculesDestinataires ?
+            avancerIntersection(deplacements);
+            intersection.supprimerVehicule(vehicule);
+            //à la sortie envoyer un msg de SORTIE (à qui ??) => intersection ou véhiculesDestinataires ?
             //}
 
         }
@@ -179,13 +176,12 @@ public class VehiculeController implements Runnable {
      * Si un conflit est détecté, retourne `true` et met à jour la liste des véhicules impliqués dans le conflit.
      * Sinon, retourne `false` et la liste reste vide.
      *
-     * @param messagesReçus Liste des messages contenant les informations sur les véhicules et leurs itinéraires.
-     * @param itineraire L'itinéraire du véhicule actuel.
+     * @param messagesReçus      Liste des messages contenant les informations sur les véhicules et leurs itinéraires.
+     * @param itineraire         L'itinéraire du véhicule actuel.
      * @param vehiculesEnConflit Liste des véhicules qui causent un conflit (mise à jour si conflit détecté).
      * @return `true` s'il y a un conflit, sinon `false`.
      */
-    public boolean conflit(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEnConflit)
-    {
+    public static boolean conflit(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEnConflit) {
         // Vider la liste des véhicules en conflit pour un nouveau calcul
         vehiculesEnConflit.clear();
 
@@ -205,14 +201,14 @@ public class VehiculeController implements Runnable {
 
     /**
      * Compare deux itinéraires pour détecter une éventuelle collision. (à renommer en détécterCollision())
+     *
      * @param itin1 Le premier itinéraire.
      * @param itin2 Le second itinéraire.
      * @return `true` s'il y a une collision, sinon `false`.
      */
-    public boolean compareItineraire(ArrayList<Vector2D> itin1, ArrayList<Vector2D> itin2)
-    {
+    public static boolean compareItineraire(ArrayList<Vector2D> itin1, ArrayList<Vector2D> itin2) {
         for (int i = 0; i < itin1.size(); i++) {
-            if (i< itin2.size()) {
+            if (i < itin2.size()) {
                 if (itin1.get(i).equals(itin2.get(i)))
                     return true;
             } else return false;
@@ -220,38 +216,29 @@ public class VehiculeController implements Runnable {
         return false; //pas de collision
     }
 
-    /**
-     * Retourne le temps d'attente du véhicule en fonction des itinéraires des autres véhicules
-     *
-     * @param messagesReçus Liste des messages reçus contenant les itinéraires des autres véhicules.
-     * @param itineraire L'itinéraire de mon véhicule.
-     * @param vehiculesEngages Les véhicules qui sont déjà engagés dans l'intersection
-     * @return Une configuration optimisée de l'ordre de passage des véhicules.
-     */
-    public int calculs(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEngages)
-    {
+    public static int calculs(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire,
+                       ArrayList<Vehicule> vehiculesEngages) {
+        ArrayList<Vehicule>vehiculesenconflit=new ArrayList<>() ;
         int tempsAttente = 0;
-        // Filtrer les messages pour ne garder que ceux qui concernent les véhicules en conflit
-        ArrayList<Message> messagesFiltres = new ArrayList<>();
-
-        // Proposer un ordre de passage en tenant compte des itinéraires filtrés
-        for (Message message : messagesFiltres) {
-            ArrayList<Vector2D> itineraireVehicule = message.getItineraire();
-
-            //////////// A IMPLEMENTER //////////////////
+        if (conflit(messagesReçus, itineraire, vehiculesenconflit)) {
+            for (Vehicule v : vehiculesenconflit) {
+                if (vehiculesEngages.contains(v)) {
+                    tempsAttente++;
+                }
+            }
         }
+        return tempsAttente; // Retourner le temps d'attente
 
-        return tempsAttente;
     }
-    public void liaisonListeners(ArrayList<Vehicule> destinataires)
-    {
-        for (Vehicule v: destinataires) {
+
+
+    public void liaisonListeners(ArrayList<Vehicule> destinataires) {
+        for (Vehicule v : destinataires) {
             vehicule.addListener(v);
         }
     }
 
-    private boolean estDansCommunication(Vector2D position)
-    {
+    private boolean estDansCommunication(Vector2D position) {
         return terrain.getCellule(position).getTypeZone() == TypeZone.COMMUNICATION;
     }
 
@@ -262,8 +249,7 @@ public class VehiculeController implements Runnable {
      * @param positionActuelle La position actuelle du véhicule représentée par un objet `Vector2D`.
      * @return Une liste de positions (objets `Vector2D`) des cellules accessibles à partir de la position actuelle.
      */
-    public List<Vector2D> getCellulesAutour(Vector2D positionActuelle)
-    {
+    public List<Vector2D> getCellulesAutour(Vector2D positionActuelle) {
         List<Vector2D> cellulesPotentielles = new ArrayList<>();
 
         Cellule celluleActuelle = terrain.getGrille()[positionActuelle.getX()][positionActuelle.getY()];
@@ -285,9 +271,8 @@ public class VehiculeController implements Runnable {
 
         return cellulesPotentielles;
     }
-    
-    public ArrayList<Vector2D> gestionIntersection()
-    {
+
+    public ArrayList<Vector2D> gestionIntersection() {
         List<Vector2D> itineraire = vehicule.getItineraire();
         ArrayList<Vector2D> deplacements = new ArrayList<>();
 
@@ -305,8 +290,7 @@ public class VehiculeController implements Runnable {
         return deplacements;
     }
 
-    private void avancerIntersection(List<Vector2D> deplacements)
-    {
+    private void avancerIntersection(List<Vector2D> deplacements) {
         for (Vector2D pos : deplacements) {
             anciennePosition = vehicule.getPosition().copy();
             vehicule.move(pos);
@@ -318,8 +302,7 @@ public class VehiculeController implements Runnable {
         }
     }
 
-    public synchronized void mettreAJourCellules()
-    {
+    public synchronized void mettreAJourCellules() {
         nouvellePosition = vehicule.getPosition().copy();
         Cellule cell2 = terrain.getCellule(nouvellePosition);
         Cellule cell1 = terrain.getCellule(anciennePosition);
@@ -330,13 +313,11 @@ public class VehiculeController implements Runnable {
         cell2.setIdVoiture(vehicule.getId());
     }
 
-    private void mettreAJourGraphique()
-    {
+    private void mettreAJourGraphique() {
         Platform.runLater(() -> terrainController.updateCellule(anciennePosition, nouvellePosition, vehiculeShape));
     }
 
-    private void pauseEntreMouvements(int millisecondes)
-    {
+    private void pauseEntreMouvements(int millisecondes) {
         try {
             Thread.sleep(millisecondes);
         } catch (InterruptedException e) {
@@ -344,13 +325,11 @@ public class VehiculeController implements Runnable {
         }
     }
 
-    private Shape creerVehiculeShape(TypeVehicule typeVehicule)
-    {
+    private Shape creerVehiculeShape(TypeVehicule typeVehicule) {
         List<Color> listeCouleurs = Arrays.asList(Color.HOTPINK, Color.DEEPPINK, Color.ORANGE, Color.LIME, Color.MAGENTA, Color.CYAN, Color.PURPLE, Color.GOLD);
         int couleurRandom = new Random().nextInt(listeCouleurs.size());
 
-        switch (typeVehicule)
-        {
+        switch (typeVehicule) {
             case VOITURE -> {
                 return new Circle(5, listeCouleurs.get(couleurRandom));
             }
@@ -365,4 +344,5 @@ public class VehiculeController implements Runnable {
             }
         }
     }
+
 }

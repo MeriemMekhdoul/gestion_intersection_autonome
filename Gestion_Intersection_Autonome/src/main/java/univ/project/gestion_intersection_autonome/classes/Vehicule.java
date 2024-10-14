@@ -14,7 +14,7 @@ public class Vehicule implements VehiculeListener {
     private Vector2D positionArrivee;
     private static int idCompteur = 1;// génère un ID pour chaque véhicule
     private boolean enMouvement;
-    private List<Vector2D> itineraire;
+    private static List<Vector2D> itineraire;
 
 
     // Constructeur paramétré
@@ -34,6 +34,21 @@ public class Vehicule implements VehiculeListener {
         }
     }
 
+    public Vehicule(TypeVehicule typeVehicule, Vector2D positionDepart, Vector2D positionArrivee) {
+        this.id = idCompteur++;
+        this.type = type;
+        this.position = positionDepart.copy();
+        this.positionDepart = positionDepart.copy();
+        this.positionArrivee = positionArrivee.copy();
+
+
+    }
+
+    public Vehicule(ArrayList<Vector2D> itineraire) {
+        this.id = idCompteur++;
+        this.type = type;
+        this.itineraire=itineraire;
+    }
 
     // Méthodes
     public void move(Vector2D pos) {
@@ -121,8 +136,8 @@ public class Vehicule implements VehiculeListener {
         this.positionArrivee = positionArrivee;
     }
 
-    public List<Vector2D> getItineraire() {
-        return itineraire;
+    public static ArrayList<Vector2D> getItineraire() {
+        return (ArrayList<Vector2D>) itineraire;
     }
 
     //listener
