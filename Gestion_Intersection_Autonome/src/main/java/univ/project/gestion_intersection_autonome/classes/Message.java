@@ -10,7 +10,7 @@ public class Message {
     private Vehicule v1 ;
     private ArrayList<Vehicule>v2 ;
     private Objetmessage objet ;
-    private static ArrayList<Vector2D> itineraire ;
+    private ArrayList<Vector2D> itineraire ;
     private Configuration configuration;
 
     //constructeur par défaut
@@ -22,7 +22,7 @@ public class Message {
         this.itineraire = new ArrayList<>() ;
     }
 
-    //constructeur parametre
+    //constructeur paramétré
     public Message(Instant t, Vehicule v1, ArrayList<Vehicule>v2, Objetmessage objet, ArrayList<Vector2D> itineraire){
         this.t=t;
         this.v1=v1;
@@ -44,13 +44,17 @@ public class Message {
     public void setv2(ArrayList<Vehicule>v2){this.v2=v2;}
     public ArrayList<Vehicule> getv2() {return v2;}
 
-    public void setItineraire(ArrayList<Vector2D>itineraire){this.itineraire=itineraire;}
-    public static ArrayList<Vector2D> getItineraire() {
+    public void setItineraire(ArrayList<Vector2D>itineraire){
+        this.itineraire=itineraire;
+    }
+    public ArrayList<Vector2D> getItineraire() {
         return itineraire;
     }
 
     public void setObjet(Objetmessage objet){this.objet=objet;}
-    public Objetmessage getobjet() {return objet;}
+    public Objetmessage getObjet() {
+        return objet;
+    }
 
     public Configuration getConfiguration() {
         return configuration;
@@ -60,10 +64,8 @@ public class Message {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Le véhicule de type \"").append(v1.getType()).append("\" et id \"").append(v1.getId()).append("\" ");
-        sb.append("envoie ce message : ").append(t).append(", objet : ").append(objet).append(", itinéraire : ").append(itineraire);
-        return sb.toString();
+        return "Le véhicule de type \"" + v1.getType() + "\" et id \"" + v1.getId() + "\" " +
+                "envoie ce message : " + t + ", objet : " + objet + ", itinéraire : " + itineraire;
     }
 
     @Override
