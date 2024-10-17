@@ -1,16 +1,17 @@
 package univ.project.gestion_intersection_autonome.classes;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Configuration {
-    private ArrayList<Vehicule> vehicules;
-    private Map<Vehicule, Message> tempsArrivee;
-    private Map<Integer,EtatVehicule> etatVehicule;
+    private ArrayList<Vehicule> vehicules;  // Peut être remplacé par CopyOnWriteArrayList si nécessaire
+    private ConcurrentHashMap<Vehicule, Message> tempsArrivee;
+    private ConcurrentHashMap<Integer, EtatVehicule> etatVehicule;
 
     public Configuration(){
         vehicules = new ArrayList<>();
-        tempsArrivee = new HashMap<>();
-        etatVehicule = new HashMap<>();
+        tempsArrivee = new ConcurrentHashMap<>();
+        etatVehicule = new ConcurrentHashMap<>();
     }
 
     public ArrayList<Vehicule> getVehicules() {
@@ -18,9 +19,9 @@ public class Configuration {
     }
 
     public void nouveauVehicule(Vehicule v, Message m){
+        vehicules.add(v);
         tempsArrivee.put(v,m);
-        etatVehicule.put(v.getId(),EtatVehicule.ENGAGE)
-        ;
+        etatVehicule.put(v.getId(),EtatVehicule.ATTENTE);
     }
 
     public void editEtat(Integer id, EtatVehicule etat) {
@@ -84,5 +85,29 @@ public class Configuration {
         return Objects.hash(vehicules, tempsArrivee, etatVehicule);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+
+        // Titre du tableau
+        s.append("id Véhicule | Objet Message | Temps Arrivée | État\n");
+        s.append("----------------------------------------------------\n");
+
+        // Parcours des véhicules
+        for (Vehicule v : vehicules) {
+            Message m = tempsArrivee.get(v); // Récupération du message lié au véhicule
+            String etat = etatVehicule.get(v.getId()).toString(); // Récupération de l'état du véhicule
+
+            // Gestion des valeurs nulles pour éviter les erreurs
+            String objetMessage = (m != null) ? m.getObjet().toString() : "Aucun message";
+            String tempsArriveeStr = (m != null) ? m.getT().toString() : "Inconnu";
+            etat = (etat != null) ? etat : "État inconnu";
+
+            // Utilisation de String.format pour un formatage plus propre
+            s.append(String.format("id = %d | %s | %s | %s\n", v.getId(), objetMessage, tempsArriveeStr, etat));
+        }
+
+        return s.toString();
+    }
 
 }
