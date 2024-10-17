@@ -14,7 +14,7 @@ public class Vehicule implements VehiculeListener {
     private Vector2D positionArrivee;
     private static int idCompteur = 1;// génère un ID pour chaque véhicule
     private boolean enMouvement;
-    private static List<Vector2D> itineraire;
+    private List<Vector2D> itineraire;
 
 
     // Constructeur paramétré
@@ -36,17 +36,15 @@ public class Vehicule implements VehiculeListener {
 
     public Vehicule(TypeVehicule typeVehicule, Vector2D positionDepart, Vector2D positionArrivee) {
         this.id = idCompteur++;
-        this.type = type;
+        this.type = typeVehicule;
         this.position = positionDepart.copy();
         this.positionDepart = positionDepart.copy();
         this.positionArrivee = positionArrivee.copy();
-
-
     }
 
     public Vehicule(ArrayList<Vector2D> itineraire) {
         this.id = idCompteur++;
-        this.type = type;
+        //this.type = type;
         this.itineraire=itineraire;
     }
 
@@ -136,7 +134,7 @@ public class Vehicule implements VehiculeListener {
         this.positionArrivee = positionArrivee;
     }
 
-    public static ArrayList<Vector2D> getItineraire() {
+    public ArrayList<Vector2D> getItineraire() {
         return (ArrayList<Vector2D>) itineraire;
     }
 
@@ -164,6 +162,7 @@ public class Vehicule implements VehiculeListener {
     @Override
     public String toString() {
         return "Vehicule{" +
+                "id=" + id +
                 "type=" + type +
                 ", positionDepart=" + positionDepart +
                 ", positionArrivee=" + positionArrivee +
@@ -179,7 +178,7 @@ public class Vehicule implements VehiculeListener {
     public void onMessageReceived(Message message) {
         // Traitement du message reçu
         System.out.println("Le véhicule de type \"" + message.getv1().getType() + "\" et id \"" + message.getv1().getId() +
-                "\" envoie ce message : " + message.getT() + ", objet : " + message.getobjet() +
+                "\" envoie ce message : " + message.getT() + ", objet : " + message.getObjet() +
                 ", itinéraire : " + message.getItineraire());
 
         System.out.println("Le véhicule de type \"" + this.getType() + "\" et id \"" + this.getId() + "\" a reçu ce message.");
