@@ -189,13 +189,17 @@ public class VehiculeController implements Runnable {
      * @param vehiculesEnConflit Liste des véhicules qui causent un conflit (mise à jour si conflit détecté).
      * @return `true` s'il y a un conflit, sinon `false`.
      */
-    public static boolean conflit(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEnConflit) {
+    public static boolean conflit(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEnConflit
+                                    , ArrayList<ArrayList<Vector2D>> itinerairesVoitures) {
         // Vider la liste des véhicules en conflit pour un nouveau calcul
         vehiculesEnConflit.clear();
 
+        int i = 0;
+
         // Récupérer un tableau des itinéraires depuis les messages
         for (Message message : messagesReçus) {
-            ArrayList<Vector2D> itineraireAutreVehicule = message.getItineraire();
+            ArrayList<Vector2D> itineraireAutreVehicule = itinerairesVoitures.get(i);//message.getItineraire();
+            i++;
 
             // Si une collision est détectée entre les itinéraires
             if (compareItineraire(itineraire, itineraireAutreVehicule)) {
@@ -228,7 +232,26 @@ public class VehiculeController implements Runnable {
     {
         ArrayList<Vehicule> vehiculesenconflit  = new ArrayList<>() ;
         int tempsAttente = 0;
-        if (conflit(messagesReçus, itineraire, vehiculesenconflit)) {
+
+        ArrayList<ArrayList<Vector2D>> nouveauxItineraires = new ArrayList<>();
+
+        for (Message message : messagesReçus) {
+            ArrayList<Vector2D> itineraireAmodifier = message.getItineraire();
+
+            if (vehiculesEngages.contains(message.getv1())) {
+                Vector2D posActuV = message.getv1().getPosition().copy();
+                int index = itineraireAmodifier.indexOf(posActuV);
+                //truck tableau a partir de l'index
+                ArrayList<Vector2D> newItineraire = new ArrayList<>();
+                for (int i = index; i < itineraireAmodifier.size(); i++) {
+                    newItineraire.add(itineraireAmodifier.get(i));
+                }
+                nouveauxItineraires.add(newItineraire);
+            }
+            nouveauxItineraires.add(itineraireAmodifier);
+        }
+
+            if (conflit(messagesReçus, itineraire, vehiculesenconflit, nouveauxItineraires)) {
             for (Vehicule v : vehiculesenconflit) {
                 if (vehiculesEngages.contains(v) && (v != vehicule)) {
                     tempsAttente++;
