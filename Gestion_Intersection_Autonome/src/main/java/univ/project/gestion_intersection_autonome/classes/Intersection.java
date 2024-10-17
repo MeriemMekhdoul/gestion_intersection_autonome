@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Intersection {
     private final List<Vector2D> cellulesCommunication; // Liste des cellules qui appartiennent à l'intersection (à revoir)
-    private Map<Direction, Integer> etatTrafic;  //ajouter une énum état trafic ?
+    private ConcurrentHashMap<Direction, Integer> etatTrafic;  //ajouter une énum état trafic ?
     private Configuration configuration;
 
     public Intersection(List<Vector2D> cellulesInfluence) {
         this.cellulesCommunication = cellulesInfluence;
-        this.etatTrafic = new HashMap<>();
+        this.etatTrafic = new ConcurrentHashMap<>();
         this.configuration = new Configuration();
     }
 
@@ -58,6 +59,10 @@ public class Intersection {
     }
     public ArrayList<Vehicule> getVehicules(){
         return configuration.getVehicules();
+    }
+
+    public void afficherConfig() {
+        System.out.println(configuration);
     }
 
 }
