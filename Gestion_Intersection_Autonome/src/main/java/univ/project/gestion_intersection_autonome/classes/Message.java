@@ -31,6 +31,9 @@ public class Message {
         this.itineraire=itineraire;
     }
 
+    public Message(VehiculePolice vehiculePolice, String m) {
+    }
+
     //setters et getters
     public void setT(Instant t){this.t=t;}
     public Instant getT(){return t;}

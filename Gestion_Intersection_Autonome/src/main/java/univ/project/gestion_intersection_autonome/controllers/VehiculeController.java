@@ -10,8 +10,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.Objects;
 
-public class VehiculeController implements Runnable {
+public class VehiculeController implements Runnable,VehiculeControllerListener {
     private final Vehicule vehicule;
     private final Terrain terrain;
     private final TerrainController terrainController;
@@ -19,7 +20,7 @@ public class VehiculeController implements Runnable {
     private Vector2D nouvellePosition;
     private final Shape vehiculeShape; // référence de la forme du véhicule
     private boolean entreeIntersection = true; // pour savoir si on rentre ou on sort d'une intersection
-    private final int VITESSE_SIMULATION_MS = 1000;
+    private final int VITESSE_SIMULATION_MS = 3000;
 
     public VehiculeController(Vehicule vehicule, Terrain terrain, TerrainController terrainController) {
         this.vehicule = vehicule;
@@ -190,7 +191,7 @@ public class VehiculeController implements Runnable {
      * @return `true` s'il y a un conflit, sinon `false`.
      */
     public static boolean conflit(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEnConflit
-                                    , ArrayList<ArrayList<Vector2D>> itinerairesVoitures) {
+            , ArrayList<ArrayList<Vector2D>> itinerairesVoitures) {
         // Vider la liste des véhicules en conflit pour un nouveau calcul
         vehiculesEnConflit.clear();
 
@@ -228,9 +229,8 @@ public class VehiculeController implements Runnable {
         return false; //pas de collision
     }
 
-    public int calculs(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEngages)
-    {
-        ArrayList<Vehicule> vehiculesenconflit  = new ArrayList<>() ;
+    public int calculs(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEngages) {
+        ArrayList<Vehicule> vehiculesenconflit = new ArrayList<>();
         int tempsAttente = 0;
 
         ArrayList<ArrayList<Vector2D>> nouveauxItineraires = new ArrayList<>();
@@ -251,7 +251,7 @@ public class VehiculeController implements Runnable {
             nouveauxItineraires.add(itineraireAmodifier);
         }
 
-            if (conflit(messagesReçus, itineraire, vehiculesenconflit, nouveauxItineraires)) {
+        if (conflit(messagesReçus, itineraire, vehiculesenconflit, nouveauxItineraires)) {
             for (Vehicule v : vehiculesenconflit) {
                 if (vehiculesEngages.contains(v) && (v != vehicule)) {
                     tempsAttente++;
@@ -375,4 +375,79 @@ public class VehiculeController implements Runnable {
         }
     }
 
+    //Vc ecouteur de vc
+
+    private List<VehiculeControllerListener> listeners = new ArrayList<>();
+
+    public void addListener(VehiculeControllerListener listener) {
+
+        listeners.add(listener);
+    }
+    public void removeListener (VehiculeControllerListener listener){
+            listeners.remove(listener);
+    }
+private void notifyListeners(Message message) {
+        for (VehiculeControllerListener listener : listeners) {
+            if (!listener.equals(message.getv1())) {
+                listener.messageVc(message);
+            }
+        }
+    }
+    public void sendMessagevc (Message message) {
+        notifyListeners(message); // Notifie tous les observateurs
+    }
+    @Override
+    public String toString() {
+        return "Vehicule{" +
+                "type=" + vehicule.getType() +
+                ", positionDepart=" + vehicule.getPositionDepart() +
+                ", positionArrivee=" + vehicule.getPositionArrivee() +
+                '}';
+    }
+    @Override
+    public void messageVc(Message message) {
+        // Traitement du message reçu
+
+        System.out.println("Le véhicule de type \"" + message.getv1().getType() + "\" et id \"" + message.getv1().getId() +
+                "\" envoie ce message : " + message.getT() + ", objet : " + message.getObjet() +
+                ", itinéraire : " + message.getItineraire());
+
+        System.out.println("Le véhicule de type \"" + vehicule.getType() + "\" et id \"" + vehicule.getId() + "\" a reçu ce message.");
+
+
+    }
+    //intersection ecouteur de vc
+    private List<IntersectionListener> intersections = new ArrayList<>();
+
+    public void addIntersectionListener(IntersectionListener listener) {
+        intersections.add(listener);
+    }
+
+    public void removeIntersectionListener(IntersectionListener listener) {
+        intersections.remove(listener);
+    }
+
+    public void sendMessageToIntersections(Message message) {
+        for (IntersectionListener listener : intersections) {
+            listener.onMessageReceivedFromVehiculeController(message);
+        }
+    }
+
+    @Override
+    public void onMessageReceivedFromIntersection(Message message) {
+        //changer si necessaire
+        System.out.println("Le véhicule de type \"" + message.getv1().getType() + "\" et id \"" + message.getv1().getId() +
+                "\" envoie ce message : " + message.getT() + ", objet : " + message.getObjet() +
+                ", itinéraire : " + message.getItineraire());
+
+        System.out.println("Le véhicule de type \"" + vehicule.getType() + "\" et id \"" + vehicule.getId() + "\" a reçu ce message.");
+
+    }
+
+
+
+
 }
+
+
+

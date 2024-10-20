@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Intersection {
+public class Intersection implements IntersectionListener {
     private final List<Vector2D> cellulesCommunication; // Liste des cellules qui appartiennent à l'intersection (à revoir)
     private ConcurrentHashMap<Direction, Integer> etatTrafic;  //ajouter une énum état trafic ?
     private Configuration configuration;
@@ -16,6 +16,7 @@ public class Intersection {
         this.etatTrafic = new ConcurrentHashMap<>();
         this.configuration = new Configuration();
     }
+
 
     public boolean contientCellule(Vector2D position) {
         return cellulesCommunication.contains(position);
@@ -65,4 +66,74 @@ public class Intersection {
         System.out.println(configuration);
     }
 
+
+    //listener intersection de intersection
+
+    private List<IntersectionListener> listeners = new ArrayList<>();
+
+    public void addListener(IntersectionListener listener) {
+
+        listeners.add(listener);
+    }
+    public void removeListener (IntersectionListener listener){
+        listeners.remove(listener);
+    }
+
+    private void notifyListeners(Message message) {
+        for (IntersectionListener listener : listeners) {
+            if (!listener.equals(message.getv1())) {
+                listener.messageIntersection(message);
+            }
+        }
+    }
+    public void sendMessageintersection (Message message) {
+        notifyListeners(message); // Notifie tous les observateurs
+    }
+
+
+
+    @Override
+    public void messageIntersection(Message message) {
+        System.out.println("Le véhicule de type \"" + message.getv1().getType() + "\" et id \"" + message.getv1().getId() +
+                "\" envoie ce message : " + message.getT() + ", objet : " + message.getObjet() +
+                ", itinéraire : " + message.getItineraire());
+
+        System.out.println("recu");
+
+    }
+    //listener vc de intersection
+
+    private List<VehiculeControllerListener> vehiculeControllers = new ArrayList<>();
+
+    public void addVehiculeControllerListener(VehiculeControllerListener listener) {
+        vehiculeControllers.add(listener);
+    }
+
+    public void removeVehiculeControllerListener(VehiculeControllerListener listener) {
+        vehiculeControllers.remove(listener);
+    }
+
+    public void sendMessageToVehiculeControllers(Message message) {
+        for (VehiculeControllerListener listener : vehiculeControllers) {
+            listener.onMessageReceivedFromIntersection(message);
+        }
+    }
+
+    @Override
+    public void onMessageReceivedFromVehiculeController(Message message) {
+        //changer
+        System.out.println("Le véhicule de type \"" + message.getv1().getType() + "\" et id \"" + message.getv1().getId() +
+                "\" envoie ce message : " + message.getT() + ", objet : " + message.getObjet() +
+                ", itinéraire : " + message.getItineraire());
+
+        System.out.println("recu");
+    }
+
 }
+
+
+
+
+
+
+

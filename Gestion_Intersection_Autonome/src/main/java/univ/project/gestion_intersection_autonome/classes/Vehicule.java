@@ -40,6 +40,8 @@ public class Vehicule implements VehiculeListener {
         this.position = positionDepart.copy();
         this.positionDepart = positionDepart.copy();
         this.positionArrivee = positionArrivee.copy();
+
+
     }
 
     public Vehicule(ArrayList<Vector2D> itineraire) {
@@ -162,7 +164,6 @@ public class Vehicule implements VehiculeListener {
     @Override
     public String toString() {
         return "Vehicule{" +
-                "id=" + id +
                 "type=" + type +
                 ", positionDepart=" + positionDepart +
                 ", positionArrivee=" + positionArrivee +
@@ -200,3 +201,10 @@ public class Vehicule implements VehiculeListener {
     }
 
 }
+//sous-classe police : methode qui calcule le temps d'attente se met en ecoute de vehicule controller:
+// a partir de 3 vehicules faire intervenir l'intersection qui bloque toutes les entrees de l'intersection laisse passer ceux
+//qui sont engageees et laisse passer la police
+//intersection comme listener
+//vehicule controller comme listener
+//listener
+//si temps attente beaucoup -> intersection se mettre a l ecoute , police envoye un message -> methode de meryem

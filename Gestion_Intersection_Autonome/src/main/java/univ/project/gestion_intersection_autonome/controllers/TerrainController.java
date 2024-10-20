@@ -72,14 +72,14 @@ public class TerrainController implements Initializable {
     // Définir la couleur de la cellule selon son type
     private void setCouleurCellule(Rectangle rect, Cellule cellule) {
         if (cellule.estValide()) {
-            rect.setFill(Color.GRAY);  // Route
+            rect.setFill(Color.GREY);  // Route
             if (cellule.getTypeZone() == TypeZone.CONFLIT) {
-                rect.setFill(Color.RED);  // Zone de conflit
+                rect.setFill(Color.GREY);  // Zone de conflit
             } else if (cellule.getTypeZone() == TypeZone.COMMUNICATION) {
-                rect.setFill(Color.YELLOW);  // Communication
+                rect.setFill(Color.LIGHTCYAN);  // Communication
             }
         } else {
-            rect.setFill(Color.GREEN); // Espace vide
+            rect.setFill(Color.BLUE); // Espace vide
         }
     }
 
