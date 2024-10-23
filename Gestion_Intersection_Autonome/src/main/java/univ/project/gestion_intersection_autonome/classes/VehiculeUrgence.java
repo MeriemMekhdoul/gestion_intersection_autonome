@@ -5,10 +5,10 @@ import univ.project.gestion_intersection_autonome.controllers.VehiculeController
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class VehiculePolice extends Vehicule {
+public class VehiculeUrgence extends Vehicule {
 
 
-    public VehiculePolice(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee, Terrain terrain) throws IOException {
+    public VehiculeUrgence(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee, Terrain terrain) throws IOException {
         super(type, positionDepart, positionArrivee, terrain);
     }
 
@@ -18,14 +18,15 @@ public class VehiculePolice extends Vehicule {
         vehiculeController.addListener((VehiculeControllerListener) intersection); // Ajout du listener
 
         // Récupérer les véhicules en attente dans l'intersection
-        ArrayList<Vehicule>vehiculesEnAttente=intersection.getVehiculesEnAttente();
+        ArrayList<Vehicule> vehiculesEnAttente = intersection.getVehiculesEnAttente();
+
+        //détecter s'il y a trop d'attente
 
         // Vérifier si le nombre de véhicules en attente dépasse 3
         if(vehiculesEnAttente.size()>3) {
-
             Message message= new Message(this,"Laissez passer le véhicule de police ");
 
-            intersection.sendMessageintersection(message); // Notifie l'intersection et les VC
+            intersection.sendMessageIntersection(message); // Notifie l'intersection et les VC
         }
         else {
             System.out.println("Le véhicule de police passe normalement.");
