@@ -1,9 +1,11 @@
 package univ.project.gestion_intersection_autonome.classes;
 
-import java.util.ArrayList;
-import java.util.List;
+import javafx.scene.paint.Color;
+
+import java.awt.*;
+import java.util.*;
 import java.io.*;
-import java.util.Objects;
+import java.util.List;
 
 public class Vehicule implements VehiculeListener {
     // Données membres
@@ -15,26 +17,20 @@ public class Vehicule implements VehiculeListener {
     private static int idCompteur = 1;// génère un ID pour chaque véhicule
     private boolean enMouvement;
     private List<Vector2D> itineraire;
-
+    private Color couleur;
 
     // Constructeur paramétré
-    public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee, Terrain terrain) throws IOException {
+    public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee, List<Vector2D> itineraire, Color couleur) throws IOException {
         this.id = idCompteur++;
         this.type = type;
         this.position = positionDepart.copy();
         this.positionDepart = positionDepart.copy();
         this.positionArrivee = positionArrivee.copy();
-
-        // calcul de l'itinéraire
-        AStar aStar = new AStar(terrain);
-        this.itineraire = aStar.trouverChemin(positionDepart, positionArrivee);
-
-        if (itineraire.isEmpty()) {
-            throw new IllegalStateException("Aucun chemin trouvé de " + positionDepart + " à " + positionArrivee);
-        }
+        this.itineraire = itineraire;
+        this.couleur = couleur;
     }
 
-    public Vehicule(TypeVehicule typeVehicule, Vector2D positionDepart, Vector2D positionArrivee) {
+/*    public Vehicule(TypeVehicule typeVehicule, Vector2D positionDepart, Vector2D positionArrivee) {
         this.id = idCompteur++;
         this.type = typeVehicule;
         this.position = positionDepart.copy();
@@ -46,7 +42,7 @@ public class Vehicule implements VehiculeListener {
         this.id = idCompteur++;
         //this.type = type;
         this.itineraire=itineraire;
-    }
+    }*/
 
     // Méthodes
     public void move(Vector2D pos) {
@@ -93,7 +89,18 @@ public class Vehicule implements VehiculeListener {
     //utilisation de sockets pour l'envoi de messages d'un vehicule à un ou plusieurs autres vehicules
     //methode pour envoyer un message
 
+    // generer une couleur aleatoire
+    public static Color genererCouleurAleatoire()
+    {
+        List<Color> listeCouleurs = Arrays.asList(
+                Color.CRIMSON, Color.DEEPPINK, Color.MEDIUMPURPLE, Color.GOLD,
+                Color.ORCHID, Color.MEDIUMSEAGREEN, Color.LIGHTSEAGREEN
+        );
 
+        int couleurRandom = new Random().nextInt(listeCouleurs.size());
+
+        return listeCouleurs.get(couleurRandom);
+    }
 
     // Getters et setters
     public int getId() {
@@ -136,6 +143,10 @@ public class Vehicule implements VehiculeListener {
 
     public ArrayList<Vector2D> getItineraire() {
         return (ArrayList<Vector2D>) itineraire;
+    }
+
+    public Color getCouleur() {
+        return couleur;
     }
 
     //listener
