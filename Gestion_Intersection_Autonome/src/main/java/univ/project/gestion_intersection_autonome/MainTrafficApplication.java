@@ -38,16 +38,21 @@ public class MainTrafficApplication extends Application {
         stage.show();
 
         simulation.lancerSimulation();
+
+
+
     }
-    public static void main(String[] args) {
-        try {
-            launch(args);
-        } catch (Exception e) {
-            e.printStackTrace();
+        public static void main (String[]args){
+            try {
+                launch(args);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
         }
     }
 
-}
 
 
 
