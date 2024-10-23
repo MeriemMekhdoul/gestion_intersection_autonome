@@ -4,6 +4,7 @@ module univ.project.gestion_intersection_autonome {
 
     requires org.controlsfx.controls;
     requires com.almasb.fxgl.all;
+    requires java.desktop;
 
     opens univ.project.gestion_intersection_autonome to javafx.fxml;
     exports univ.project.gestion_intersection_autonome;
