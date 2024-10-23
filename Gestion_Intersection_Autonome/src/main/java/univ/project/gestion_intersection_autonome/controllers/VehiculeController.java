@@ -13,14 +13,17 @@ import java.util.Random;
 import java.util.Objects;
 
 public class VehiculeController implements Runnable,VehiculeControllerListener {
-    private final Vehicule vehicule;
-    private final Terrain terrain;
-    private final TerrainController terrainController;
-    private Vector2D anciennePosition;
-    private Vector2D nouvellePosition;
-    private final Shape vehiculeShape; // référence de la forme du véhicule
-    private boolean entreeIntersection = true; // pour savoir si on rentre ou on sort d'une intersection
-    private final int VITESSE_SIMULATION_MS = 3000;
+    protected final Vehicule vehicule;
+    protected final Terrain terrain;
+    protected final TerrainController terrainController;
+    protected Vector2D anciennePosition;
+    protected Vector2D nouvellePosition;
+    protected final Shape vehiculeShape; // référence de la forme du véhicule
+    protected boolean entreeIntersection = true; // pour savoir si on rentre ou on sort d'une intersection
+    protected List<VehiculeControllerListener> listeners = new ArrayList<>();
+    protected IntersectionListener intersectionListener; //on n'a peut-être pas besoin d'une liste ?? une seule intersection suffit
+    protected boolean enPause = false;
+    protected final int VITESSE_SIMULATION_MS = 500;
 
     public VehiculeController(Vehicule vehicule, Terrain terrain, TerrainController terrainController) {
         this.vehicule = vehicule;
@@ -37,19 +40,6 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         for (int i = 1; i < itineraire.size(); i++) {
             anciennePosition = vehicule.getPosition().copy();
             nouvellePosition = itineraire.get(i);
-/*
-            // vérification de l'occupation de la cellule
-            if (terrain.getCellule(nouvellePosition).estOccupee()) {
-                System.out.println("Cellule occupée");
-
-                // attente libération
-                while (terrain.getCellule(nouvellePosition).estOccupee()) {
-                    System.out.println("Attente libération cellule");
-                    pauseEntreMouvements(VITESSE_SIMULATION_MS);
-                }
-            }
-*/
-            //pauseEntreMouvements(VITESSE_SIMULATION_MS);
             deplacement();
             //mettre l'index à jour dans le cas du déplacement dans l'intersection
             i = itineraire.indexOf(nouvellePosition);
@@ -87,7 +77,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         }
     }
 
-    private void deplacerHorsIntersection() {
+    protected void deplacerHorsIntersection() {
         System.out.println("Déplacement hors intersection");
 
         // vérification de l'occupation de la cellule
@@ -109,7 +99,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         pauseEntreMouvements(VITESSE_SIMULATION_MS);
     }
 
-    private void entrerIntersection() {
+    protected void entrerIntersection() {
         Intersection intersection = terrain.getIntersection(anciennePosition);
 
         System.out.println("Entrée dans une intersection");
@@ -156,16 +146,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
 
             System.out.println("je calcule mon temps d'attente");
             int tempsAttente = calculs(messagesVoitures, deplacements, vehiculesEngages);
-/*
-                //Créer un nouveau message et l'envoyer aux véhicules en conflit
-                Message messageConfig = new Message();
-                messageConfig.setv1(vehicule);
-                messageConfig.setv2(vehiculesEnConflit);
-                messageConfig.setObjet(Objetmessage.CONFIG);
-                messageConfig.setConfiguration(configProposee);
 
-                vehicule.sendMessage(messageConfig);
-*/
             System.out.println("temps d'attente calculé et estimé à : " + tempsAttente + " secondes");
             pauseEntreMouvements(tempsAttente * VITESSE_SIMULATION_MS);
             System.out.println("attente effectuée, conflit évité, update l'état à ENGAGE puis j'avance");
@@ -268,38 +249,8 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         }
     }
 
-    private boolean estDansCommunication(Vector2D position) {
+    protected boolean estDansCommunication(Vector2D position) {
         return terrain.getCellule(position).getTypeZone() == TypeZone.COMMUNICATION;
-    }
-
-    /**
-     * Retourne une liste des positions des cellules voisines accessibles à partir d'une position donnée,
-     * en fonction des directions autorisées et en évitant le retour en arrière.
-     *
-     * @param positionActuelle La position actuelle du véhicule représentée par un objet `Vector2D`.
-     * @return Une liste de positions (objets `Vector2D`) des cellules accessibles à partir de la position actuelle.
-     */
-    public List<Vector2D> getCellulesAutour(Vector2D positionActuelle) {
-        List<Vector2D> cellulesPotentielles = new ArrayList<>();
-
-        Cellule celluleActuelle = terrain.getGrille()[positionActuelle.getX()][positionActuelle.getY()];
-        boolean[] directionsAutorisees = celluleActuelle.getDirectionsAutorisees();
-
-        // Remplir les cellules potentielles en fonction des directions autorisées
-        if (directionsAutorisees[0] && positionActuelle.getY() - 1 >= 0) {
-            cellulesPotentielles.add(new Vector2D(positionActuelle.getX(), positionActuelle.getY() - 1));
-        }
-        if (directionsAutorisees[1] && positionActuelle.getX() + 1 < terrain.getLargeur()) {
-            cellulesPotentielles.add(new Vector2D(positionActuelle.getX() + 1, positionActuelle.getY()));
-        }
-        if (directionsAutorisees[2] && positionActuelle.getY() + 1 < terrain.getHauteur()) {
-            cellulesPotentielles.add(new Vector2D(positionActuelle.getX(), positionActuelle.getY() + 1));
-        }
-        if (directionsAutorisees[3] && positionActuelle.getX() - 1 >= 0) {
-            cellulesPotentielles.add(new Vector2D(positionActuelle.getX() - 1, positionActuelle.getY()));
-        }
-
-        return cellulesPotentielles;
     }
 
     public ArrayList<Vector2D> gestionIntersection() {
@@ -320,7 +271,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         return deplacements;
     }
 
-    private void avancerIntersection(List<Vector2D> deplacements) {
+    protected void avancerIntersection(List<Vector2D> deplacements) {
         for (Vector2D pos : deplacements) {
             anciennePosition = vehicule.getPosition().copy();
             vehicule.move(pos);
@@ -343,11 +294,11 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         cell2.setIdVoiture(vehicule.getId());
     }
 
-    private void mettreAJourGraphique() {
+    protected void mettreAJourGraphique() {
         Platform.runLater(() -> terrainController.updateCellule(anciennePosition, nouvellePosition, vehiculeShape));
     }
 
-    private void pauseEntreMouvements(int millisecondes) {
+    protected void pauseEntreMouvements(int millisecondes) {
         try {
             Thread.sleep(millisecondes);
         } catch (InterruptedException e) {
@@ -355,7 +306,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         }
     }
 
-    private Shape creerVehiculeShape(TypeVehicule typeVehicule) {
+    protected Shape creerVehiculeShape(TypeVehicule typeVehicule) {
         List<Color> listeCouleurs = Arrays.asList(Color.HOTPINK, Color.DEEPPINK, Color.ORANGE, Color.LIME, Color.MAGENTA, Color.CYAN, Color.PURPLE, Color.GOLD);
         int couleurRandom = new Random().nextInt(listeCouleurs.size());
 
@@ -375,18 +326,16 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         }
     }
 
-    //Vc ecouteur de vc
 
     private List<VehiculeControllerListener> listeners = new ArrayList<>();
 
     public void addListener(VehiculeControllerListener listener) {
-
         listeners.add(listener);
     }
     public void removeListener (VehiculeControllerListener listener){
             listeners.remove(listener);
     }
-private void notifyListeners(Message message) {
+    protected void notifyListeners(Message message) {
         for (VehiculeControllerListener listener : listeners) {
             if (!listener.equals(message.getv1())) {
                 listener.messageVc(message);
@@ -396,25 +345,13 @@ private void notifyListeners(Message message) {
     public void sendMessagevc (Message message) {
         notifyListeners(message); // Notifie tous les observateurs
     }
-    @Override
-    public String toString() {
-        return "Vehicule{" +
-                "type=" + vehicule.getType() +
-                ", positionDepart=" + vehicule.getPositionDepart() +
-                ", positionArrivee=" + vehicule.getPositionArrivee() +
-                '}';
-    }
-    @Override
+    @Override // Traitement du message reçu
     public void messageVc(Message message) {
-        // Traitement du message reçu
-
         System.out.println("Le véhicule de type \"" + message.getv1().getType() + "\" et id \"" + message.getv1().getId() +
                 "\" envoie ce message : " + message.getT() + ", objet : " + message.getObjet() +
                 ", itinéraire : " + message.getItineraire());
 
         System.out.println("Le véhicule de type \"" + vehicule.getType() + "\" et id \"" + vehicule.getId() + "\" a reçu ce message.");
-
-
     }
     //intersection ecouteur de vc
     private List<IntersectionListener> intersections = new ArrayList<>();
