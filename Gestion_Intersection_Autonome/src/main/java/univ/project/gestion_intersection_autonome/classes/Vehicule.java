@@ -13,7 +13,7 @@ public class Vehicule implements VehiculeListener {
     private Vector2D positionDepart;
     private Vector2D positionArrivee;
     private static int idCompteur = 1;// génère un ID pour chaque véhicule
-    private boolean enMouvement;
+    private boolean enAttente;
     private List<Vector2D> itineraire;
 
 
@@ -24,6 +24,7 @@ public class Vehicule implements VehiculeListener {
         this.position = positionDepart.copy();
         this.positionDepart = positionDepart.copy();
         this.positionArrivee = positionArrivee.copy();
+        this.enAttente = false;
 
         // calcul de l'itinéraire
         AStar aStar = new AStar(terrain);
@@ -40,14 +41,13 @@ public class Vehicule implements VehiculeListener {
         this.position = positionDepart.copy();
         this.positionDepart = positionDepart.copy();
         this.positionArrivee = positionArrivee.copy();
-
-
+        this.enAttente = false;
     }
 
     public Vehicule(ArrayList<Vector2D> itineraire) {
         this.id = idCompteur++;
         //this.type = type;
-        this.itineraire=itineraire;
+        this.itineraire = itineraire;
     }
 
     // Méthodes
@@ -57,8 +57,7 @@ public class Vehicule implements VehiculeListener {
     }
 
     //methode qui determine la position par laquelle le véhicule passe selon le chemin le plus court , prend un paramètre un tableau de Vector2D contenant les positions possibles
-    public Vector2D choisirPositionOptimale(List<Vector2D> positionsPossibles)
-    {
+    public Vector2D choisirPositionOptimale(List<Vector2D> positionsPossibles) {
         // dans le cas où le véhicule est en bordure
         if (positionsPossibles == null || positionsPossibles.isEmpty()) {
             System.out.println("Aucune position valide pour le véhicule.");
@@ -96,14 +95,15 @@ public class Vehicule implements VehiculeListener {
     //methode pour envoyer un message
 
 
-
     // Getters et setters
     public int getId() {
         return id;
     }
+
     public int setId(int id) {
         return id;
     }
+
     public TypeVehicule getType() {
         return type;
     }
@@ -161,6 +161,7 @@ public class Vehicule implements VehiculeListener {
             }
         }
     }
+
     @Override
     public String toString() {
         return "Vehicule{" +
@@ -200,11 +201,11 @@ public class Vehicule implements VehiculeListener {
         return Objects.hash(id);
     }
 
+    public boolean isEnAttente() {
+        return enAttente;
+    }
+
+    public void setEnAttente(boolean enAttente) {
+        this.enAttente = enAttente;
+    }
 }
-//sous-classe police : methode qui calcule le temps d'attente se met en ecoute de vehicule controller:
-// a partir de 3 vehicules faire intervenir l'intersection qui bloque toutes les entrees de l'intersection laisse passer ceux
-//qui sont engageees et laisse passer la police
-//intersection comme listener
-//vehicule controller comme listener
-//listener
-//si temps attente beaucoup -> intersection se mettre a l ecoute , police envoye un message -> methode de meryem
