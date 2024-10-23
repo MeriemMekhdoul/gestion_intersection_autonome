@@ -68,6 +68,25 @@ public class Cellule {
     public boolean[] getDirectionsAutorisees() {
         return directionsAutorisees;
     }
+    public boolean isDirectionAutorisee(Direction d){
+        switch(d) {
+            case NORD -> {
+                return directionsAutorisees[0];
+            }
+            case EST -> {
+                return directionsAutorisees[1];
+            }
+            case SUD -> {
+                return directionsAutorisees[2];
+            }
+            case OUEST -> {
+                return directionsAutorisees[3];
+            }
+            default -> {
+                return false;
+            }
+        }
+    }
 }
 
 

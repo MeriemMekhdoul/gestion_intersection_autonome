@@ -110,4 +110,11 @@ public class Configuration {
         return s.toString();
     }
 
+    public Vehicule getVehicule(int idVoiture) {
+        for (Vehicule v : vehicules) {
+            if (v.getId() == idVoiture)
+                return v;
+        }
+        return null;
+    }
 }
