@@ -70,4 +70,9 @@ public class Vector2D
         return Objects.hash(x, y);
     }
 
+    // Calculer la distance entre deux positions (distance de Manhattan)
+    public double distance(Vector2D autrePosition) {
+        // Calcul de la distance de Manhattan (modifiez si vous utilisez la distance Euclidienne)
+        return Math.abs(this.x - autrePosition.getX()) + Math.abs(this.y - autrePosition.getY());
+    }
 }
