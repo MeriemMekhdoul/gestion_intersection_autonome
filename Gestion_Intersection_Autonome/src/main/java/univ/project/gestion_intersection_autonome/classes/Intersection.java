@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Intersection implements IntersectionListener {
     private final List<Vector2D> cellulesCommunication; // Liste des cellules qui appartiennent à l'intersection (à revoir)
+    private final ArrayList<Vector2D> pointsEntree;
     private ConcurrentHashMap<Direction, Integer> etatTrafic;  //ajouter une énum état trafic ?
     private Configuration configuration;
 
@@ -15,9 +16,15 @@ public class Intersection implements IntersectionListener {
         this.cellulesCommunication = cellulesInfluence;
         this.etatTrafic = new ConcurrentHashMap<>();
         this.configuration = new Configuration();
+        this.terrain = terrain;
+        pointsEntree = _pointsEntree;
     }
 
 
+
+    public ArrayList<Vector2D> getPointsEntree() {
+        return pointsEntree;
+    }
     public boolean contientCellule(Vector2D position) {
         return cellulesCommunication.contains(position);
     }

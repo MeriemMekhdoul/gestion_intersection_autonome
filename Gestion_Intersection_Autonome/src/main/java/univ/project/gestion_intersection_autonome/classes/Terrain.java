@@ -223,16 +223,49 @@ public class Terrain {
 
     public void creerIntersection(int x, int i){
         ArrayList<Vector2D> cellulesComm = new ArrayList<>();
+        ArrayList<Vector2D> pointsEntree = new ArrayList<>();
+
         cellulesComm.add(new Vector2D(x-1, i));
         cellulesComm.add(new Vector2D(x-1,i+1));
+
+        pointsEntree.add(cellulesComm.get(cellulesComm.size() - 1));
+
         cellulesComm.add(new Vector2D(x,i-1));
+
+        pointsEntree.add(cellulesComm.get(cellulesComm.size() - 1));
+
         cellulesComm.add(new Vector2D(x+1,i-1));
         cellulesComm.add(new Vector2D(x+2, i));
+
+        pointsEntree.add(cellulesComm.get(cellulesComm.size() - 1));
+
         cellulesComm.add(new Vector2D(x+2,i+1));
         cellulesComm.add(new Vector2D(x,i+2));
         cellulesComm.add(new Vector2D(x+1,i+2));
 
-        Intersection intersection = new Intersection(cellulesComm);
+        pointsEntree.add(cellulesComm.get(cellulesComm.size() - 1));
+
+        Intersection intersection = new Intersection(cellulesComm, pointsEntree, this);
         intersections.add(intersection);
+    }
+
+
+    // Méthode pour vérifier si une position est proche d'une intersection (moins de 5 cases)
+    public boolean estProcheIntersection(Vector2D position) {
+        // Parcourir toutes les intersections dans le terrain
+        for (Intersection intersection : intersections) {
+            // Vérifier chaque point d'entrée de l'intersection
+            for (Vector2D pointEntree : intersection.getPointsEntree()) {
+                // Calculer la distance entre la position et le point d'entrée
+                double distance = position.distance(pointEntree);
+
+                // Si la distance est inférieure ou égale à 5, alors on est proche de l'intersection
+                if (distance <= 5) {
+                    return true;
+                }
+            }
+        }
+        // Si aucune intersection n'est proche, retourner false
+        return false;
     }
 }
