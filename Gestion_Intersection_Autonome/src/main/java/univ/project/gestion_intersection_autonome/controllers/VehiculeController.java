@@ -57,7 +57,9 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
             //mettre l'index à jour dans le cas du déplacement dans l'intersection
             i = itineraire.indexOf(nouvellePosition);
         }
-
+        finDeplacement();
+    }
+    public void finDeplacement(){
         //libérer la dernière cellule occupée
         Cellule cell = terrain.getCellule(nouvellePosition);
         cell.setOccupee(false);
@@ -389,6 +391,16 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
 
         System.out.println("Le véhicule de type \"" + vehicule.getType() + "\" avec l'id \"" + vehicule.getId() + "\" a reçu ce message.");
 
+        // Traitement du message en fonction de l'objet
+        switch (message.getObjet()) {
+            case MARCHE ->
+                // Si le message est MARCHE, le véhicule doit reprendre ou continuer son exécution
+                    reprendreExecution();
+            case STOP ->
+                // Si le message est STOP, le véhicule doit se mettre en pause
+                    mettreEnPause();
+            default -> System.out.println("Objet de message non reconnu : " + message.getObjet());
+        }
     }
 
     public synchronized void mettreEnPause() {
