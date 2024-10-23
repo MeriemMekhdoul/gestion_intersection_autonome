@@ -32,7 +32,7 @@ public class MainTrafficApplication extends Application {
         // Passer l'instance de TerrainController à la simulation
         simulation.setTerrainController(terrainController);
 
-        Scene scene = new Scene(root, 525, 525);
+        Scene scene = new Scene(root, 610, 610);
         stage.setTitle("Mon Terrain");
         stage.setScene(scene);
         stage.show();
