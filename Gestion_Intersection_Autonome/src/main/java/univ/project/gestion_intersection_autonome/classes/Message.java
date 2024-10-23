@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class Message {
     private Instant t ;
-    private Vehicule v1 ;
+    private Vehicule v1 ; //ajouter un attribut controleur ?
     private ArrayList<Vehicule>v2 ;
     private Objetmessage objet ;
     private ArrayList<Vector2D> itineraire ;
@@ -31,7 +31,7 @@ public class Message {
         this.itineraire=itineraire;
     }
 
-    public Message(VehiculePolice vehiculePolice, String m) {
+    public Message(VehiculeUrgence vehiculeUrgence, String m) {
     }
 
     //setters et getters
@@ -45,6 +45,9 @@ public class Message {
 
 
     public void setv2(ArrayList<Vehicule>v2){this.v2=v2;}
+    public void setv2 (Vehicule v) {
+        this.v2.add(v);
+    }
     public ArrayList<Vehicule> getv2() {return v2;}
 
     public void setItineraire(ArrayList<Vector2D>itineraire){
