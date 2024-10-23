@@ -1,9 +1,11 @@
 package univ.project.gestion_intersection_autonome.controllers;
 
 import javafx.application.Platform;
+import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import univ.project.gestion_intersection_autonome.classes.*;
 
 import java.util.ArrayList;
@@ -35,7 +37,10 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
     @Override
     public void run() {
         List<Vector2D> itineraire = vehicule.getItineraire();
-        //mettreAJourGraphique();
+        anciennePosition = vehicule.getPosition().copy();
+        nouvellePosition = vehicule.getPosition().copy();
+        mettreAJourGraphique();
+
         // on démarre à 1, car 0 est la position de départ (actuelle)
         for (int i = 1; i < itineraire.size(); i++) {
             // Vérifier si le véhicule est en pause
@@ -53,6 +58,9 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
             // Déplacer le véhicule uniquement s'il n'est pas en pause
             anciennePosition = vehicule.getPosition().copy();
             nouvellePosition = itineraire.get(i);
+            System.out.println("J'entre dans le run avant de me déplacer");
+            System.out.println("J'affiche avant de me déplacer");
+
             deplacement();
             //mettre l'index à jour dans le cas du déplacement dans l'intersection
             i = itineraire.indexOf(nouvellePosition);
@@ -75,8 +83,8 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         });
     }
 
-
     public void deplacement() {
+        System.out.println("Le véhicule se déplace");
         if (estDansCommunication(anciennePosition) && entreeIntersection) {
             System.out.println("je suis dans une zone de communication");
             entrerIntersection();
@@ -121,6 +129,11 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         System.out.println("Entrée dans une intersection");
         ArrayList<Vector2D> deplacements = gestionIntersection();
         System.out.println("Itinéraire dans l'intersection : " + deplacements);
+
+        // dessiner l'itinéraire sur la grille
+        Platform.runLater(() -> {
+            terrainController.dessinerItineraire(deplacements, vehicule);
+        });
 
         Message message = new Message();
         //Rajouter un nv constructeur
@@ -171,7 +184,14 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
             //Envoyer un message avant de s'engager ??
 
             avancerIntersection(deplacements);
+
+            Platform.runLater(() -> {
+                terrainController.effacerItineraire(vehicule, anciennePosition);
+            });
+
             intersection.supprimerVehicule(vehicule);
+
+
             //à la sortie envoyer un msg de SORTIE (à qui ??) => intersection ou véhiculesDestinataires ?
             //}
         }
@@ -299,19 +319,32 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         }
     }
 
-    public synchronized void mettreAJourCellules() {
+    public synchronized void mettreAJourCellules()
+    {
+        System.out.println("mettreAJourCellules called with anciennePosition: " + anciennePosition + ", nouvellePosition: " + nouvellePosition);
         nouvellePosition = vehicule.getPosition().copy();
         Cellule cell2 = terrain.getCellule(nouvellePosition);
-        Cellule cell1 = terrain.getCellule(anciennePosition);
 
-        cell1.setOccupee(false);
-        cell1.setIdVoiture(0);
+        if (!anciennePosition.equals(nouvellePosition)) {
+            Cellule cell1 = terrain.getCellule(anciennePosition);
+            cell1.setOccupee(false);
+            cell1.setIdVoiture(0);
+
+            Platform.runLater(() -> {
+                terrainController.effacerItineraire(vehicule, anciennePosition);
+            });
+        }
+
         cell2.setOccupee(true);
         cell2.setIdVoiture(vehicule.getId());
     }
 
     protected void mettreAJourGraphique() {
-        Platform.runLater(() -> terrainController.updateCellule(anciennePosition, nouvellePosition, vehiculeShape));
+    System.out.println("mettreAJourGraphique called with anciennePosition: " + anciennePosition + ", nouvellePosition: " + nouvellePosition);
+        Platform.runLater(() -> {
+            System.out.println("Appel a terrainController.updateCellule");
+            terrainController.updateCellule(anciennePosition, nouvellePosition, vehiculeShape);
+        });
     }
 
     protected void pauseEntreMouvements(int millisecondes) {
@@ -322,22 +355,24 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         }
     }
 
-    protected Shape creerVehiculeShape(TypeVehicule typeVehicule) {
-        List<Color> listeCouleurs = Arrays.asList(Color.HOTPINK, Color.DEEPPINK, Color.ORANGE, Color.LIME, Color.MAGENTA, Color.CYAN, Color.PURPLE, Color.GOLD);
-        int couleurRandom = new Random().nextInt(listeCouleurs.size());
+    protected Shape creerVehiculeShape(TypeVehicule typeVehicule)
+    {
+        Color couleurVehicule = vehicule.getCouleur();
 
-        switch (typeVehicule) {
+        switch (typeVehicule)
+        {
             case VOITURE -> {
-                return new Circle(5, listeCouleurs.get(couleurRandom));
+                return new Circle((double) terrainController.TAILLE_CELLULE / 2, couleurVehicule);
             }
-/*            case URGENCE -> {
-                return new Rectangle(10, 10, Color.BLUE); // voir plus tard pour alterner rouge / bleu
+            case URGENCE -> {
+                return new Circle((double) terrainController.TAILLE_CELLULE / 2, Color.BLUE); // voir plus tard pour alterner rouge / bleu
             }
+            /*
             case BUS -> {
                 return new Rectangle(10, 10, Color.BLUE); // voir plus tard
             }*/
             default -> {
-                return new Circle(5, listeCouleurs.get(couleurRandom));
+                return new Circle((double) terrainController.TAILLE_CELLULE / 2, couleurVehicule);
             }
         }
     }

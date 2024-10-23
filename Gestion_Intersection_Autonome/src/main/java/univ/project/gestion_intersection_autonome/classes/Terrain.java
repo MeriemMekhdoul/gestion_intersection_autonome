@@ -9,10 +9,10 @@ public class Terrain {
     private final List<Intersection> intersections;
     private int largeur;
     private int hauteur;
-    private final int NOMBRE_MAX_ROUTES_HORIZONTALES = 1;
-    private final int NOMBRE_MAX_ROUTES_VERTICALES = 1;
+    private final int NOMBRE_MAX_ROUTES_HORIZONTALES = 4;
+    private final int NOMBRE_MAX_ROUTES_VERTICALES = 4;
     private final int ESPACE_MIN = 8;
-    private final int ESPACE_MAX = 20;
+    private final int ESPACE_MAX = 16;
 
     // Constructeur par défaut
     public Terrain() {

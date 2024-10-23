@@ -4,6 +4,8 @@ import javafx.application.Platform;
 import univ.project.gestion_intersection_autonome.controllers.TerrainController;
 import univ.project.gestion_intersection_autonome.controllers.VehiculeController;
 
+import javafx.scene.paint.Color;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +21,10 @@ public class Simulation {
     private TerrainController terrainController;
     private ArrayList<VehiculeController> controleurs;
     private ScheduledExecutorService scheduler;
-    private final int LARGEUR_TERRAIN = 50;
-    private final int HAUTEUR_TERRAIN = 50;
+    private final int LARGEUR_TERRAIN = 40;
+    private final int HAUTEUR_TERRAIN = 40;
+    private final int LIMITE_VEHICULES = 50;
+
 
     //constructeur par défaut
     public Simulation() {
@@ -35,8 +39,9 @@ public class Simulation {
     }
 
     //Générer aléatoirement un véhicule
-    public void genererVehiculeAleatoire() throws IOException {
-        if (vehicules.size() >= 50) {
+    public void genererVehiculeAleatoire() throws IOException
+    {
+        if (vehicules.size() >= LIMITE_VEHICULES) {
 //            System.out.println("Limite de véhicules atteinte");
             return;
         }
@@ -50,8 +55,15 @@ public class Simulation {
             return;
         }
 
-        Vector2D positionDepart = entrees.get(new Random().nextInt(entrees.size()));
-        Vector2D positionArrivee = sorties.get(new Random().nextInt(sorties.size()));
+        int indexEntree = new Random().nextInt(entrees.size());
+        int indexSortie = new Random().nextInt(sorties.size());
+
+        while (indexEntree == indexSortie) {
+            indexSortie = new Random().nextInt(sorties.size());
+        }
+
+        Vector2D positionDepart = entrees.get(indexEntree);
+        Vector2D positionArrivee = sorties.get(indexSortie);
 
         // en cas de modification des listes après lancement
         if (sorties.contains(positionDepart)) {
@@ -61,9 +73,26 @@ public class Simulation {
 
         System.out.println("Départ : " + positionDepart + " | Arrivée : " + positionArrivee);
 
-        TypeVehicule type = TypeVehicule.values()[new Random().nextInt(TypeVehicule.values().length)];
+        // génération du type de véhicule
+        int random = new Random().nextInt(20) + 1;
+        TypeVehicule type = TypeVehicule.VOITURE;
 
-        Vehicule vehicule = new Vehicule(type, positionDepart, positionArrivee, terrain);
+        Color couleur = Vehicule.genererCouleurAleatoire();
+
+        if (random == 1) {
+            type = TypeVehicule.URGENCE;
+            couleur = Color.WHITE;
+        }
+
+        // calcul de l'itinéraire
+        AStar aStar = new AStar(terrain);
+        List<Vector2D> itineraire = aStar.trouverChemin(positionDepart, positionArrivee);
+
+        if (itineraire.isEmpty()) {
+            throw new IllegalStateException("Aucun chemin trouvé de " + positionDepart + " à " + positionArrivee);
+        }
+
+        Vehicule vehicule = new Vehicule(type, positionDepart, positionArrivee, itineraire, couleur);
 
         Cellule cellule = terrain.getCellule(positionDepart);
         cellule.setOccupee(true);
@@ -75,7 +104,7 @@ public class Simulation {
 
         Thread thread = new Thread(vehiculeController);
         thread.start();
-        System.out.println("Véhicule ajouté");
+        System.out.println("Véhicule ajouté à la position " + vehicule.getPosition());
     }
 
     // Lancer les véhicules dans des threads
@@ -90,6 +119,7 @@ public class Simulation {
                 }
             });
         }, 0, 1, TimeUnit.SECONDS); // Ajoute un véhicule toutes les secondes
+        // voir pour modifier afin de récupérer la constante de véhicule controller
     }
 
     // suppression du véhicule de la liste des vehicules et controlleurs
