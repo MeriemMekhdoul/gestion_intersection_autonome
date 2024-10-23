@@ -38,6 +38,19 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         //mettreAJourGraphique();
         // on démarre à 1, car 0 est la position de départ (actuelle)
         for (int i = 1; i < itineraire.size(); i++) {
+            // Vérifier si le véhicule est en pause
+            synchronized (this) {
+                while (enPause) {
+                    try {
+                        wait(); // Attend que 'enPause' soit false
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        System.out.println("Le thread du véhicule a été interrompu.");
+                    }
+                }
+            }
+
+            // Déplacer le véhicule uniquement s'il n'est pas en pause
             anciennePosition = vehicule.getPosition().copy();
             nouvellePosition = itineraire.get(i);
             deplacement();
@@ -101,6 +114,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
 
     protected void entrerIntersection() {
         Intersection intersection = terrain.getIntersection(anciennePosition);
+        intersection.addVehiculeControllerListener(this);
 
         System.out.println("Entrée dans une intersection");
         ArrayList<Vector2D> deplacements = gestionIntersection();
@@ -327,8 +341,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
     }
 
 
-    private List<VehiculeControllerListener> listeners = new ArrayList<>();
-
+    //vehiculeController(s) en écoute de ce vehiculeController
     public void addListener(VehiculeControllerListener listener) {
         listeners.add(listener);
     }
@@ -342,7 +355,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
             }
         }
     }
-    public void sendMessagevc (Message message) {
+    public void sendMessageVc (Message message) {
         notifyListeners(message); // Notifie tous les observateurs
     }
     @Override // Traitement du message reçu
@@ -353,36 +366,45 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
 
         System.out.println("Le véhicule de type \"" + vehicule.getType() + "\" et id \"" + vehicule.getId() + "\" a reçu ce message.");
     }
-    //intersection ecouteur de vc
-    private List<IntersectionListener> intersections = new ArrayList<>();
 
+
+    //intersections en écoute du vc
     public void addIntersectionListener(IntersectionListener listener) {
-        intersections.add(listener);
+        intersectionListener = listener;
     }
 
-    public void removeIntersectionListener(IntersectionListener listener) {
+    /*public void removeIntersectionListener(IntersectionListener listener) {
         intersections.remove(listener);
-    }
+    }*/
 
     public void sendMessageToIntersections(Message message) {
-        for (IntersectionListener listener : intersections) {
-            listener.onMessageReceivedFromVehiculeController(message);
-        }
+        intersectionListener.onMessageReceivedFromVehiculeController(message);
     }
-
-    @Override
+    @Override //traitement du message reçu de l'intersection
     public void onMessageReceivedFromIntersection(Message message) {
-        //changer si necessaire
-        System.out.println("Le véhicule de type \"" + message.getv1().getType() + "\" et id \"" + message.getv1().getId() +
+        // Affichage des informations de debug
+        System.out.println("Le véhicule de type \"" + message.getv1().getType() + "\" avec l'id \"" + message.getv1().getId() +
                 "\" envoie ce message : " + message.getT() + ", objet : " + message.getObjet() +
                 ", itinéraire : " + message.getItineraire());
 
-        System.out.println("Le véhicule de type \"" + vehicule.getType() + "\" et id \"" + vehicule.getId() + "\" a reçu ce message.");
+        System.out.println("Le véhicule de type \"" + vehicule.getType() + "\" avec l'id \"" + vehicule.getId() + "\" a reçu ce message.");
 
     }
 
+    public synchronized void mettreEnPause() {
+        enPause = true;
+        System.out.println("Véhicule mis en pause");
+    }
 
+    public synchronized void reprendreExecution() {
+        enPause = false;
+        notify(); // Relance le thread si le véhicule est en pause
+        System.out.println("Véhicule reprend son déplacement");
+    }
 
+    public Vehicule getVehicule() {
+        return vehicule;
+    }
 
 }
 
