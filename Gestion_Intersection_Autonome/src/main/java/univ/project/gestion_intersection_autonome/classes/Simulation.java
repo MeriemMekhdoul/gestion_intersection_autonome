@@ -23,7 +23,7 @@ public class Simulation {
     private ScheduledExecutorService scheduler;
     private final int LARGEUR_TERRAIN = 40;
     private final int HAUTEUR_TERRAIN = 40;
-    private final int LIMITE_VEHICULES = 50;
+    private final int LIMITE_VEHICULES = 40;
 
 
     //constructeur par défaut
@@ -92,19 +92,28 @@ public class Simulation {
             throw new IllegalStateException("Aucun chemin trouvé de " + positionDepart + " à " + positionArrivee);
         }
 
-        Vehicule vehicule = new Vehicule(type, positionDepart, positionArrivee, itineraire, couleur);
+        Vehicule vehicule;
+        if (type == TypeVehicule.URGENCE)
+            vehicule = new VehiculeUrgence(type, positionDepart, positionArrivee, itineraire, couleur);
+        else
+            vehicule = new Vehicule(type, positionDepart, positionArrivee, itineraire, couleur);
 
         Cellule cellule = terrain.getCellule(positionDepart);
         cellule.setOccupee(true);
         cellule.setIdVoiture(vehicule.getId());
 
-        VehiculeController vehiculeController = new VehiculeController(vehicule, terrain, terrainController);
+        VehiculeController vehiculeController;
+        if (type == TypeVehicule.URGENCE)
+             vehiculeController = new VehiculeUrgenceController((VehiculeUrgence) vehicule, terrain, terrainController);
+        else
+            vehiculeController = new VehiculeController(vehicule, terrain, terrainController);
+
         vehicules.add(vehicule);
         controleurs.add(vehiculeController);
 
         Thread thread = new Thread(vehiculeController);
         thread.start();
-        System.out.println("Véhicule ajouté à la position " + vehicule.getPosition());
+        //System.out.println("Véhicule ajouté à la position " + vehicule.getPosition());
     }
 
     // Lancer les véhicules dans des threads
