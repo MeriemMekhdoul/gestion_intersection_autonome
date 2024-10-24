@@ -137,15 +137,16 @@ public class Intersection implements IntersectionListener {
     public void onMessageReceivedFromVehiculeController(Message message) {
 
         //get la voie par laquelle le vehicule arrive pour pouvoir bloquer les autres
-        Vector2D voieEntree = getVoieEntree(message.getv1().getPosition());
+        Vector2D voieEntree = getVoieEntree(message.getv1().getPosition().copy());
         System.out.println("position actuelle du véhicule : " + message.getv1().getPosition() + " voie d'entrée : " + voieEntree);
 
         switch (message.getObjet()) {
             case PASSAGE -> {
                 execEntreeVehiculeUrgence(message, voieEntree);
             }
-            case SORTIE -> {
-                execSortieVehiculeUrgence(voieEntree);
+            case ENTREE -> {
+                System.out.println("pos actuelle a passer a exec sortie : " + message.getEntreeUrgence());
+                execSortieVehiculeUrgence(message.getEntreeUrgence());
             }
         }
     }
@@ -154,33 +155,28 @@ public class Intersection implements IntersectionListener {
         ArrayList<Vector2D> positionsPossibles = new ArrayList<>();
         boolean sameX = true;
 
-        for (Vector2D pos : cellulesCommunication) {
-            if (pos.getX() == position.getX()){
+        for (Vector2D pos : pointsEntree) {
+            if (pos.getX() == position.getX()) {
+                System.out.println("same X pos = " + pos);
                 positionsPossibles.add(pos.copy());
-            } else if (pos.getY() == pos.getY()) {
+                return pos;
+            } else if (pos.getY() == position.getY()) {
+                System.out.println("same Y pos = " + pos);
                 positionsPossibles.add(pos.copy());
                 sameX = false;
+                return pos;
             }
             //else on passe au suivant
         }
-        Vector2D pos1 = positionsPossibles.get(0);
-        Vector2D pos2 = positionsPossibles.get(1);
-        if (sameX) {
-            return terrain.getCellule(position).isDirectionAutorisee(Direction.NORD)
-                    ? (pos1.getY() > pos2.getY() ? pos1 : pos2)
-                    : (pos1.getY() < pos2.getY() ? pos1 : pos2);
-        } else {
-            return terrain.getCellule(position).isDirectionAutorisee(Direction.EST)
-                    ? (pos1.getX() < pos2.getX() ? pos1 : pos2)
-                    : (pos1.getX() > pos2.getX() ? pos1 : pos2);
-        }
+        return null;
     }
 
     public void execSortieVehiculeUrgence(Vector2D voieEntree){
+        System.out.println("EXEC SORTIE VEHICULE URGENCE /// voie entree = " + voieEntree);
         System.out.println("un VéhiculeController a envoyé un message de SORTIE à l'intersection");
         //libérer les cases ET les véhicules
         //get les vehicules qui sont en attente pour leur envoyer un signal et les remettre en marche
-        ArrayList<Vehicule> vehiculesEnAttente = setEtatCellulesEtVehicules(true, voieEntree);
+        ArrayList<Vehicule> vehiculesEnAttente = setEtatCellulesEtVehicules(false, voieEntree);
 
         // Préparer le message pour indiquer que les véhicules peuvent redémarrer
         sendControllerMessage(vehiculesEnAttente, Objetmessage.MARCHE);
@@ -190,6 +186,8 @@ public class Intersection implements IntersectionListener {
         System.out.println("un VéhiculeController a envoyé un message d'ENTRÉE à l'intersection");
         System.out.println("sender id : " + message.getv1().getId() + " , type = " + message.getv1().getType());
 
+        System.out.println("EXEC ENTREE VEHICULE URGENCE /// voie entree = " + voieEntree);
+
         // Bloquer les entrées et envoyer un signal d'arrêt aux véhicules en attente
         ArrayList<Vehicule> vehiculesEnAttente = setEtatCellulesEtVehicules(true, voieEntree);
         sendControllerMessage(vehiculesEnAttente, Objetmessage.STOP);
@@ -198,9 +196,10 @@ public class Intersection implements IntersectionListener {
     public ArrayList<Vehicule> setEtatCellulesEtVehicules(boolean etat, Vector2D voieEntree) {
         ArrayList<Vehicule> vehiculesEnAttentes = new ArrayList<>();
 
-        for (Vector2D position : cellulesCommunication) {
-            if(!voieEntree.equals(position) && isEntreeIntersection(position)) {
-                if (terrain.getCellule(position).estOccupee() && (terrain.getCellule(position).getIdVoiture() != 0)) {
+        for (Vector2D position : pointsEntree) {
+            if(!voieEntree.equals(position)) {
+                System.out.println("pos a bloquer : " + position);
+                if (terrain.getCellule(position).estOccupee() && (terrain.getCellule(position).getIdVoiture() > 0)) {
                     int idVoiture = terrain.getCellule(position).getIdVoiture();
                     Vehicule vehicule = configuration.getVehicule(idVoiture);
                     vehicule.setEnAttente(etat);
@@ -208,7 +207,7 @@ public class Intersection implements IntersectionListener {
                 } else {
                     terrain.getCellule(position).setOccupee(etat);
                 }
-            }
+            } //je bloque pas
         }
 
         return vehiculesEnAttentes;
@@ -233,13 +232,14 @@ public class Intersection implements IntersectionListener {
     }
 
     public void sendControllerMessage(ArrayList<Vehicule> vehiculesEnAttente, Objetmessage objet) {
-        // Créer et envoyer le message aux contrôleurs associés
-        Message message = new Message();
-        message.setObjet(objet);
-        message.setv2(vehiculesEnAttente);
+        if (vehiculesEnAttente.isEmpty()){// Créer et envoyer le message aux contrôleurs associés
+            Message message = new Message();
+            message.setObjet(objet);
+            message.setv2(vehiculesEnAttente);
 
-        ArrayList<VehiculeControllerListener> controllersEnAttente = getControllers(vehiculesEnAttente);
-        sendMessageToVehiculeControllers(message, controllersEnAttente);
+            ArrayList<VehiculeControllerListener> controllersEnAttente = getControllers(vehiculesEnAttente);
+            sendMessageToVehiculeControllers(message, controllersEnAttente);
+        }
     }
 
     public boolean verifierEmbouteillage(Vector2D position) {
