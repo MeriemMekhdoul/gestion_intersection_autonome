@@ -12,6 +12,7 @@ public class Message {
     private Objetmessage objet ;
     private ArrayList<Vector2D> itineraire ;
     private Configuration configuration;
+    private Vector2D entreeUrgence;
 
     //constructeur par défaut
     public Message(){
@@ -77,6 +78,14 @@ public class Message {
     @Override
     public int hashCode() {
         return Objects.hash(t, v1, v2, objet, itineraire);
+    }
+
+    public Vector2D getEntreeUrgence() {
+        return entreeUrgence;
+    }
+
+    public void setEntreeUrgence(Vector2D position) {
+        entreeUrgence = position;
     }
 }
 
