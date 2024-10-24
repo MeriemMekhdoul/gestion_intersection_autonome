@@ -23,7 +23,7 @@ public class Simulation {
     private ScheduledExecutorService scheduler;
     private final int LARGEUR_TERRAIN = 40;
     private final int HAUTEUR_TERRAIN = 40;
-    private final int LIMITE_VEHICULES = 40;
+    private final int LIMITE_VEHICULES = 50;
 
 
     //constructeur par défaut
@@ -98,16 +98,11 @@ public class Simulation {
         else
             vehicule = new Vehicule(type, positionDepart, positionArrivee, itineraire, couleur);
 
-        Cellule cellule = terrain.getCellule(positionDepart);
-        cellule.setOccupee(true);
-        cellule.setIdVoiture(vehicule.getId());
-
         VehiculeController vehiculeController;
         if (type == TypeVehicule.URGENCE)
-             vehiculeController = new VehiculeUrgenceController((VehiculeUrgence) vehicule, terrain, terrainController);
+            vehiculeController = new VehiculeUrgenceController((VehiculeUrgence) vehicule, terrain, terrainController);
         else
             vehiculeController = new VehiculeController(vehicule, terrain, terrainController);
-
         vehicules.add(vehicule);
         controleurs.add(vehiculeController);
 
