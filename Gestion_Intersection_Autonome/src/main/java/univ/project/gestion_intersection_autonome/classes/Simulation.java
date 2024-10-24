@@ -94,10 +94,6 @@ public class Simulation {
 
         Vehicule vehicule = new Vehicule(type, positionDepart, positionArrivee, itineraire, couleur);
 
-        Cellule cellule = terrain.getCellule(positionDepart);
-        cellule.setOccupee(true);
-        cellule.setIdVoiture(vehicule.getId());
-
         VehiculeController vehiculeController = new VehiculeController(vehicule, terrain, terrainController);
         vehicules.add(vehicule);
         controleurs.add(vehiculeController);
