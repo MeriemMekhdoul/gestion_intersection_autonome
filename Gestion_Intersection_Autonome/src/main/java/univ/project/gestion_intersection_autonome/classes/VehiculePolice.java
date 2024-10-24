@@ -1,5 +1,6 @@
 package univ.project.gestion_intersection_autonome.classes;
 
+import javafx.scene.paint.Color;
 import univ.project.gestion_intersection_autonome.controllers.VehiculeController;
 
 import java.io.IOException;
@@ -8,8 +9,8 @@ import java.util.ArrayList;
 public class VehiculePolice extends Vehicule {
 
 
-    public VehiculePolice(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee, Terrain terrain) throws IOException {
-        super(type, positionDepart, positionArrivee, terrain);
+    public VehiculePolice(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee, ArrayList<Vector2D> itineraire, Color couleur) throws IOException {
+        super(type, positionDepart, positionArrivee, itineraire, couleur);
     }
 
     public void passagePolice (Intersection intersection, VehiculeController vehiculeController) {
