@@ -154,12 +154,12 @@ public class TerrainController implements Initializable {
 
     public void updateCellule(Vector2D anciennePosition, Vector2D nouvellePosition, Shape vehiculeShape)
     {
-        System.out.println("J'entre dans update cellule");
+        //System.out.println("J'entre dans update cellule");
         if (!anciennePosition.equals(nouvellePosition)) {
             effacerVehicule(anciennePosition, vehiculeShape);
         }
         dessinerVehicule(nouvellePosition, vehiculeShape);
-        System.out.println("Déplacement du véhicule graphiquement");
+        //System.out.println("Déplacement du véhicule graphiquement");
     }
 
 
@@ -179,13 +179,13 @@ public class TerrainController implements Initializable {
                 }
 
                 cellule.getChildren().add(vehiculeShape);
-                System.out.println("Véhicule dessiné à la cellule : " + position);
+                //System.out.println("Véhicule dessiné à la cellule : " + position);
             } else {
-                System.out.println("Véhicule déjà présent dans la cellule : " + position); // à supprimer après vérif case occupée
+                //System.out.println("Véhicule déjà présent dans la cellule : " + position); // à supprimer après vérif case occupée
             }
         }
 
-        System.out.println("Le véhicule a été dessiné");
+        //System.out.println("Le véhicule a été dessiné");
     }
 
     public void effacerVehicule(Vector2D position, Shape vehiculeShape)
@@ -194,7 +194,7 @@ public class TerrainController implements Initializable {
 
         if (cellule != null) {
             cellule.getChildren().remove(vehiculeShape);
-            System.out.println("Véhicule effacé de la cellule : " + position);
+            //System.out.println("Véhicule effacé de la cellule : " + position);
         }
     }
 
