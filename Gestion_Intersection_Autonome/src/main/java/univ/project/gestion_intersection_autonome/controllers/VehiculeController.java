@@ -39,7 +39,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         mettreAJourGraphique();
 
         // on démarre à 1, car 0 est la position de départ (actuelle)
-        for (int i = 1; i < itineraire.size(); i++) {
+        for (int i = 0; i < itineraire.size(); i++) {
             anciennePosition = vehicule.getPosition().copy();
             nouvellePosition = itineraire.get(i);
 /*
