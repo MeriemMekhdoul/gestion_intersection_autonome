@@ -221,6 +221,24 @@ public class Terrain {
         throw new NoSuchElementException("Aucune intersection ne contient la cellule à la position " + position);
     }
 
+    public Intersection getIntersectionPlusProche(Vector2D position){
+        // Parcourir toutes les intersections dans le terrain
+        for (Intersection intersection : intersections) {
+            // Vérifier chaque point d'entrée de l'intersection
+            for (Vector2D pointEntree : intersection.getPointsEntree()) {
+                // Calculer la distance entre la position et le point d'entrée
+                double distance = position.distance(pointEntree);
+
+                // Si la distance est inférieure ou égale à 5, alors on est proche de l'intersection
+                if (distance <= 5) {
+                    return intersection;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public void creerIntersection(int x, int i){
         ArrayList<Vector2D> cellulesComm = new ArrayList<>();
         ArrayList<Vector2D> pointsEntree = new ArrayList<>();
