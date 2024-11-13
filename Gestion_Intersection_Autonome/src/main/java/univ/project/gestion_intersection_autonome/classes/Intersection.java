@@ -202,7 +202,9 @@ public class Intersection implements IntersectionListener {
                 if (terrain.getCellule(position).estOccupee() && (terrain.getCellule(position).getIdVoiture() > 0)) {
                     int idVoiture = terrain.getCellule(position).getIdVoiture();
                     Vehicule vehicule = configuration.getVehicule(idVoiture);
+                    System.out.println("id a chercher = " + idVoiture + " /// " + configuration);
                     vehicule.setEnAttente(etat);
+
                     vehiculesEnAttentes.add(vehicule);
                 } else {
                     terrain.getCellule(position).setOccupee(etat);

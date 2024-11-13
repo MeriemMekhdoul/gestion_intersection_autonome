@@ -20,7 +20,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
     protected List<VehiculeControllerListener> listeners = new ArrayList<>();
     protected IntersectionListener intersectionListener; //on n'a peut-être pas besoin d'une liste ?? une seule intersection suffit
     protected boolean enPause = false;
-    protected final int VITESSE_SIMULATION_MS = 800;
+    protected final int VITESSE_SIMULATION_MS = 300;
 
     public VehiculeController(Vehicule vehicule, Terrain terrain, TerrainController terrainController) {
         this.vehicule = vehicule;

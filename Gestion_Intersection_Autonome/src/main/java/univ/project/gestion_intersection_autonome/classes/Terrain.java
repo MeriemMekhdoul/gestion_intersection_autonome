@@ -63,20 +63,37 @@ public class Terrain {
         for (int i = 0; i < largeur; i++) {
             grille[i][y].estValide(true);
             grille[i][y + 1].estValide(true);
+            grille[i][y + 2].estValide(true);
+            grille[i][y + 3].estValide(true);
+
+
+
 
             grille[i][y].setTypeZone(TypeZone.ROUTE);
             grille[i][y + 1].setTypeZone(TypeZone.ROUTE);
+            grille[i][y + 2].setTypeZone(TypeZone.ROUTE);
+            grille[i][y + 3].setTypeZone(TypeZone.ROUTE);
 
-            grille[i][y].setDirectionsAutorisees(false,false,false,true);
-            grille[i][y + 1].setDirectionsAutorisees(false,true,false,false);
+
+            grille[i][y].setDirectionsAutorisees(false,false,false,true,false,false,false,false);
+            grille[i][y + 1].setDirectionsAutorisees(false,true,false,false,false,false,false,false);
+            grille[i][y + 2].setDirectionsAutorisees(false,false,false,true,false,false,false,false);
+            grille[i][y + 3].setDirectionsAutorisees(false,true,false,false,false,false,false,false);
         }
+
         entrees.add(new Vector2D(0,y + 1));
         entrees.add(new Vector2D(largeur - 1, y));
+        entrees.add(new Vector2D (0,y + 3));
+        entrees.add(new Vector2D(largeur - 1, y + 2));
+
         sorties.add(new Vector2D(0, y));
         sorties.add(new Vector2D(largeur - 1, y + 1));
+        sorties.add(new Vector2D(0, y+2));
+        sorties.add(new Vector2D(largeur - 1, y + 3));
+
     }
 
-//peut être améliorée ...
+    //peut être améliorée ...
     private void genererColonne(int x) {  // Remplir une route verticale dans la grille
         for (int i = 0; i < hauteur; i++) {
             // Gérer les intersections
@@ -85,52 +102,137 @@ public class Terrain {
                 creerIntersection(x,i);
 
                 grille[x][i].setTypeZone(TypeZone.CONFLIT);
-                grille[x + 1][i].setTypeZone(TypeZone.CONFLIT);
-                grille[x][i + 1].setTypeZone(TypeZone.CONFLIT);
-                grille[x + 1][i + 1].setTypeZone(TypeZone.CONFLIT);
+                grille[x][i+1].setTypeZone(TypeZone.CONFLIT);
+                grille[x][i+2].setTypeZone(TypeZone.CONFLIT);
+                grille[x][i+3].setTypeZone(TypeZone.CONFLIT);
 
-                grille[x][i].setDirectionsAutorisees(false,false,true,true);
-                grille[x + 1][i].setDirectionsAutorisees(true,false,false,true);
-                grille[x][i + 1].setDirectionsAutorisees(false,true,true,false);
-                grille[x + 1][i + 1].setDirectionsAutorisees(true,true,false,false);
+                grille[x + 1][i].setTypeZone(TypeZone.CONFLIT);
+                grille[x + 1][i+1].setTypeZone(TypeZone.CONFLIT);
+                grille[x + 1][i+2].setTypeZone(TypeZone.CONFLIT);
+                grille[x + 1][i+3].setTypeZone(TypeZone.CONFLIT);
+
+                grille[x + 2][i].setTypeZone(TypeZone.CONFLIT);
+                grille[x + 2][ i+1 ].setTypeZone(TypeZone.CONFLIT);
+                grille[x + 2][ i+2 ].setTypeZone(TypeZone.CONFLIT);
+                grille[x + 2][ i+3 ].setTypeZone(TypeZone.CONFLIT);
+
+                grille[x + 3][i].setTypeZone(TypeZone.CONFLIT);
+                grille[x + 3][i + 1].setTypeZone(TypeZone.CONFLIT);
+                grille[x + 3][i + 2].setTypeZone(TypeZone.CONFLIT);
+                grille[x + 3][i + 3].setTypeZone(TypeZone.CONFLIT);
+
+
+
+                grille[x][i].setDirectionsAutorisees(false,false,true,true,false,false,false,false);
+                grille[x][i+1].setDirectionsAutorisees(false,true,true,false,false,false,false,false);
+                grille[x][i+2].setDirectionsAutorisees(false,false,true,true,false,false,false,false);
+                grille[x][i+3].setDirectionsAutorisees(false,true,true,false,false,false,false,false);
+
+                grille[x + 1][i].setDirectionsAutorisees(true,false,false,true,false,false,false,false);
+                grille[x + 1][i+1].setDirectionsAutorisees(true,true,false,false,false,false,false,false);
+                grille[x + 1][i+2].setDirectionsAutorisees(true,false,false,true,false,false,false,false);
+                grille[x + 1][i+3].setDirectionsAutorisees(true,true,false,true,false,false,false,false);
+
+                grille[x + 2][i].setDirectionsAutorisees(false,false,true,true,false,false,false,false);
+                grille[x + 2][ i+1 ].setDirectionsAutorisees(false,true,true,false,false,false,false,false);
+                grille[x + 2][ i+2 ].setDirectionsAutorisees(false,false,true,true,false,false,false,false);
+                grille[x + 2][ i+3 ].setDirectionsAutorisees(false,true,true,false,false,false,false,false);
+
+                grille[x + 3][i].setDirectionsAutorisees(true,false,false,true,false,false,false,false);
+                grille[x + 3][i + 1].setDirectionsAutorisees(true,true,false,false,false,false,false,false);
+                grille[x + 3][i + 2].setDirectionsAutorisees(true,false,false,true,false,false,false,false);
+                grille[x + 3][i + 3].setDirectionsAutorisees(true,true,false,false,false,false,false,false);
+
+
+
 
                 grille[x - 1][i].setTypeZone(TypeZone.COMMUNICATION);
                 grille[x - 1][i + 1].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x - 1][i + 2].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x - 1][i + 3].setTypeZone(TypeZone.COMMUNICATION);
+
+
                 grille[x][i - 1].setTypeZone(TypeZone.COMMUNICATION);
                 grille[x + 1][i - 1].setTypeZone(TypeZone.COMMUNICATION);
-                grille[x + 2][i].setTypeZone(TypeZone.COMMUNICATION);
-                grille[x + 2][i + 1].setTypeZone(TypeZone.COMMUNICATION);
-                grille[x][i + 2].setTypeZone(TypeZone.COMMUNICATION);
-                grille[x + 1][i + 2].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x + 2][i - 1].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x + 3][i - 1].setTypeZone(TypeZone.COMMUNICATION);
 
-                grille[x - 1][i].setDirectionsAutorisees(false,false,false,true);
-                grille[x - 1][i + 1].setDirectionsAutorisees(false,true,false,false);
-                grille[x][i - 1].setDirectionsAutorisees(false,false,true,false);
-                grille[x + 1][i - 1].setDirectionsAutorisees(true,false,false,false);
-                grille[x + 1][i + 2].setDirectionsAutorisees(true,false,false,false);
-                grille[x + 2][i].setDirectionsAutorisees(false,false,false,true);
-                grille[x + 2][i + 1].setDirectionsAutorisees(false,true,false,false);
-                grille[x][i + 2].setDirectionsAutorisees(false,false,true,false);
+
+                grille[x + 4][i].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x + 4][i + 1].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x + 4][i + 2].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x + 4][i + 3].setTypeZone(TypeZone.COMMUNICATION);
+
+
+
+                grille[x][i+4].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x + 1][i+4].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x + 2][i+4].setTypeZone(TypeZone.COMMUNICATION);
+                grille[x + 3][i+4].setTypeZone(TypeZone.COMMUNICATION);
+
+
+
+
+                grille[x - 1][i].setDirectionsAutorisees(false,false,false,true,false,false,false,false);
+                grille[x - 1][i + 1].setDirectionsAutorisees(false,false,true,false,false,false,false,false);
+                grille[x - 1][i + 2].setDirectionsAutorisees(false,false,false,true,false,false,false,false);
+                grille[x - 1][i + 3].setDirectionsAutorisees(false,false,true,false,false,false,false,false);
+
+
+
+                grille[x][i - 1].setDirectionsAutorisees(false,false,true,false,false,false,false,false);
+                grille[x + 1][i - 1].setDirectionsAutorisees(true,false,false,false,false,false,false,false);
+                grille[x + 2][i - 1].setDirectionsAutorisees(false,false,true,false,false,false,false,false);
+                grille[x + 3][i - 1].setDirectionsAutorisees(true,false,false,false,false,false,false,false);
+
+
+
+                grille[x +4][i].setDirectionsAutorisees(false,false,false,true,false,false,false,false);
+                grille[x + 4][i + 1].setDirectionsAutorisees(false,true,false,false,false,false,false,false);
+                grille[x + 4][i + 2].setDirectionsAutorisees(false,false,false,true,false,false,false,false);
+                grille[x + 4][i + 3].setDirectionsAutorisees(true,true,false,false,false,false,false,false);
+
+
+                grille[x][i + 4].setDirectionsAutorisees(false,false,true,false,false,false,false,false);
+                grille[x + 1][i + 4].setDirectionsAutorisees(true,false,false,false,false,false,false,false);
+                grille[x + 2][i + 4].setDirectionsAutorisees(false,false,true,false,false,false,false,false);
+                grille[x + 3][i + 4].setDirectionsAutorisees(true,false,false,false,false,false,false,false);
 
                 i++;  // Sauter la ligne d'après
             } else {
                 grille[x][i].estValide(true);
                 grille[x + 1][i].estValide(true);
+                grille[x + 2][i].estValide(true);
+                grille[x + 3][i].estValide(true);
+
 
                 if(grille[x][i].getTypeZone() == null){
                     grille[x][i].setTypeZone(TypeZone.ROUTE);
                     grille[x + 1][i].setTypeZone(TypeZone.ROUTE);
+                    grille[x + 2][i].setTypeZone(TypeZone.ROUTE);
+                    grille[x + 3][i].setTypeZone(TypeZone.ROUTE);
 
-                    grille[x][i].setDirectionsAutorisees(false,false,true,false);
-                    grille[x + 1][i].setDirectionsAutorisees(true,false,false,false);
+
+                    grille[x][i].setDirectionsAutorisees(false,false,true,false,false,false,false,false);
+                    grille[x + 1][i].setDirectionsAutorisees(true,false,false,false,false,false,false,false);
+                    grille[x + 2][i].setDirectionsAutorisees(false,false,true,false,false,false,false,false);
+                    grille[x + 3][i].setDirectionsAutorisees(true,false,false,false,false,false,false,false);
                 }
             }
         }
 
         entrees.add(new Vector2D(x, 0));
-        entrees.add(new Vector2D(x + 1, hauteur - 1));
-        sorties.add(new Vector2D(x + 1, 0));
+        entrees.add(new Vector2D(x + 2, hauteur - 1));
+
+        entrees.add(new Vector2D(x + 1, 0));
+        entrees.add(new Vector2D(x + 3, hauteur - 1));
+
+
+        sorties.add(new Vector2D(x + 2, 0));
         sorties.add(new Vector2D(x, hauteur - 1));
+
+        sorties.add(new Vector2D(x + 3, 0));
+        sorties.add(new Vector2D(x + 1, hauteur - 1));
     }
 
     // mettre espace_min et espace_max comme constantes en dehors de la methode
