@@ -183,7 +183,6 @@ public class TerrainController implements Initializable {
             }
         }
 
-        //System.out.println("Le véhicule a été dessiné");
     }
 
     public void effacerVehicule(Vector2D position, Shape vehiculeShape)

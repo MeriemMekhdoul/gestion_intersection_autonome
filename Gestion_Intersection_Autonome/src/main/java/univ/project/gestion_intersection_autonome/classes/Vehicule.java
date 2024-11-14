@@ -195,7 +195,90 @@ public class Vehicule implements VehiculeListener {
         return enAttente;
     }
 
-    public void setEnAttente(boolean enAttente) {
+    synchronized public void setEnAttente(boolean enAttente) {
         this.enAttente = enAttente;
+        System.out.println("vehicule : "+ id + " etat changé et mis à : " + enAttente);
     }
+
+    /**
+     * Calcule le temps d'attente du véhicule actuel en fonction des itinéraires
+     * des autres véhicules potentiellement en conflit.
+     *
+     * @param vehiculesEtItineraires Un map contenant chaque véhicule et son itinéraire respectif.
+     * @param itineraire             L'itinéraire du véhicule actuel.
+     * @return Le temps d'attente en secondes causé par les conflits potentiels avec d'autres véhicules.
+     */
+    public int calculTempsAttente(Map<Vehicule,ArrayList<Vector2D>> vehiculesEtItineraires, ArrayList<Vector2D> itineraire) {
+        ArrayList<Vehicule> vehiculesenconflit = new ArrayList<>();
+        Map<Vehicule,ArrayList<Vector2D>> newMap = new HashMap<>();
+        int tempsAttente = 0;
+
+        for (Vehicule v : vehiculesEtItineraires.keySet()) {
+            ArrayList<Vector2D> itineraireAmodifier = vehiculesEtItineraires.get(v);
+
+            Vector2D posActuV = v.getPosition();
+            int index = itineraireAmodifier.indexOf(posActuV);
+            //trunk tableau a partir de l'index
+            ArrayList<Vector2D> newItineraire = new ArrayList<>();
+            for (int i = index; i < itineraireAmodifier.size(); i++) {
+                newItineraire.add(itineraireAmodifier.get(i));
+            }
+            newMap.put(v,newItineraire);
+        }
+
+        if(conflit(newMap,itineraire,vehiculesenconflit)) {
+            for (Vehicule v : vehiculesenconflit) {
+                if (v.getId() != this.id) {
+                    tempsAttente++;
+                }
+            }
+        }
+        return tempsAttente; // Retourner le temps d'attente
+    }
+
+    /**
+     * Vérifie s'il existe un conflit potentiel entre l'itinéraire du véhicule actuel et ceux des autres véhicules.
+     * Si un conflit est détecté, met à jour la liste des véhicules en conflit.
+     *
+     * @param vehiculesEtItineraires Un map contenant chaque véhicule et son itinéraire respectif.
+     * @param itineraire             L'itinéraire du véhicule actuel dans l'intersection.
+     * @param vehiculesEnConflit      La liste des véhicules qui causent un conflit (mise à jour si un conflit est détecté).
+     * @return `true` s'il existe un conflit avec un ou plusieurs véhicules, sinon `false`.
+     */
+    public boolean conflit(Map<Vehicule,ArrayList<Vector2D>> vehiculesEtItineraires, ArrayList<Vector2D> itineraire,ArrayList<Vehicule> vehiculesEnConflit) {
+        // Vider la liste des véhicules en conflit pour un nouveau calcul
+        vehiculesEnConflit.clear();
+
+        // Récupérer un tableau des itinéraires depuis les messages
+        for (Vehicule v : vehiculesEtItineraires.keySet()) {
+            ArrayList<Vector2D> itineraireAutreVehicule = vehiculesEtItineraires.get(v);//message.getItineraire();
+
+            // Si une collision est détectée entre les itinéraires
+            if (compareItineraire(itineraire, itineraireAutreVehicule)) {
+                // Ajouter le véhicule en conflit à la liste
+                vehiculesEnConflit.add(v);
+            }
+        }
+        // Si des véhicules en conflit sont détectés, retourner vrai
+        return !vehiculesEnConflit.isEmpty();
+    }
+
+    /**
+     * Compare deux itinéraires pour détecter une éventuelle collision. (à renommer en détécterCollision())
+     *
+     * @param itin1 Le premier itinéraire.
+     * @param itin2 Le second itinéraire.
+     * @return `true` s'il y a une collision, sinon `false`.
+     */
+    public boolean compareItineraire(ArrayList<Vector2D> itin1, ArrayList<Vector2D> itin2) {
+        for (int i = 0; i < itin1.size(); i++) {
+            if (i < itin2.size()) {
+                if (itin1.get(i).equals(itin2.get(i)))
+                    return true;
+            } else return false;
+        }
+        return false; //pas de collision
+    }
+
+
 }

@@ -157,11 +157,16 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
                 messagesVoitures.add(intersection.getMessage(v));
             }
 
+            //construire map de Vehicule + itineraire
+            Map<Vehicule,ArrayList<Vector2D>> vehiculesEtItineraires = new HashMap<>();
+            for (Message m : messagesVoitures) {
+                if (vehiculesEngages.contains(m.getv1())) {
+                    vehiculesEtItineraires.put(m.getv1(),m.getItineraire());
+                }
+            }
+            //int tempsAttente = calculs(messagesVoitures, deplacements, vehiculesEngages);
 
-            //System.out.println("je calcule mon temps d'attente");
-            int tempsAttente = calculs(messagesVoitures, deplacements, vehiculesEngages);
-
-            //System.out.println("temps d'attente calculé et estimé à : " + tempsAttente + " secondes");
+            int tempsAttente = vehicule.calculTempsAttente(vehiculesEtItineraires,deplacements);
             pauseEntreMouvements(tempsAttente * VITESSE_SIMULATION_MS);
 
             intersection.editConfig(vehicule, EtatVehicule.ENGAGE);
