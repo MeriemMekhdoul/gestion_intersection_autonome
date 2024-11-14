@@ -21,8 +21,8 @@ public class Simulation {
     private TerrainController terrainController;
     private ArrayList<VehiculeController> controleurs;
     private ScheduledExecutorService scheduler;
-    private final int LARGEUR_TERRAIN = 40;
-    private final int HAUTEUR_TERRAIN = 40;
+    private final int LARGEUR_TERRAIN = 30;
+    private final int HAUTEUR_TERRAIN = 30;
     private final int LIMITE_VEHICULES = 50;
 
 
@@ -109,6 +109,55 @@ public class Simulation {
         Thread thread = new Thread(vehiculeController);
         thread.start();
         //System.out.println("Véhicule ajouté à la position " + vehicule.getPosition());
+    }
+
+    public void TgenererVehiculeAleatoire() throws IOException {
+        List<Vector2D> entrees = terrain.getEntrees(); // Récupérer les entrées du terrain
+        List<Vector2D> sorties = terrain.getSorties(); // Récupérer les sorties du terrain
+        if (vehicules.size() >= LIMITE_VEHICULES) {
+//            System.out.println("Limite de véhicules atteinte");
+            return;
+        }
+        // vérification du remplissage des entrées et sorties
+        if (entrees.isEmpty() || sorties.isEmpty()) {
+            System.err.println("Erreur : Aucune entrée ou sortie de disponible !");
+            return;
+        }
+
+        int a=0, b=3;
+        for(int i=0;i<LIMITE_VEHICULES-1;i++){
+            System.out.println("for de simulation iteration = "+i);
+            Vector2D positionDepart = entrees.get(a);
+            Vector2D positionArrivee = sorties.get(b);
+
+            // calcul de l'itinéraire
+            AStar aStar = new AStar(terrain);
+            List<Vector2D> itineraire = aStar.trouverChemin(positionDepart, positionArrivee);
+
+            Vehicule vehicule = new Vehicule(TypeVehicule.VOITURE, positionDepart, positionArrivee, itineraire, Vehicule.genererCouleurAleatoire());
+            VehiculeController vehiculeController = new VehiculeController(vehicule, terrain, terrainController);
+            vehicules.add(vehicule);
+            controleurs.add(vehiculeController);
+            Thread thread = new Thread(vehiculeController);
+            thread.start();
+
+            a++; b--;
+            if(b==0) {b=3; a=0;}
+         }
+        // calcul de l'itinéraire
+        AStar aStar = new AStar(terrain);
+
+        Vector2D positionDepart = entrees.get(2);
+        Vector2D positionArrivee = sorties.get(0);
+        List<Vector2D> itineraire = aStar.trouverChemin(positionDepart, positionArrivee);
+
+        VehiculeUrgence vehicule = new VehiculeUrgence(TypeVehicule.URGENCE, positionDepart, positionArrivee, itineraire, Color.WHITE);
+        VehiculeController vehiculeController = new VehiculeUrgenceController(vehicule, terrain, terrainController);
+        vehicules.add(vehicule);
+        controleurs.add(vehiculeController);
+
+        Thread thread = new Thread(vehiculeController);
+        thread.start();
     }
 
     // Lancer les véhicules dans des threads
