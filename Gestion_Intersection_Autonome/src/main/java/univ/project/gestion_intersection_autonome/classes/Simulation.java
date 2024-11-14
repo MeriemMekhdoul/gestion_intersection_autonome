@@ -7,9 +7,11 @@ import univ.project.gestion_intersection_autonome.controllers.VehiculeController
 import javafx.scene.paint.Color;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -23,7 +25,7 @@ public class Simulation {
     private ScheduledExecutorService scheduler;
     private final int LARGEUR_TERRAIN = 40;
     private final int HAUTEUR_TERRAIN = 40;
-    private final int LIMITE_VEHICULES = 50;
+    private final int LIMITE_VEHICULES = 1;
 
 
     //constructeur par défaut
@@ -46,8 +48,10 @@ public class Simulation {
             return;
         }
 
-        List<Vector2D> entrees = terrain.getEntrees(); // Récupérer les entrées du terrain
-        List<Vector2D> sorties = terrain.getSorties(); // Récupérer les sorties du terrain
+        boolean voieGauche = new Random().nextBoolean(); // voie aléatoire
+
+        List<Vector2D> entrees = voieGauche ? terrain.getEntreesVoieGauche() : terrain.getEntreesVoieDroite(); // Récupérer les entrées du terrain
+        List<Vector2D> sorties = voieGauche ? terrain.getSortiesVoieGauche() : terrain.getSortiesVoieDroite(); // Récupérer les sorties du terrain
 
         // vérification du remplissage des entrées et sorties
         if (entrees.isEmpty() || sorties.isEmpty()) {
@@ -55,21 +59,23 @@ public class Simulation {
             return;
         }
 
-        int indexEntree = new Random().nextInt(entrees.size());
-        int indexSortie = new Random().nextInt(sorties.size());
+        Vector2D positionDepart = entrees.get(new Random().nextInt(entrees.size()));
 
-        while (indexEntree == indexSortie) {
-            indexSortie = new Random().nextInt(sorties.size());
+        ArrayList<Vector2D> sortiesPossibles = new ArrayList<>();
+
+        // on trie les sorties qui ne sont pas à côté de l'entrée
+        for (Vector2D sortie : sorties) {
+            if (!estSurMemeLigne(positionDepart, sortie)) {
+                sortiesPossibles.add(sortie);
+            }
         }
 
-        Vector2D positionDepart = entrees.get(indexEntree);
-        Vector2D positionArrivee = sorties.get(indexSortie);
-
-        // en cas de modification des listes après lancement
-        if (sorties.contains(positionDepart)) {
-            System.err.println("Erreur : Position de départ ne peut pas être une sortie : " + positionDepart);
+        if (sortiesPossibles.isEmpty()) {
+            System.err.println("Aucune sortie possible pour l'entrée choisie");
             return;
         }
+
+        Vector2D positionArrivee = sortiesPossibles.get(new Random().nextInt(sortiesPossibles.size()));
 
         System.out.println("Départ : " + positionDepart + " | Arrivée : " + positionArrivee);
 
@@ -144,6 +150,12 @@ public class Simulation {
         this.terrainController = terrainController;
         terrainController.setTerrain(terrain);
     }
+
+    // verifie si deux positions sont considérées comme à côté
+    private boolean estSurMemeLigne(Vector2D pos1, Vector2D pos2) {
+        return pos1.getX() == pos2.getX() || pos1.getY() == pos2.getY();
+    }
+
 }
 
 
