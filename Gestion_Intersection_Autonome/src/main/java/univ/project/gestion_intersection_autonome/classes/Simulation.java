@@ -171,7 +171,7 @@ public class Simulation {
                     throw new RuntimeException(e);
                 }
             });
-        }, 0, 1, TimeUnit.SECONDS); // Ajoute un véhicule toutes les secondes
+        }, 0, VehiculeController.VITESSE_SIMULATION_MS, TimeUnit.MILLISECONDS); // Ajoute un véhicule toutes les secondes
         // voir pour modifier afin de récupérer la constante de véhicule controller
     }
 
