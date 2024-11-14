@@ -14,9 +14,8 @@ public class Intersection implements IntersectionListener {
     private final Terrain terrain;
     private List<IntersectionListener> listeners = new ArrayList<>();
     private List<VehiculeControllerListener> vehiculeControllers = new ArrayList<>();
-    public final int DISTANCE = 2; // on considère qu'un embouteillage se forme si 2 cellules consécutives sont occupées
-
-
+    private ArrayList<Vehicule> vehiculesBloqués;
+    public final int NB_VEHICULES_MAX = 2; // on considère qu'un embouteillage se forme si 2 cellules consécutives sont occupées
 
     public Intersection(List<Vector2D> cellulesInfluence, ArrayList<Vector2D> _pointsEntree, Terrain terrain) {
         this.cellulesCommunication = cellulesInfluence;
@@ -24,6 +23,7 @@ public class Intersection implements IntersectionListener {
         this.configuration = new Configuration();
         this.terrain = terrain;
         pointsEntree = _pointsEntree;
+        vehiculesBloqués = new ArrayList<>();
     }
 
 
@@ -136,7 +136,11 @@ public class Intersection implements IntersectionListener {
             listener.onMessageReceivedFromIntersection(message);
         }
     }
-    public void sendMessageToVehiculeControllers(Message message, VehiculeControllerListener controller) {
+    public void sendMessageToVehiculeController(Message message, VehiculeControllerListener controller) {
+        // Si le message est 'MARCHE', le véhicule doit reprendre ou continuer son exécution
+        if (Objects.requireNonNull(message.getObjet()) == Objetmessage.MARCHE) {
+            controller.notify();
+        }
         controller.onMessageReceivedFromIntersection(message);
     }
 
@@ -198,16 +202,41 @@ public class Intersection implements IntersectionListener {
             if(!voieEntree.equals(position)) {
                 System.out.println("i'm in setEtatCellulesEtVehicules : print configuration avant modifs :\n" + configuration);
                 System.out.println("pos a bloquer : " + position);
-                if (terrain.getCellule(position).estOccupee() && (terrain.getCellule(position).getIdVoiture() > 0)) {
-                    int idVoiture = terrain.getCellule(position).getIdVoiture();
-                    Vehicule vehicule = configuration.getVehicule(idVoiture);
-                    vehicule.setEnAttente(etat);
-                    vehiculesEnAttentes.add(vehicule);
+
+                if(etat){ //à l'entrée
+                    terrain.getCellule(position).setOccupee(true);
+                    if (terrain.getCellule(position).contientVehicule()) {
+                        int idVoiture = terrain.getCellule(position).getIdVoiture();
+                        Vehicule vehicule = terrain.getCellule(position).getVehicule();
+
+                        System.out.println("ETAT=TRUE l'id de la voiture a modif "+ idVoiture + " \nprint config :\n" + configuration);
+
+                        if (vehicule != null) {
+                            vehicule.setEnAttente(true);
+                            //TODO:Send msg here
+                            vehiculesEnAttentes.add(vehicule);
+                            vehiculesBloqués.add(vehicule);
+                        } else System.out.println("le véhicule dans la cellule est NULL weird parceque son id = " + idVoiture);
+
+                    } else System.out.println("cellule ne contient pas de véhicule à priori");
                 } else {
-                    terrain.getCellule(position).setOccupee(etat);
+                    for (Vehicule v: vehiculesBloqués) {
+                        System.out.println("ETAT=FALSE l'id de la voiture a modif "+ v.getId() + " \nprint config :\n" + configuration);
+                        if (terrain.getCellule(position).getIdVoiture() == v.getId()){
+                            v.setEnAttente(false);
+                            //send msg here & supp de cette liste
+                            vehiculesEnAttentes.add(v);  //les véhicules à notifier
+                        } else System.out.println("la cellule "+ terrain.getCellule(position) + " contient id = " + terrain.getCellule(position).getIdVoiture()
+                        + " mais la voiture bloquée est = " + v.getId());
+                    }
+                    terrain.getCellule(position).setOccupee(false);
                 }
             } //je bloque pas
         }
+        if (!etat)
+            vehiculesBloqués.clear();
+        else
+            System.out.println("les vehicules bloqués (état = true) : " + vehiculesBloqués);
 
         return vehiculesEnAttentes;
     }
