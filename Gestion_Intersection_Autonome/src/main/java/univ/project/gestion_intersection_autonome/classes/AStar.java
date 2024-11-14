@@ -2,16 +2,14 @@ package univ.project.gestion_intersection_autonome.classes;
 
 import java.util.*;
 
-public class AStar
-{
+public class AStar {
     private Terrain terrain;
 
     public AStar(Terrain terrain) {
         this.terrain = terrain;
     }
 
-    public List<Vector2D> trouverChemin(Vector2D positionDepart, Vector2D positionArrivee)
-    {
+    public List<Vector2D> trouverChemin(Vector2D positionDepart, Vector2D positionArrivee) {
         System.out.println("Recherche du chemin de " + positionDepart + " à " + positionArrivee);
 
         PriorityQueue<Noeud> openList = new PriorityQueue<>(); // noeuds à explorer
@@ -30,8 +28,7 @@ public class AStar
                 return recontruireChemin(noeudActuel);
             }
 
-            for (Vector2D posititionVoisin : trouverVoisins(noeudActuel.position))
-            {
+            for (Vector2D posititionVoisin : trouverVoisins(noeudActuel.position)) {
                 // si la cellule est dans le terrain
                 if (!terrain.estCelluleValide(posititionVoisin)) continue;
 
@@ -47,8 +44,7 @@ public class AStar
                 allNodes.put(posititionVoisin, noeudVoisin);
 
                 // on met à jour les voisins en fonction de leurs coûts
-                if (tentativeGScore < noeudVoisin.gScore)
-                {
+                if (tentativeGScore < noeudVoisin.gScore) {
                     noeudVoisin.precedent = noeudActuel;
                     noeudVoisin.gScore = tentativeGScore;
                     noeudVoisin.fScore = tentativeGScore + heuristique(posititionVoisin, positionArrivee);
@@ -65,8 +61,7 @@ public class AStar
     }
 
     // effectue le chemin en arrière en récupérant les noeuds précédents depuis l'arrivée
-    private List<Vector2D> recontruireChemin(Noeud noeud)
-    {
+    private List<Vector2D> recontruireChemin(Noeud noeud) {
         List<Vector2D> chemin = new ArrayList<>();
 
         while (noeud != null) {
@@ -81,11 +76,10 @@ public class AStar
 
     // calcul du coût d'un noeud jusqu'à l'arrivée
     private double heuristique(Vector2D a, Vector2D b) {
-        return Math.max(Math.abs(b.getX() - a.getX()), Math.abs(b.getY() - a.getY())); // heuristique de manhattan (taxi cab)
+        return Math.max(Math.abs(b.getX() - a.getX()), Math.abs(b.getY() - a.getY())); // Distance de Chebyshev
     }
 
-    private List<Vector2D> trouverVoisins(Vector2D position)
-    {
+    private List<Vector2D> trouverVoisins(Vector2D position) {
         List<Vector2D> voisins = new ArrayList<>();
         int x = position.getX();
         int y = position.getY();
@@ -96,8 +90,7 @@ public class AStar
         // peut être amélioré, voir plus tard
 
         // NORD
-        if (directions[0] && y > 0)
-        {
+        if (directions[0] && y > 0) {
             Vector2D nord = new Vector2D(x, y - 1);
 
             if (terrain.estCelluleValide(nord)) {
@@ -106,8 +99,7 @@ public class AStar
         }
 
         // EST
-        if (directions[1] && x < terrain.getLargeur() - 1)
-        {
+        if (directions[1] && x < terrain.getLargeur() - 1) {
             Vector2D est = new Vector2D(x + 1, y);
 
             if (terrain.estCelluleValide(est)) {
@@ -116,8 +108,7 @@ public class AStar
         }
 
         // SUD
-        if (directions[2] && y < terrain.getHauteur() - 1)
-        {
+        if (directions[2] && y < terrain.getHauteur() - 1) {
             Vector2D sud = new Vector2D(x, y + 1);
 
             if (terrain.estCelluleValide(sud)) {
@@ -126,8 +117,7 @@ public class AStar
         }
 
         // OUEST
-        if (directions[3] && x > 0)
-        {
+        if (directions[3] && x > 0) {
             Vector2D ouest = new Vector2D(x - 1, y);
 
             if (terrain.estCelluleValide(ouest)) {
@@ -135,12 +125,44 @@ public class AStar
             }
         }
 
+        // NORD-OUEST
+        if (directions[4] && x > 0 && y > 0) {
+            Vector2D nordOuest = new Vector2D(x - 1, y - 1);
+            if (terrain.estCelluleValide(nordOuest)) {
+                voisins.add(nordOuest);
+            }
+        }
+
+        // NORD-EST
+        if (directions[5] && x < terrain.getLargeur() - 1 && y > 0) {
+            Vector2D nordEst = new Vector2D(x + 1, y - 1);
+            if (terrain.estCelluleValide(nordEst)) {
+                voisins.add(nordEst);
+            }
+        }
+
+        // SUD-OUEST
+        if (directions[6] && x > 0 && y < terrain.getHauteur() - 1) {
+            Vector2D sudOuest = new Vector2D(x - 1, y + 1);
+            if (terrain.estCelluleValide(sudOuest)) {
+                voisins.add(sudOuest);
+            }
+        }
+
+        // SUD-EST
+        if (directions[7] && x < terrain.getLargeur() - 1 && y < terrain.getHauteur() - 1) {
+            Vector2D sudEst = new Vector2D(x + 1, y + 1);
+            if (terrain.estCelluleValide(sudEst)) {
+                voisins.add(sudEst);
+            }
+        }
+
+
         return voisins;
     }
 
 
-    private static class Noeud implements Comparable<Noeud>
-    {
+    private static class Noeud implements Comparable<Noeud> {
         Vector2D position;
         Noeud precedent;
         double gScore; // coût total depuis un noeud
