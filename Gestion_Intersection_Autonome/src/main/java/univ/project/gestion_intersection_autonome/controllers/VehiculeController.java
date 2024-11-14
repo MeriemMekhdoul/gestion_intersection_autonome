@@ -67,6 +67,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         Cellule cell = terrain.getCellule(nouvellePosition);
         cell.setOccupee(false);
         cell.setIdVoiture(0);
+        cell.setVehicule(null);
 
         //System.out.println("Le véhicule " + vehicule.getId() + " est arrivé à destination !");
 
@@ -311,6 +312,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
             Cellule cell1 = terrain.getCellule(anciennePosition);
             cell1.setOccupee(false);
             cell1.setIdVoiture(0);
+            cell1.setVehicule(null);
 
             Platform.runLater(() -> {
                 terrainController.effacerItineraire(vehicule, anciennePosition);
@@ -319,6 +321,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
 
         cell2.setOccupee(true);
         cell2.setIdVoiture(vehicule.getId());
+        cell2.setVehicule(vehicule);
     }
 
     protected void mettreAJourGraphique() {
