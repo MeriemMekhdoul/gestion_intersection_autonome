@@ -81,7 +81,7 @@ public class AStar
 
     // calcul du coût d'un noeud jusqu'à l'arrivée
     private double heuristique(Vector2D a, Vector2D b) {
-        return Math.abs(a.getX() - b.getX()) + Math.abs(a.getY() - b.getY()); // heuristique de manhattan (taxi cab)
+        return Math.max(Math.abs(b.getX() - a.getX()), Math.abs(b.getY() - a.getY())); // heuristique de manhattan (taxi cab)
     }
 
     private List<Vector2D> trouverVoisins(Vector2D position)
