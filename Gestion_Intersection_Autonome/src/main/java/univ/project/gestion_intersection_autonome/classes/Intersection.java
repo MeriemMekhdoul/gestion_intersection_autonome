@@ -4,13 +4,14 @@ import univ.project.gestion_intersection_autonome.controllers.VehiculeController
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Intersection implements IntersectionListener {
     private final List<Vector2D> cellulesCommunication; // Liste des cellules qui appartiennent à l'intersection (à revoir)
     private final ArrayList<Vector2D> pointsEntree;
     private ConcurrentHashMap<Direction, Integer> etatTrafic;  //ajouter une énum état trafic ?
-    private Configuration configuration;
+    private final Configuration configuration;
     private final Terrain terrain;
     private List<IntersectionListener> listeners = new ArrayList<>();
     private List<VehiculeControllerListener> vehiculeControllers = new ArrayList<>();
@@ -26,8 +27,6 @@ public class Intersection implements IntersectionListener {
         vehiculesBloqués = new ArrayList<>();
     }
 
-
-
     public ArrayList<Vector2D> getPointsEntree() {
         return pointsEntree;
     }
@@ -42,11 +41,11 @@ public class Intersection implements IntersectionListener {
         configuration.nouveauVehiculeTemp(v);
     }
 
-    public void supprimerVehicule(Vehicule v){
+    synchronized public void supprimerVehicule(Vehicule v){
         configuration.supprimerVehicule(v);
     }
 
-    public void editConfig(Vehicule v, EtatVehicule etat) {
+    synchronized public void editConfig(Vehicule v, EtatVehicule etat) {
         configuration.editEtat(v.getId(),etat);
     }
 
@@ -84,7 +83,7 @@ public class Intersection implements IntersectionListener {
         return configuration.getVehicules().isEmpty();
     }
 
-    public ArrayList<Vehicule> getVehicules(){
+    synchronized public List<Vehicule> getVehicules(){
         return configuration.getVehicules();
     }
 
@@ -99,7 +98,7 @@ public class Intersection implements IntersectionListener {
 
     private void notifyListeners(Message message) {
         for (IntersectionListener listener : listeners) {
-            if (!listener.equals(message.getv1())) {
+            if (!listener.equals(message.getv1())) { // TODO: vehicle is not an intersection
                 listener.messageIntersection(message);
             }
         }
@@ -133,7 +132,7 @@ public class Intersection implements IntersectionListener {
 
     public void sendMessageToVehiculeControllers(Message message, ArrayList<VehiculeControllerListener> controllers) {
         for (VehiculeControllerListener listener : controllers) {
-            listener.onMessageReceivedFromIntersection(message);
+            sendMessageToVehiculeController(message,listener);
         }
     }
     public void sendMessageToVehiculeController(Message message, VehiculeControllerListener controller) {

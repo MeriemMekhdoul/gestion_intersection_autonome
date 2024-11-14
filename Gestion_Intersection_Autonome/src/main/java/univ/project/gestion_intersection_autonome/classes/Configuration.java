@@ -2,14 +2,15 @@ package univ.project.gestion_intersection_autonome.classes;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Configuration {
-    private ArrayList<Vehicule> vehicules;  // Peut être remplacé par CopyOnWriteArrayList si nécessaire
+    private List<Vehicule> vehicules;  // Peut être remplacé par CopyOnWriteArrayList si nécessaire
     private ConcurrentHashMap<Vehicule, Message> tempsArrivee;
     private ConcurrentHashMap<Integer, EtatVehicule> etatVehicule;
 
     public Configuration(){
-        vehicules = new ArrayList<>();
+        vehicules = new CopyOnWriteArrayList<>();
         tempsArrivee = new ConcurrentHashMap<>();
         etatVehicule = new ConcurrentHashMap<>();
     }
@@ -47,14 +48,14 @@ public class Configuration {
         }
     }
 
-    public EtatVehicule getEtat(Integer id) throws NoSuchElementException {
+    synchronized public EtatVehicule getEtat(Integer id) throws NoSuchElementException {
         if (!etatVehicule.containsKey(id)) {
             throw new NoSuchElementException("L'identifiant du véhicule " + id + " est introuvable dans la liste des états.");
         }
         return etatVehicule.get(id);
     }
 
-    public void supprimerVehicule(Vehicule v){
+    synchronized public void supprimerVehicule(Vehicule v){
         vehicules.remove(v);
         tempsArrivee.remove(v);
         etatVehicule.remove(v.getId());
@@ -81,7 +82,7 @@ public class Configuration {
      * @return vrai si les deux configs ont les mêmes véhicules (dans l'ordre), faux sinon
      */
     public boolean compare(Configuration config){
-        ArrayList<Vehicule> _vehicules = config.getVehicules();
+        List<Vehicule> _vehicules = config.getVehicules();
         if (_vehicules.size() != vehicules.size())
             return false;
         else {
@@ -109,15 +110,15 @@ public class Configuration {
         // Parcours des véhicules
         for (Vehicule v : vehicules) {
             Message m = tempsArrivee.get(v); // Récupération du message lié au véhicule
-            String etat = etatVehicule.get(v.getId()).toString(); // Récupération de l'état du véhicule
+            EtatVehicule etat = etatVehicule.get(v.getId()); // Récupération de l'état du véhicule
 
             // Gestion des valeurs nulles pour éviter les erreurs
-            String objetMessage = (m != null) ? m.getObjet().toString() : "Aucun message";
-            String tempsArriveeStr = (m != null) ? m.getT().toString() : "Inconnu";
-            etat = (etat != null) ? etat : "État inconnu";
+            String objetMessage = (m != null && m.getObjet() != null) ? m.getObjet().toString() : "Aucun message";
+            String tempsArriveeStr = (m != null && m.getT() != null) ? m.getT().toString() : "Inconnu";
+            String etatStr = (etat != null) ? etat.toString() : "État inconnu";
 
             // Utilisation de String.format pour un formatage plus propre
-            s.append(String.format("id = %d | %s | %s | %s\n", v.getId(), objetMessage, tempsArriveeStr, etat));
+            s.append(String.format("id = %d | %s | %s | %s\n", v.getId(), objetMessage, tempsArriveeStr, etatStr));
         }
 
         return s.toString();

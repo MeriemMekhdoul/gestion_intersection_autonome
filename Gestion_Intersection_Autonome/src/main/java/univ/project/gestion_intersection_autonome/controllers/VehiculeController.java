@@ -424,12 +424,12 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         }
     }
 
-    public synchronized void mettreEnPause() {
+    public void mettreEnPause() {
         enPause = true;
         System.out.println("Véhicule mis en pause");
     }
 
-    public synchronized void reprendreExecution() {
+    public void reprendreExecution() {
         enPause = false;
         notify(); // Relance le thread si le véhicule est en pause
         System.out.println("Véhicule reprend son déplacement");
