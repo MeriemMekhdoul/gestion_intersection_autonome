@@ -76,8 +76,8 @@ public class Terrain {
 
 
             grille[i][y].setDirectionsAutorisees(false,false,false,true,false,false,false,false);
-            grille[i][y + 1].setDirectionsAutorisees(false,true,false,false,false,false,false,false);
-            grille[i][y + 2].setDirectionsAutorisees(false,false,false,true,false,false,false,false);
+            grille[i][y + 1].setDirectionsAutorisees(false,false,false,true,false,false,false,false);
+            grille[i][y + 2].setDirectionsAutorisees(false,true,false,false,false,false,false,false);
             grille[i][y + 3].setDirectionsAutorisees(false,true,false,false,false,false,false,false);
         }
 
@@ -214,8 +214,8 @@ public class Terrain {
 
 
                     grille[x][i].setDirectionsAutorisees(false,false,true,false,false,false,false,false);
-                    grille[x + 1][i].setDirectionsAutorisees(true,false,false,false,false,false,false,false);
-                    grille[x + 2][i].setDirectionsAutorisees(false,false,true,false,false,false,false,false);
+                    grille[x + 1][i].setDirectionsAutorisees(false,false,true,false,false,false,false,false);
+                    grille[x + 2][i].setDirectionsAutorisees(true,false,false,false,false,false,false,false);
                     grille[x + 3][i].setDirectionsAutorisees(true,false,false,false,false,false,false,false);
                 }
             }
@@ -343,30 +343,47 @@ public class Terrain {
         ArrayList<Vector2D> cellulesComm = new ArrayList<>();
         ArrayList<Vector2D> pointsEntree = new ArrayList<>();
 
+        // OUEST
         cellulesComm.add(new Vector2D(x-1, i));
         cellulesComm.add(new Vector2D(x-1,i+1));
+        cellulesComm.add(new Vector2D(x-1,i+2));
+        cellulesComm.add(new Vector2D(x-1,i+3));
 
         pointsEntree.add(cellulesComm.get(cellulesComm.size() - 1));
+        pointsEntree.add(cellulesComm.get(cellulesComm.size() - 2));
 
+        // NORD
+        cellulesComm.add(new Vector2D(x + 2,i-1));
+        cellulesComm.add(new Vector2D(x + 3,i-1));
         cellulesComm.add(new Vector2D(x,i-1));
+        cellulesComm.add(new Vector2D(x + 1,i-1));
 
         pointsEntree.add(cellulesComm.get(cellulesComm.size() - 1));
+        pointsEntree.add(cellulesComm.get(cellulesComm.size() - 2));
 
-        cellulesComm.add(new Vector2D(x+1,i-1));
-        cellulesComm.add(new Vector2D(x+2, i));
+
+        // EST
+        cellulesComm.add(new Vector2D(x + 4,i + 2));
+        cellulesComm.add(new Vector2D(x + 4,i + 3));
+        cellulesComm.add(new Vector2D(x + 4, i));
+        cellulesComm.add(new Vector2D(x + 4,i + 1));
 
         pointsEntree.add(cellulesComm.get(cellulesComm.size() - 1));
+        pointsEntree.add(cellulesComm.get(cellulesComm.size() - 2));
 
-        cellulesComm.add(new Vector2D(x+2,i+1));
-        cellulesComm.add(new Vector2D(x,i+2));
-        cellulesComm.add(new Vector2D(x+1,i+2));
+        // SUD
+        cellulesComm.add(new Vector2D(x, i + 4));
+        cellulesComm.add(new Vector2D(x + 1,i + 4));
+        cellulesComm.add(new Vector2D(x + 2,i + 4));
+        cellulesComm.add(new Vector2D(x + 3,i + 4));
 
         pointsEntree.add(cellulesComm.get(cellulesComm.size() - 1));
+        pointsEntree.add(cellulesComm.get(cellulesComm.size() - 2));
+
 
         Intersection intersection = new Intersection(cellulesComm, pointsEntree, this);
         intersections.add(intersection);
     }
-
 
     // Méthode pour vérifier si une position est proche d'une intersection (moins de 5 cases)
     public boolean estProcheIntersection(Vector2D position) {
