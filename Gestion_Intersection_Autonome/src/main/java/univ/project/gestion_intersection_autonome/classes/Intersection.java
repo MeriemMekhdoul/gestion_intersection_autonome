@@ -35,8 +35,11 @@ public class Intersection implements IntersectionListener {
         return cellulesCommunication.contains(position);
     }
 
-    public void ajouterVehicule(Vehicule v, Message m){
+    synchronized public void ajouterVehicule(Vehicule v, Message m){
         configuration.nouveauVehicule(v,m);
+    }
+    synchronized public void ajouterVehiculeTemp(Vehicule v){
+        configuration.nouveauVehiculeTemp(v);
     }
 
     public void supprimerVehicule(Vehicule v){
@@ -49,20 +52,28 @@ public class Intersection implements IntersectionListener {
 
     public ArrayList<Vehicule> getVehiculesEnAttente() {
         ArrayList<Vehicule> vehiculeEnAttente = new ArrayList<>();
-        for (Vehicule v : configuration.getVehicules()) {
-            if (configuration.getEtat(v.getId()) == EtatVehicule.ATTENTE)
-                vehiculeEnAttente.add(v);
+        synchronized(configuration){
+            for (int id : configuration.getEtatVehicule().keySet()) {
+                Vehicule v = configuration.getVehicule(id);
+                if (configuration.getEtat(id) == EtatVehicule.ATTENTE) {
+                    vehiculeEnAttente.add(v);
+                }
+            }
         }
         return vehiculeEnAttente;
     }
 
     public ArrayList<Vehicule> getVehiculesEngages() {
-        ArrayList<Vehicule> vehiculeEngages = new ArrayList<>();
-        for (Vehicule v : configuration.getVehicules()) {
-            if (configuration.getEtat(v.getId()) == EtatVehicule.ENGAGE)
-                vehiculeEngages.add(v);
+        ArrayList<Vehicule> vehiculesEngages = new ArrayList<>();
+        synchronized(configuration){
+            for (int id : configuration.getEtatVehicule().keySet()) {
+                Vehicule v = configuration.getVehicule(id);
+                if (configuration.getEtat(id) == EtatVehicule.ENGAGE) {
+                    vehiculesEngages.add(v);
+                }
+            }
         }
-        return vehiculeEngages;
+        return vehiculesEngages;
     }
 
     public Message getMessage(Vehicule v){

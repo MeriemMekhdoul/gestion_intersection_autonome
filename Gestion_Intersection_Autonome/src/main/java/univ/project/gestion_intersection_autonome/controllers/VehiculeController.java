@@ -95,6 +95,14 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
             if (estDansCommunication(nouvellePosition)) {
                 //System.out.println("je m'apprête à entrer dans une nouvelle intersection");
                 entreeIntersection = true;
+                //ajouter le véhicule temporairement a la config de l'intersection
+                Intersection i = terrain.getIntersection(nouvellePosition);
+                i.ajouterVehiculeTemp(vehicule);
+                System.out.println("Véhicule " + vehicule.getId() +
+                        "à la position" + vehicule.getPosition() +
+                        "vient d'arriver en zone comm et s'est ajouté à la config = ");
+                i.afficherConfiguration();
+
             }
         }
     }

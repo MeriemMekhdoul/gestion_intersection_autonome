@@ -14,17 +14,30 @@ public class Configuration {
         etatVehicule = new ConcurrentHashMap<>();
     }
 
-    public ArrayList<Vehicule> getVehicules() {
+    synchronized public List<Vehicule> getVehiculesTemp() {
         return vehicules;
     }
+    synchronized public List<Vehicule> getVehicules() {
+        return new ArrayList<>(tempsArrivee.keySet());
+    }
 
-    public void nouveauVehicule(Vehicule v, Message m){
-        vehicules.add(v);
+    synchronized public void nouveauVehicule(Vehicule v, Message m){
+        if(!vehicules.contains(v))
+            vehicules.add(v);
         tempsArrivee.put(v,m);
         etatVehicule.put(v.getId(),EtatVehicule.ATTENTE);
     }
 
-    public void editEtat(Integer id, EtatVehicule etat) {
+    synchronized public void nouveauVehiculeTemp(Vehicule v){
+        if(!vehicules.contains(v))
+            vehicules.add(v);
+    }
+
+    public ConcurrentHashMap<Integer, EtatVehicule> getEtatVehicule() {
+        return etatVehicule;
+    }
+
+    synchronized public void editEtat(Integer id, EtatVehicule etat) {
         // Si le véhicule existe dans la carte, on met à jour son état
         if (etatVehicule.containsKey(id)) {
             etatVehicule.put(id, etat); // Mise à jour de l'état du véhicule
