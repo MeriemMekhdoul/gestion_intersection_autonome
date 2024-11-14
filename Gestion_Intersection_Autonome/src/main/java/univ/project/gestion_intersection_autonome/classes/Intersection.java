@@ -267,43 +267,44 @@ public class Intersection implements IntersectionListener {
         }
     }
 
+    /**
+     * Vérifie si un embouteillage se produit dans l'intersection en fonction de la position actuelle du véhicule.
+     * Un embouteillage est détecté si plus de `NB_VEHICULES_MAX` véhicules sont présents dans n'importe quelle voie de l'intersection.
+     *
+     * @param position La position actuelle du véhicule (représentée par un objet `Vector2D`).
+     * @return `true` si un embouteillage est détecté, sinon `false`.
+     */
     public boolean verifierEmbouteillage(Vector2D position) {
-        Vector2D voieEntree = getVoieEntree(position);
         int cellulesOccupees = 0;
-        Vector2D cellulePosition = new Vector2D();
 
-        if (voieEntree.getX() == position.getX()) { // Cas d'une voie verticale
-            int startY = Math.min(voieEntree.getY(), position.getY());
-            int endY = Math.max(voieEntree.getY(), position.getY());
+        Vector2D voieEntree = getVoieEntree(position);
+        // Calcul de la distance entre la position actuelle et l'entrée de l'intersection
+        int distance = getDistance(position, voieEntree);
 
-            // Parcourir les cellules entre les deux points (le long de l'axe Y)
+        // Parcourir chaque point d'entrée (chaque voie différente)
+        for (Vector2D pos : pointsEntree) {
+            // Vérification des cellules dans la voie d'entrée en fonction de la direction
+            Vector2D posVoiture = pos.copy();
 
-            for (int y = startY; y <= endY; y++) {
-                cellulePosition.setX(position.getX());
-                cellulePosition.setY(y);
-                Cellule cellule = terrain.getCellule(cellulePosition.copy());
+            for (int d = 0; d <= distance; d++) {
+                // Vérifier dans quelle direction se déplacer (en fonction de la voie)
+                Cellule cellule = terrain.getCellule(posVoiture);
 
-                if (cellule.estOccupee()) {
-                    cellulesOccupees++;
-                    if (cellulesOccupees >= DISTANCE) {
-                        return true; // Embouteillage détecté
-                    }
+                // Vérifier la direction autorisée et avancer dans la voie
+                if (cellule.isDirectionAutorisee(Direction.NORD)) {
+                    posVoiture.setY(posVoiture.getY() - 1); // Avance vers le nord
+                } else if (cellule.isDirectionAutorisee(Direction.SUD)) {
+                    posVoiture.setY(posVoiture.getY() + 1); // Avance vers le sud
+                } else if (cellule.isDirectionAutorisee(Direction.EST)) {
+                    posVoiture.setX(posVoiture.getX() + 1); // Avance vers l'est
+                } else if (cellule.isDirectionAutorisee(Direction.OUEST)) {
+                    posVoiture.setX(posVoiture.getX() - 1); // Avance vers l'ouest
                 }
-            }
-        } else { // Cas d'une voie horizontale
-            // Si les coordonnées Y sont égales, on a une voie horizontale.
-            int startX = Math.min(voieEntree.getX(), position.getX());
-            int endX = Math.max(voieEntree.getX(), position.getX());
 
-            // Parcourir les cellules entre les deux points (le long de l'axe X)
-            for (int x = startX; x <= endX; x++) {
-                cellulePosition.setX(x);
-                cellulePosition.setY(position.getY());
-                Cellule cellule = terrain.getCellule(cellulePosition);
-
+                // Vérification si la cellule est occupée
                 if (cellule.estOccupee()) {
                     cellulesOccupees++;
-                    if (cellulesOccupees >= DISTANCE) {
+                    if (cellulesOccupees >= NB_VEHICULES_MAX) {
                         return true; // Embouteillage détecté
                     }
                 }
@@ -311,6 +312,71 @@ public class Intersection implements IntersectionListener {
         }
 
         return false; // Pas d'embouteillage détecté
+    }
+
+    /**
+     * Calcule et retourne le nombre de cases entre deux positions (distance de Manhattan)
+     * sur une même ligne ou colonne dans une grille.
+     *
+     * @param position   La position de départ.
+     * @param voieEntree La position d'arrivée, généralement l'entrée de l'intersection.
+     * @return Le nombre de cases entre la position et l'entrée de l'intersection.
+     */
+    private int getDistance(Vector2D position, Vector2D voieEntree){
+        int start;
+        int end;
+
+        if (voieEntree.getX() == position.getX()) { // Cas d'une voie verticale
+            start = Math.min(voieEntree.getY(), position.getY());
+            end = Math.max(voieEntree.getY(), position.getY());
+        } else { // Cas d'une voie horizontale
+            start = Math.min(voieEntree.getX(), position.getX());
+            end = Math.max(voieEntree.getX(), position.getX());
+        }
+        return end - start;
+    }
+
+    /**
+     * Récupère tous les véhicules se trouvant dans les voies à partir des points d'entrée,
+     * dans un rayon donné (distance) depuis chaque point d'entrée.
+     *
+     * @param distance La distance maximale (en cases) depuis chaque point d'entrée pour rechercher les véhicules.
+     * @return Une liste des véhicules présents dans les autres voies, dans la limite de la distance spécifiée.
+     */
+    private List<Vehicule> obtenirTousLesVehiculesDansAutresVoies(int distance) {
+        List<Vehicule> autresVehicules = new ArrayList<>();
+
+        // Parcourir chaque point d'entrée (chaque voie différente)
+        for (Vector2D position : pointsEntree) {
+            Vector2D posVoiture = position.copy();
+            // Parcourir les cellules dans un rayon autour du point d'entrée
+            for (int d = 0; d <= distance; d++) {
+            // Obtenir la cellule à la distance d le long de la voie
+
+                // Vérifier si la cellule contient un véhicule
+                Cellule cellule = terrain.getCellule(posVoiture);
+                if (cellule.isDirectionAutorisee(Direction.NORD)) {
+                    // Si la direction NORD est autorisée, on diminue Y pour avancer vers le haut
+                    posVoiture.setY(posVoiture.getY() - 1);
+                } else if (cellule.isDirectionAutorisee(Direction.SUD)) {
+                    // Si la direction SUD est autorisée, on augmente Y pour avancer vers le bas
+                    posVoiture.setY(posVoiture.getY() + 1);
+                } else if (cellule.isDirectionAutorisee(Direction.EST)) {
+                    // Si la direction 'EST' est autorisée, on augmente X pour avancer vers la droite
+                    posVoiture.setX(posVoiture.getX() + 1);
+                } else if (cellule.isDirectionAutorisee(Direction.OUEST)) {
+                    // Si la direction OUEST est autorisée, on diminue X pour avancer vers la gauche
+                    posVoiture.setX(posVoiture.getX() - 1);
+                }
+
+                if (cellule.contientVehicule()) {
+                    // Ajouter le véhicule dans la liste des autres véhicules
+                    //autresVehicules.add(cellule.getVehicule());
+                }
+            }
+        }
+
+        return autresVehicules;
     }
 
     public void afficherConfiguration(){
