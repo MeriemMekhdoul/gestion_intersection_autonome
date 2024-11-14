@@ -4,30 +4,38 @@ import java.util.*;
 
 public class Terrain {
     private Cellule[][] grille;
-    private final List<Vector2D> sorties;
-    private final List<Vector2D> entrees;
+    private final List<Vector2D> entreesVoieGauche;
+    private final List<Vector2D> entreesVoieDroite;
+    private final List<Vector2D> sortiesVoieGauche;
+    private final List<Vector2D> sortiesVoieDroite;
     private final List<Intersection> intersections;
     private int largeur;
     private int hauteur;
-    private final int NOMBRE_MAX_ROUTES_HORIZONTALES = 4;
-    private final int NOMBRE_MAX_ROUTES_VERTICALES = 4;
+    private final int NOMBRE_MAX_ROUTES_HORIZONTALES = 1;
+    private final int NOMBRE_MAX_ROUTES_VERTICALES = 1;
     private final int ESPACE_MIN = 8;
     private final int ESPACE_MAX = 16;
 
     // Constructeur par défaut
     public Terrain() {
-        entrees = new ArrayList<>();
-        sorties = new ArrayList<>();
+        entreesVoieGauche = new ArrayList<>();
+        entreesVoieDroite = new ArrayList<>();
+        sortiesVoieGauche = new ArrayList<>();
+        sortiesVoieDroite = new ArrayList<>();
         intersections = new ArrayList<>();
     }
+
     public Terrain(int _largeur, int _hauteur){
         this.largeur = _largeur;
         this.hauteur = _hauteur;
 
         this.grille = new Cellule[largeur][hauteur];
 
-        entrees = new ArrayList<>();
-        sorties = new ArrayList<>();
+        entreesVoieGauche = new ArrayList<>();
+        entreesVoieDroite = new ArrayList<>();
+        sortiesVoieGauche = new ArrayList<>();
+        sortiesVoieDroite = new ArrayList<>();
+
         intersections = new ArrayList<>();
 
         initialiserGrilleVide();
@@ -37,8 +45,21 @@ public class Terrain {
         afficherEntreesEtSorties();
     }
 
-    public List<Vector2D> getEntrees() { return entrees;}
-    public List<Vector2D> getSorties() { return sorties;}
+    public List<Vector2D> getEntreesVoieGauche() {
+        return entreesVoieGauche;
+    }
+
+    public List<Vector2D> getEntreesVoieDroite() {
+        return entreesVoieDroite;
+    }
+
+    public List<Vector2D> getSortiesVoieGauche() {
+        return sortiesVoieGauche;
+    }
+
+    public List<Vector2D> getSortiesVoieDroite() {
+        return sortiesVoieDroite;
+    }
 
     public Cellule[][] getGrille() { return grille; }
 
@@ -81,16 +102,17 @@ public class Terrain {
             grille[i][y + 3].setDirectionsAutorisees(false,true,false,false,false,false,false,false);
         }
 
-        entrees.add(new Vector2D(0,y + 2));
-        entrees.add(new Vector2D(largeur - 1, y));
-        entrees.add(new Vector2D (0,y + 3));
-        entrees.add(new Vector2D(largeur - 1, y + 1));
+        // Côté Ouest (x = 0)
+        sortiesVoieDroite.add(new Vector2D(0, y));        // SD
+        sortiesVoieGauche.add(new Vector2D(0, y + 1));    // SG
+        entreesVoieGauche.add(new Vector2D(0, y + 2));    // EG
+        entreesVoieDroite.add(new Vector2D(0, y + 3));    // ED
 
-        sorties.add(new Vector2D(0, y));
-        sorties.add(new Vector2D(largeur - 1, y + 2));
-        sorties.add(new Vector2D(0, y+1));
-        sorties.add(new Vector2D(largeur - 1, y + 3));
-
+        // Côté Est (x = largeur - 1)
+        entreesVoieDroite.add(new Vector2D(largeur - 1, y));     // ED
+        entreesVoieGauche.add(new Vector2D(largeur - 1, y + 1)); // EG
+        sortiesVoieGauche.add(new Vector2D(largeur - 1, y + 2)); // SG
+        sortiesVoieDroite.add(new Vector2D(largeur - 1, y + 3)); // SD
     }
 
     //peut être améliorée ...
@@ -221,16 +243,17 @@ public class Terrain {
             }
         }
 
-        entrees.add(new Vector2D(x, 0));
-        entrees.add(new Vector2D(x + 2, hauteur - 1));
-        entrees.add(new Vector2D(x + 1, 0));
-        entrees.add(new Vector2D(x + 3, hauteur - 1));
+        // Côté Nord (y = 0)
+        entreesVoieDroite.add(new Vector2D(x, 0));       // ED
+        entreesVoieGauche.add(new Vector2D(x + 1, 0));   // EG
+        sortiesVoieGauche.add(new Vector2D(x + 2, 0));   // SG
+        sortiesVoieDroite.add(new Vector2D(x + 3, 0));   // SD
 
-
-        sorties.add(new Vector2D(x + 2, 0));
-        sorties.add(new Vector2D(x, hauteur - 1));
-        sorties.add(new Vector2D(x + 3, 0));
-        sorties.add(new Vector2D(x + 1, hauteur - 1));
+        // Côté Sud (y = hauteur - 1)
+        sortiesVoieDroite.add(new Vector2D(x, hauteur - 1));     // SD
+        sortiesVoieGauche.add(new Vector2D(x + 1, hauteur - 1)); // SG
+        entreesVoieGauche.add(new Vector2D(x + 2, hauteur - 1)); // EG
+        entreesVoieDroite.add(new Vector2D(x + 3, hauteur - 1)); // ED
     }
 
     // mettre espace_min et espace_max comme constantes en dehors de la methode
@@ -273,14 +296,23 @@ public class Terrain {
         }
     }
 
-    public void afficherEntreesEtSorties() {
-        System.out.println("Entrées:");
-        for (Vector2D entree : entrees) {
+    public void afficherEntreesEtSorties()
+    {
+        System.out.println("Entrées voie Gauche :");
+        for (Vector2D entree : entreesVoieGauche) {
+            System.out.println("Entrée: " + entree);
+        }
+        System.out.println("Entrées voie Droite :");
+        for (Vector2D entree : entreesVoieDroite) {
             System.out.println("Entrée: " + entree);
         }
 
-        System.out.println("Sorties:");
-        for (Vector2D sortie : sorties) {
+        System.out.println("Sorties voie Gauche :");
+        for (Vector2D sortie : sortiesVoieGauche) {
+            System.out.println("Sortie: " + sortie);
+        }
+        System.out.println("Sorties voie Droite :");
+        for (Vector2D sortie : sortiesVoieDroite) {
             System.out.println("Sortie: " + sortie);
         }
     }
