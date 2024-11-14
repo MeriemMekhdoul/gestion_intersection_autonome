@@ -12,7 +12,7 @@ public class AStar
 
     public List<Vector2D> trouverChemin(Vector2D positionDepart, Vector2D positionArrivee)
     {
-        System.out.println("Recherche du chemin de " + positionDepart + " à " + positionArrivee);
+        //System.out.println("Recherche du chemin de " + positionDepart + " à " + positionArrivee);
 
         PriorityQueue<Noeud> openList = new PriorityQueue<>(); // noeuds à explorer
         Map<Vector2D, Noeud> allNodes = new HashMap<>(); // tous les noeuds visités ou en attente

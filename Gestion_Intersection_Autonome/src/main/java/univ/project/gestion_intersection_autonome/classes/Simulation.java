@@ -71,13 +71,14 @@ public class Simulation {
             return;
         }
 
-        System.out.println("Départ : " + positionDepart + " | Arrivée : " + positionArrivee);
+        //System.out.println("Départ : " + positionDepart + " | Arrivée : " + positionArrivee);
 
         // génération du type de véhicule
         int random = new Random().nextInt(20) + 1;
         TypeVehicule type = TypeVehicule.VOITURE;
 
         Color couleur = Vehicule.genererCouleurAleatoire();
+
 
         if (random == 1) {
             type = TypeVehicule.URGENCE;

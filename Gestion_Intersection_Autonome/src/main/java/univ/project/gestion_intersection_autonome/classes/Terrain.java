@@ -11,7 +11,7 @@ public class Terrain {
     private int hauteur;
     private final int NOMBRE_MAX_ROUTES_HORIZONTALES = 4;
     private final int NOMBRE_MAX_ROUTES_VERTICALES = 4;
-    private final int ESPACE_MIN = 8;
+    private final int ESPACE_MIN =8;
     private final int ESPACE_MAX = 16;
 
     // Constructeur par défaut

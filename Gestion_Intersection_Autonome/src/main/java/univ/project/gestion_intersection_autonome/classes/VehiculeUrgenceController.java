@@ -1,10 +1,8 @@
 package univ.project.gestion_intersection_autonome.classes;
 
-import javafx.application.Platform;
 import univ.project.gestion_intersection_autonome.controllers.TerrainController;
 import univ.project.gestion_intersection_autonome.controllers.VehiculeController;
 
-import java.security.MessageDigestSpi;
 import java.util.List;
 public class VehiculeUrgenceController extends VehiculeController {
 
@@ -21,7 +19,7 @@ public class VehiculeUrgenceController extends VehiculeController {
         for (int i = 1; i < itineraire.size(); i++) {
             // Vérifier le trafic avant d'atteindre une intersection
             if (estProcheIntersection(vehicule.getPosition().copy()) && !signalEnvoye && entreeIntersection) {
-                System.out.println("JE SUIS PROCHE D'UNE INTERSECTION");
+                //System.out.println("JE SUIS PROCHE D'UNE INTERSECTION : " + vehicule.getId());
                 verifierEtatTrafic();
             }
 
@@ -40,17 +38,13 @@ public class VehiculeUrgenceController extends VehiculeController {
     @Override
     public void deplacement() {
         if (estDansCommunication(anciennePosition) && entreeIntersection) {
-            //System.out.println("je suis dans une zone de communication");
             entrerIntersection();
             entreeIntersection = false; //je suis sortie de l'intersection
             signalEnvoye = false;
             //envoyer un signal de sortie
         } else {
-            //System.out.println("je suis en zone normale");
             deplacerHorsIntersection();
-            //mettre à jour l'attribut "entree" pour savoir si on arrive de nouveau dans une intersection ou pas
             if (estDansCommunication(nouvellePosition)) {
-                //System.out.println("je m'apprête à entrer dans une nouvelle intersection");
                 entreeIntersection = true;
             }
         }
@@ -95,8 +89,6 @@ public class VehiculeUrgenceController extends VehiculeController {
      * Détecte un embouteillage sur la voie du véhicule.
      */
     private boolean detecterEmbouteillageSurVoie(Intersection intersection) {
-        // Logique de détection d'embouteillage (vérification des véhicules lents ou arrêtés sur la voie)
-        // Retourne true si un embouteillage est détecté, false sinon
         return intersection.verifierEmbouteillage(vehicule.getPosition().copy());
     }
 
@@ -109,8 +101,8 @@ public class VehiculeUrgenceController extends VehiculeController {
         message.setv1(vehicule);
         message.setEntreeUrgence(vehicule.getPosition().copy());
 
-        sendMessageToIntersections(message);
         System.out.println("Signal d'urgence envoyé à l'intersection par le véhicule " + vehicule.getId());
+        sendMessageToIntersections(message);
         signalEnvoye = true;
     }
 }

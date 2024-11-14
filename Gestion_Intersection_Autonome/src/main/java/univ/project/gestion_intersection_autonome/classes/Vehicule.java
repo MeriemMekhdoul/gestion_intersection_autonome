@@ -1,8 +1,6 @@
 package univ.project.gestion_intersection_autonome.classes;
 
 import javafx.scene.paint.Color;
-
-import java.awt.*;
 import java.util.*;
 import java.io.*;
 import java.util.List;
@@ -16,8 +14,9 @@ public class Vehicule implements VehiculeListener {
     private Vector2D positionArrivee;
     private static int idCompteur = 1;// génère un ID pour chaque véhicule
     private boolean enAttente;
-    private List<Vector2D> itineraire;
-    private Color couleur;
+    private final List<Vector2D> itineraire;
+    private final Color couleur;
+    private List<VehiculeListener> listeners = new ArrayList<>();
 
     // Constructeur paramétré
     public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee, List<Vector2D> itineraire, Color couleur) throws IOException {
@@ -31,22 +30,6 @@ public class Vehicule implements VehiculeListener {
         this.couleur = couleur;
     }
 
-/*    public Vehicule(TypeVehicule typeVehicule, Vector2D positionDepart, Vector2D positionArrivee) {
-        this.id = idCompteur++;
-        this.type = typeVehicule;
-        this.position = positionDepart.copy();
-        this.positionDepart = positionDepart.copy();
-        this.positionArrivee = positionArrivee.copy();
-        this.enAttente = false;
-    }
-
-    public Vehicule(ArrayList<Vector2D> itineraire) {
-        this.id = idCompteur++;
-        //this.type = type;
-        this.itineraire=itineraire;
-    }*/
-
-    // Méthodes
     public void move(Vector2D pos) {
         position.setX(pos.getX());
         position.setY(pos.getY());
@@ -87,8 +70,6 @@ public class Vehicule implements VehiculeListener {
         return position.equals(positionArrivee);
     }
 
-    //utilisation de sockets pour l'envoi de messages d'un vehicule à un ou plusieurs autres vehicules
-    //methode pour envoyer un message
 
     // generer une couleur aleatoire
     public static Color genererCouleurAleatoire()
@@ -151,9 +132,6 @@ public class Vehicule implements VehiculeListener {
     public Color getCouleur() {
         return couleur;
     }
-
-    //listener
-    private List<VehiculeListener> listeners = new ArrayList<>();
 
     // Méthode pour s'inscrire à des notifications
     public void addListener(VehiculeListener listener) {

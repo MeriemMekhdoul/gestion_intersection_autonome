@@ -2,12 +2,15 @@ package univ.project.gestion_intersection_autonome.controllers;
 
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.shape.Circle;
 import univ.project.gestion_intersection_autonome.classes.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class VehiculeController implements Runnable,VehiculeControllerListener {
     protected final Vehicule vehicule;
@@ -101,20 +104,20 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
 
         // vérification de l'occupation de la cellule
         if (terrain.getCellule(nouvellePosition).estOccupee()) {
-            System.out.println("Cellule occupée");
+            //System.out.println("Cellule occupée");
 
             // attente libération
             while (terrain.getCellule(nouvellePosition).estOccupee()) {
-                System.out.println("Attente libération cellule");
+                //System.out.println("Attente libération cellule");
                 pauseEntreMouvements(VITESSE_SIMULATION_MS);
             }
         }
 
         vehicule.move(nouvellePosition);
 
-        //System.out.println("Le véhicule " + vehicule.getId() + " se déplace vers : " + vehicule.getPosition());
         mettreAJourCellules();
         mettreAJourGraphique();
+        //System.out.println("Vehicule ("+ vehicule.getType() + ") id = "+ vehicule.getId() + " s'est déplacé en : " + nouvellePosition);
         pauseEntreMouvements(VITESSE_SIMULATION_MS);
     }
 
@@ -139,22 +142,15 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
 
         intersection.ajouterVehicule(vehicule, message); //l'ajouter a la config
         ArrayList<Vehicule> vehiculesEngages = intersection.getVehiculesEngages(); //les véhicules qui ne sont pas engagés
-        //System.out.println("vehiculesEngages  = " + vehiculesEngages);
 
-        ArrayList<Vehicule> vehiculesDansIntersection = intersection.getVehicules();
-        //System.out.println("vehiculesDansIntersection  = " + vehiculesDansIntersection);
+        List<Vehicule> vehiculesDansIntersection = intersection.getVehicules();
 
 
         if (vehiculesDansIntersection.size() == 1) {
-            //send message "Engagée" ????
             intersection.editConfig(vehicule, EtatVehicule.ENGAGE);
-            //System.out.println("aucun vehicule dans l'intersection donc j'avance'");
             avancerIntersection(deplacements);
-            intersection.supprimerVehicule(vehicule);
-            //System.out.println("je suis sorti de l'intersection et j'ai supp le vehicule de la config");
         } else //entrer dans le mode négociation, calculs et gestion des priorités
         {
-            //System.out.println("des véhicule sont dans l'intersection");
             //récupérer les infos (itinéraires) des autres
             ArrayList<Message> messagesVoitures = new ArrayList<>();
             for (Vehicule v : vehiculesDansIntersection) {
@@ -167,7 +163,6 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
 
             //System.out.println("temps d'attente calculé et estimé à : " + tempsAttente + " secondes");
             pauseEntreMouvements(tempsAttente * VITESSE_SIMULATION_MS);
-            //System.out.println("attente effectuée, conflit évité, update l'état à ENGAGE puis j'avance");
 
             intersection.editConfig(vehicule, EtatVehicule.ENGAGE);
             //Envoyer un message avant de s'engager ??
@@ -177,13 +172,12 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
             Platform.runLater(() -> {
                 terrainController.effacerItineraire(vehicule, anciennePosition);
             });
-
-            intersection.supprimerVehicule(vehicule);
-
-
             //à la sortie envoyer un msg de SORTIE (à qui ??) => intersection ou véhiculesDestinataires ?
             //}
         }
+
+        intersection.supprimerVehicule(vehicule);
+        //intersection.removeVehiculeControllerListener(this);
     }
 
     /**
@@ -196,7 +190,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
      * @param vehiculesEnConflit Liste des véhicules qui causent un conflit (mise à jour si conflit détecté).
      * @return `true` s'il y a un conflit, sinon `false`.
      */
-    public static boolean conflit(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEnConflit
+    public boolean conflit(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEnConflit
             , ArrayList<ArrayList<Vector2D>> itinerairesVoitures) {
         // Vider la liste des véhicules en conflit pour un nouveau calcul
         vehiculesEnConflit.clear();
@@ -225,7 +219,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
      * @param itin2 Le second itinéraire.
      * @return `true` s'il y a une collision, sinon `false`.
      */
-    public static boolean compareItineraire(ArrayList<Vector2D> itin1, ArrayList<Vector2D> itin2) {
+    public boolean compareItineraire(ArrayList<Vector2D> itin1, ArrayList<Vector2D> itin2) {
         for (int i = 0; i < itin1.size(); i++) {
             if (i < itin2.size()) {
                 if (itin1.get(i).equals(itin2.get(i)))
@@ -247,7 +241,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
             if (vehiculesEngages.contains(message.getv1())) {
                 Vector2D posActuV = message.getv1().getPosition().copy();
                 int index = itineraireAmodifier.indexOf(posActuV);
-                //truck tableau a partir de l'index
+                //trunk tableau a partir de l'index
                 ArrayList<Vector2D> newItineraire = new ArrayList<>();
                 for (int i = index; i < itineraireAmodifier.size(); i++) {
                     newItineraire.add(itineraireAmodifier.get(i));
@@ -298,13 +292,13 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
             //System.out.println("Le véhicule " + vehicule.getId() + " se déplace vers : " + vehicule.getPosition());
             mettreAJourCellules();
             mettreAJourGraphique();
+            //System.out.println("Vehicule ("+ vehicule.getType() + ") id = "+ vehicule.getId() + " s'est déplacé en : " + nouvellePosition);
             pauseEntreMouvements(VITESSE_SIMULATION_MS);
         }
     }
 
     public synchronized void mettreAJourCellules()
     {
-        //System.out.println("mettreAJourCellules called with anciennePosition: " + anciennePosition + ", nouvellePosition: " + nouvellePosition);
         nouvellePosition = vehicule.getPosition().copy();
         Cellule cell2 = terrain.getCellule(nouvellePosition);
 
@@ -346,16 +340,15 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
 
         switch (typeVehicule)
         {
-            case VOITURE -> {
+            /* case VOITURE -> {
                 return new Circle((double) terrainController.TAILLE_CELLULE / 2, couleurVehicule);
-            }
+            } */
             case URGENCE -> {
                 return new Circle((double) terrainController.TAILLE_CELLULE / 2, Color.BLUE); // voir plus tard pour alterner rouge / bleu
             }
-            /*
             case BUS -> {
                 return new Rectangle(10, 10, Color.BLUE); // voir plus tard
-            }*/
+            }
             default -> {
                 return new Circle((double) terrainController.TAILLE_CELLULE / 2, couleurVehicule);
             }
@@ -404,7 +397,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
     }
     @Override //traitement du message reçu de l'intersection
     public void onMessageReceivedFromIntersection(Message message) {
-        System.out.println("Le véhicule de type \"" + vehicule.getType() + "\" avec l'id \"" + vehicule.getId() + "\" a reçu ce message.");
+        System.out.println("Le véhicule de type \"" + vehicule.getType() + "\" avec l'id \"" + vehicule.getId() + "\" a reçu ce message de "+ message.getObjet());
 
         // Traitement du message en fonction de l'objet
         switch (message.getObjet()) {

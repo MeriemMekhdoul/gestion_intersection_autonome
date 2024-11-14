@@ -77,10 +77,6 @@ public class Intersection implements IntersectionListener {
         return configuration.getVehicules();
     }
 
-    public void afficherConfig() {
-        System.out.println(configuration);
-    }
-
 
     //listener intersection de l'intersection
     public void addListener(IntersectionListener listener) {
@@ -138,7 +134,7 @@ public class Intersection implements IntersectionListener {
 
         //get la voie par laquelle le vehicule arrive pour pouvoir bloquer les autres
         Vector2D voieEntree = getVoieEntree(message.getv1().getPosition().copy());
-        System.out.println("position actuelle du véhicule : " + message.getv1().getPosition() + " voie d'entrée : " + voieEntree);
+        System.out.println("VEHICULE ID = " + message.getv1().getId() + " position actuelle du véhicule : " + message.getv1().getPosition() + " voie d'entrée : " + voieEntree);
 
         switch (message.getObjet()) {
             case PASSAGE -> {
@@ -152,21 +148,12 @@ public class Intersection implements IntersectionListener {
     }
 
     public Vector2D getVoieEntree(Vector2D position) {
-        ArrayList<Vector2D> positionsPossibles = new ArrayList<>();
-        boolean sameX = true;
-
         for (Vector2D pos : pointsEntree) {
             if (pos.getX() == position.getX()) {
-                System.out.println("same X pos = " + pos);
-                positionsPossibles.add(pos.copy());
                 return pos;
             } else if (pos.getY() == position.getY()) {
-                System.out.println("same Y pos = " + pos);
-                positionsPossibles.add(pos.copy());
-                sameX = false;
                 return pos;
             }
-            //else on passe au suivant
         }
         return null;
     }
@@ -198,6 +185,7 @@ public class Intersection implements IntersectionListener {
 
         for (Vector2D position : pointsEntree) {
             if(!voieEntree.equals(position)) {
+                System.out.println("i'm in setEtatCellulesEtVehicules : print configuration avant modifs :\n" + configuration);
                 System.out.println("pos a bloquer : " + position);
                 if (terrain.getCellule(position).estOccupee() && (terrain.getCellule(position).getIdVoiture() > 0)) {
                     int idVoiture = terrain.getCellule(position).getIdVoiture();
@@ -213,9 +201,6 @@ public class Intersection implements IntersectionListener {
         return vehiculesEnAttentes;
     }
 
-    private boolean isEntreeIntersection(Vector2D position) {
-        return pointsEntree.contains(position);
-    }
 
     public ArrayList<VehiculeControllerListener> getControllers(ArrayList<Vehicule> vehiculesEnAttente) {
         ArrayList<VehiculeControllerListener> controllersEnAttente = new ArrayList<>();
@@ -287,6 +272,11 @@ public class Intersection implements IntersectionListener {
 
         return false; // Pas d'embouteillage détecté
     }
+
+    public void afficherConfiguration(){
+        System.out.println(configuration);
+    }
+
 
 }
 

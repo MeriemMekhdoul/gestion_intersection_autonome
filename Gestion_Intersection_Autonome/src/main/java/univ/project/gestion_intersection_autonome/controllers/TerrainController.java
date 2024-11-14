@@ -154,12 +154,10 @@ public class TerrainController implements Initializable {
 
     public void updateCellule(Vector2D anciennePosition, Vector2D nouvellePosition, Shape vehiculeShape)
     {
-        //System.out.println("J'entre dans update cellule");
         if (!anciennePosition.equals(nouvellePosition)) {
             effacerVehicule(anciennePosition, vehiculeShape);
         }
         dessinerVehicule(nouvellePosition, vehiculeShape);
-        //System.out.println("Déplacement du véhicule graphiquement");
     }
 
 
@@ -194,7 +192,6 @@ public class TerrainController implements Initializable {
 
         if (cellule != null) {
             cellule.getChildren().remove(vehiculeShape);
-            //System.out.println("Véhicule effacé de la cellule : " + position);
         }
     }
 
