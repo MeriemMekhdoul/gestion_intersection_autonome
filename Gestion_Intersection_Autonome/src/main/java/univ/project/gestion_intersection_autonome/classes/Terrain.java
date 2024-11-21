@@ -87,14 +87,10 @@ public class Terrain {
             grille[i][y + 2].estValide(true);
             grille[i][y + 3].estValide(true);
 
-
-
-
             grille[i][y].setTypeZone(TypeZone.ROUTE);
             grille[i][y + 1].setTypeZone(TypeZone.ROUTE);
             grille[i][y + 2].setTypeZone(TypeZone.ROUTE);
             grille[i][y + 3].setTypeZone(TypeZone.ROUTE);
-
 
             grille[i][y].setDirectionsAutorisees(false,false,false,true,false,false,false,false);
             grille[i][y + 1].setDirectionsAutorisees(false,false,false,true,false,false,false,false);
@@ -144,26 +140,25 @@ public class Terrain {
                 grille[x + 3][i + 3].setTypeZone(TypeZone.CONFLIT);
 
 
+                grille[x][i].setDirectionsAutorisees(false,false,true,true,false,false,false,true);
+                grille[x][i+1].setDirectionsAutorisees(false,false,true,true,false,false,false,false);
+                grille[x][i+2].setDirectionsAutorisees(false,true,true,false,false,true,false,true);
+                grille[x][i+3].setDirectionsAutorisees(false,true,true,false,false,true,false,false);
 
-                grille[x][i].setDirectionsAutorisees(false,false,true,true,false,false,false,false);
-                grille[x][i+1].setDirectionsAutorisees(false,false,true,true,false,false,false,true);
-                grille[x][i+2].setDirectionsAutorisees(false,true,false,false,false,false,false,false);
-                grille[x][i+3].setDirectionsAutorisees(false,true,true,false,false,false,false,false);
+                grille[x + 1][i].setDirectionsAutorisees(false,false,true,true,false,false,true,true);
+                grille[x + 1][i+1].setDirectionsAutorisees(false,false,true,true,true,true,false,true);
+                grille[x + 1][i+2].setDirectionsAutorisees(false,true,true,false,true,true,true,false);
+                grille[x + 1][i+3].setDirectionsAutorisees(false,true,true,false,false,false,false,false);
 
-                grille[x + 1][i].setDirectionsAutorisees(false,false,true,false,false,false,false,false);
-                grille[x + 1][i+1].setDirectionsAutorisees(true,false,true,true,false,false,false,true);
-                grille[x + 1][i+2].setDirectionsAutorisees(false,true,true,false,false,true,false,false);
-                grille[x + 1][i+3].setDirectionsAutorisees(true,true,true,false,false,true,false,false);
+                grille[x + 2][i].setDirectionsAutorisees(true,false,false,true,false,false,false,false);
+                grille[x + 2][ i+1 ].setDirectionsAutorisees(true,false,false,true,false,true,true,true);
+                grille[x + 2][ i+2 ].setDirectionsAutorisees(true,true,false,false,true,false,true,true);
+                grille[x + 2][ i+3 ].setDirectionsAutorisees(true,true,false,false,true,true,false,false);
 
-                grille[x + 2][i].setDirectionsAutorisees(true,false,false,false,false,false,false,false);
-                grille[x + 2][ i+1 ].setDirectionsAutorisees(true,false,false,true,false,false,false,true);
-                grille[x + 2][ i+2 ].setDirectionsAutorisees(true,true,false,false,true,false,false,false);
-                grille[x + 2][ i+3 ].setDirectionsAutorisees(true,false,false,false,false,false,false,false);
-
-                grille[x + 3][i].setDirectionsAutorisees(true,false,false,true,false,false,false,false);
-                grille[x + 3][i + 1].setDirectionsAutorisees(false,false,false,true,false,false,false,false);
-                grille[x + 3][i + 2].setDirectionsAutorisees(true,true,false,false,true,false,false,false);
-                grille[x + 3][i + 3].setDirectionsAutorisees(true,true,false,false,false,false,false,false);
+                grille[x + 3][i].setDirectionsAutorisees(true,false,false,true,false,false,true,false);
+                grille[x + 3][i + 1].setDirectionsAutorisees(true,false,false,true,true,false,true,false);
+                grille[x + 3][i + 2].setDirectionsAutorisees(true,true,false,false,false,false,false,false);
+                grille[x + 3][i + 3].setDirectionsAutorisees(true,true,false,false,true,false,false,false);
 
 
 
@@ -212,7 +207,7 @@ public class Terrain {
                 grille[x +4][i].setDirectionsAutorisees(false,false,false,true,false,false,false,false);
                 grille[x + 4][i + 1].setDirectionsAutorisees(false,false,false,true,false,false,false,false);
                 grille[x + 4][i + 2].setDirectionsAutorisees(false,true,false,false,false,false,false,false);
-                grille[x + 4][i + 3].setDirectionsAutorisees(true,true,false,false,false,false,false,false);
+                grille[x + 4][i + 3].setDirectionsAutorisees(false,true,false,false,false,false,false,false);
 
 
                 grille[x][i + 4].setDirectionsAutorisees(false,false,true,false,false,false,false,false);
