@@ -23,9 +23,9 @@ public class Simulation {
     private TerrainController terrainController;
     private ArrayList<VehiculeController> controleurs;
     private ScheduledExecutorService scheduler;
-    private final int LARGEUR_TERRAIN = 40;
-    private final int HAUTEUR_TERRAIN = 40;
-    private final int LIMITE_VEHICULES = 1;
+    private final int LARGEUR_TERRAIN = 20;
+    private final int HAUTEUR_TERRAIN = 20;
+    private final int LIMITE_VEHICULES = 2;
 
 
     //constructeur par défaut
@@ -65,7 +65,7 @@ public class Simulation {
 
         // on trie les sorties qui ne sont pas à côté de l'entrée
         for (Vector2D sortie : sorties) {
-            if (!estSurMemeLigne(positionDepart, sortie)) {
+            if (!isSideBySide(positionDepart, sortie)) {
                 sortiesPossibles.add(sortie);
             }
         }
@@ -85,7 +85,7 @@ public class Simulation {
 
         Color couleur = Vehicule.genererCouleurAleatoire();
 
-        if (random == 1) {
+        if (random == 100) {
             type = TypeVehicule.URGENCE;
             couleur = Color.WHITE;
         }
@@ -152,10 +152,9 @@ public class Simulation {
     }
 
     // verifie si deux positions sont considérées comme à côté
-    private boolean estSurMemeLigne(Vector2D pos1, Vector2D pos2) {
-        return pos1.getX() == pos2.getX() || pos1.getY() == pos2.getY();
+    private boolean isSideBySide(Vector2D pos1, Vector2D pos2) {
+        return pos1.distance(pos2) <= 3;
     }
-
 }
 
 

@@ -76,7 +76,7 @@ public class AStar {
 
     // calcul du coût d'un noeud jusqu'à l'arrivée
     private double heuristique(Vector2D a, Vector2D b) {
-        return Math.max(Math.abs(b.getX() - a.getX()), Math.abs(b.getY() - a.getY())); // Distance de Chebyshev
+        return Math.sqrt(Math.pow((b.getX() - a.getX()), 2) + Math.pow((b.getY() - a.getY()), 2)); // Distance euclidienne
     }
 
     private List<Vector2D> trouverVoisins(Vector2D position) {
