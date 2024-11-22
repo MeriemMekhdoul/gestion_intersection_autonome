@@ -28,26 +28,31 @@ public class AStar {
                 return recontruireChemin(noeudActuel);
             }
 
-            for (Vector2D posititionVoisin : trouverVoisins(noeudActuel.position)) {
+            for (Vector2D positionVoisin : trouverVoisins(noeudActuel.position)) {
                 // si la cellule est dans le terrain
-                if (!terrain.estCelluleValide(posititionVoisin)) continue;
+                if (!terrain.estCelluleValide(positionVoisin)) continue;
 
-                Cellule neighborCell = terrain.getCellule(posititionVoisin);
+                Cellule neighborCell = terrain.getCellule(positionVoisin);
 
                 // et si la cellule est bien une route
                 if (!neighborCell.estValide()) continue;
 
-                double tentativeGScore = noeudActuel.gScore + 1; // incrémentation du coût
+                // détermine si le mouvement est diagonal
+                boolean isDiagonalMove = (positionVoisin.getX() != noeudActuel.position.getX()) && (positionVoisin.getY() != noeudActuel.position.getY());
+
+                // calcul et attribution du cout
+                double cost = isDiagonalMove ? Math.sqrt(2) : 1.0;
+                double tentativeGScore = noeudActuel.gScore + cost;
 
                 // ajoute le noeud s'il n'existe pas
-                Noeud noeudVoisin = allNodes.getOrDefault(posititionVoisin, new Noeud(posititionVoisin));
-                allNodes.put(posititionVoisin, noeudVoisin);
+                Noeud noeudVoisin = allNodes.getOrDefault(positionVoisin, new Noeud(positionVoisin));
+                allNodes.put(positionVoisin, noeudVoisin);
 
                 // on met à jour les voisins en fonction de leurs coûts
                 if (tentativeGScore < noeudVoisin.gScore) {
                     noeudVoisin.precedent = noeudActuel;
                     noeudVoisin.gScore = tentativeGScore;
-                    noeudVoisin.fScore = tentativeGScore + heuristique(posititionVoisin, positionArrivee);
+                    noeudVoisin.fScore = tentativeGScore + heuristique(positionVoisin, positionArrivee);
 
                     if (!openList.contains(noeudVoisin)) {
                         openList.add(noeudVoisin);
