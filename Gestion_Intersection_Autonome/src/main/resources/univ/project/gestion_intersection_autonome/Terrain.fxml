@@ -1,24 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 
-<AnchorPane prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="univ.project.gestion_intersection_autonome.controllers.TerrainController">
-   <children>
-      <GridPane fx:id="grilleInitiale" alignment="CENTER" gridLinesVisible="true" layoutX="176.0" layoutY="330.0" style="-fx-border-color: #ff000000;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <!-- <columnConstraints>
-            <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-          <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-        </columnConstraints>
-        <rowConstraints>
-            <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS" />
-        </rowConstraints> -->
-      </GridPane>
-   </children>
+<AnchorPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="univ.project.gestion_intersection_autonome.controllers.TerrainController">
+    <children>
+        <StackPane fx:id="stackPane" prefWidth="800" prefHeight="800">
+            <GridPane fx:id="grilleInitiale" gridLinesVisible="true" style="-fx-border-color: black;" prefWidth="800" prefHeight="800">
+            </GridPane>
+            <Pane fx:id="vehiclePane" pickOnBounds="false" prefWidth="800" prefHeight="800"/>
+        </StackPane>
+    </children>
 </AnchorPane>
