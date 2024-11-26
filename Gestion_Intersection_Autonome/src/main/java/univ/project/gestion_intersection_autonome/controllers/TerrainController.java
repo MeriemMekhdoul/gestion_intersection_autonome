@@ -1,8 +1,11 @@
 package univ.project.gestion_intersection_autonome.controllers;
 
+import javafx.animation.TranslateTransition;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Shape;
+import javafx.util.Duration;
 import univ.project.gestion_intersection_autonome.classes.*;
 
 
@@ -18,6 +21,8 @@ import java.util.*;
 public class TerrainController implements Initializable {
     @FXML
     private GridPane grilleInitiale;
+    @FXML
+    Pane vehiclePane;
     private Terrain terrain;
     private Simulation simulation;
     public final int TAILLE_CELLULE = 15;
@@ -200,5 +205,16 @@ public class TerrainController implements Initializable {
 
     public Simulation getSimulation() {
         return simulation;
+    }
+
+    public void animerDeplacementVehicule(Shape vehiculeShape, Vector2D anciennePosition, Vector2D nouvellePosition, int dureeMs) {
+        double newX = nouvellePosition.getX() * TAILLE_CELLULE + TAILLE_CELLULE / 2;
+        double newY = nouvellePosition.getY() * TAILLE_CELLULE + TAILLE_CELLULE / 2;
+
+        TranslateTransition transition = new TranslateTransition(Duration.millis(dureeMs), vehiculeShape);
+        transition.setToX(newX);
+        transition.setToY(newY);
+
+        transition.play();
     }
 }
