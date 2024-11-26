@@ -5,7 +5,6 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import univ.project.gestion_intersection_autonome.classes.*;
 import univ.project.gestion_intersection_autonome.controllers.TerrainController;
@@ -13,12 +12,12 @@ import univ.project.gestion_intersection_autonome.controllers.VehiculeController
 
 import java.io.IOException;
 
-public class MainTrafficApplication extends Application {
+public class mainTest extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
         Simulation simulation = new Simulation();
-        Terrain terrain = simulation.getTerrain();
+        //Terrain terrain = simulation.getTerrain();
 
         FXMLLoader fxmlLoader = new FXMLLoader(MainTrafficApplication.class.getResource("Terrain.fxml"));
         fxmlLoader.setControllerFactory(obj -> new TerrainController(simulation));
@@ -26,10 +25,6 @@ public class MainTrafficApplication extends Application {
 
         // Récupérer l'instance de TerrainController créée par FXMLLoader
         TerrainController terrainController = fxmlLoader.getController();
-        VBox vbox = terrainController.getIntersection();
-
-        //terrain.getIntersections().get(0).setVBox(vbox);
-
         // Passer l'instance de TerrainController à la simulation
         simulation.setTerrainController(terrainController);
 
@@ -43,16 +38,16 @@ public class MainTrafficApplication extends Application {
 
 
     }
-        public static void main (String[]args){
-            try {
-                launch(args);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-
+    public static void main (String[]args){
+        try {
+            launch(args);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
+
     }
+}
 
 
 

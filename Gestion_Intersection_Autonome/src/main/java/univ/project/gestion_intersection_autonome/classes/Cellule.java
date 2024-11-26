@@ -2,6 +2,7 @@ package univ.project.gestion_intersection_autonome.classes;
 
 public class Cellule {
     private int idVoiture;
+    private Vehicule vehicule;
     private TypeZone typeZone ;
     private boolean valide ;
     private boolean occupee ;
@@ -10,6 +11,7 @@ public class Cellule {
     // Constructeur par défaut
     public Cellule() {
         this.idVoiture = 0 ;
+
         this.typeZone = null;
         this.valide = false;
         this.occupee = false;
@@ -32,7 +34,12 @@ public class Cellule {
     public void setIdVoiture(int idVoiture) {
         this.idVoiture = idVoiture;
     }
-
+    public Vehicule getVehicule() {
+        return vehicule;
+    }
+    public void setVehicule(Vehicule vehicule) {
+        this.vehicule = vehicule;
+    }
     public TypeZone getTypeZone() {
         return typeZone;
     }
@@ -53,7 +60,7 @@ public class Cellule {
         return occupee;
     }
 
-    public void setOccupee(boolean occupee) {
+    synchronized public void setOccupee(boolean occupee) {
         this.occupee = occupee;
     }
 
@@ -69,7 +76,6 @@ public class Cellule {
         directionsAutorisees[7] = sudest ;
 
     }
-
     public boolean[] getDirectionsAutorisees() {
         return directionsAutorisees;
     }
@@ -104,6 +110,9 @@ public class Cellule {
                 return false;
             }
         }
+    }
+    public boolean contientVehicule() {
+        return vehicule!=null;
     }
 }
 

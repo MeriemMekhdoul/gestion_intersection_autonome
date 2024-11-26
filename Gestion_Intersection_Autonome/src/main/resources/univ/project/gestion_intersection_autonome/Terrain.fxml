@@ -4,11 +4,14 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="univ.project.gestion_intersection_autonome.controllers.TerrainController">
     <children>
+                <VBox fx:id="intersection" prefHeight="800.0" prefWidth="456.0" style="-fx-background-color: #ffffff;" HBox.hgrow="ALWAYS" />
         <StackPane fx:id="stackPane" prefWidth="800" prefHeight="800">
             <GridPane fx:id="grilleInitiale" gridLinesVisible="true" style="-fx-border-color: black;" prefWidth="800" prefHeight="800">
+            
             </GridPane>
             <Pane fx:id="vehiclePane" pickOnBounds="false" prefWidth="800" prefHeight="800"/>
         </StackPane>

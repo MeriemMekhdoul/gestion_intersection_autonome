@@ -4,6 +4,7 @@ import javafx.animation.TranslateTransition;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Shape;
 import javafx.util.Duration;
 import univ.project.gestion_intersection_autonome.classes.*;
@@ -21,8 +22,13 @@ import java.util.*;
 public class TerrainController implements Initializable {
     @FXML
     private GridPane grilleInitiale;
+    
     @FXML
     Pane vehiclePane;
+
+    @FXML
+    private VBox intersection;
+
     private Terrain terrain;
     private Simulation simulation;
     public final int TAILLE_CELLULE = 15;
@@ -34,6 +40,12 @@ public class TerrainController implements Initializable {
         this.simulation = simulation;
         terrain = simulation.getTerrain();
     }
+
+
+    public VBox getIntersection() {
+        return intersection;
+    }
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -152,19 +164,18 @@ public class TerrainController implements Initializable {
             } else if (cellule.getTypeZone() == TypeZone.COMMUNICATION) {
                 rect.setFill(Color.BLACK);  // Communication
             }
-        } else {
+        }
+        else {
             rect.setFill(Color.FORESTGREEN); // Espace vide
         }
     }
 
     public void updateCellule(Vector2D anciennePosition, Vector2D nouvellePosition, Shape vehiculeShape)
     {
-        //System.out.println("J'entre dans update cellule");
         if (!anciennePosition.equals(nouvellePosition)) {
             effacerVehicule(anciennePosition, vehiculeShape);
         }
         dessinerVehicule(nouvellePosition, vehiculeShape);
-        //System.out.println("Déplacement du véhicule graphiquement");
     }
 
 
@@ -190,7 +201,6 @@ public class TerrainController implements Initializable {
             }
         }
 
-        //System.out.println("Le véhicule a été dessiné");
     }
 
     public void effacerVehicule(Vector2D position, Shape vehiculeShape)
@@ -199,7 +209,6 @@ public class TerrainController implements Initializable {
 
         if (cellule != null) {
             cellule.getChildren().remove(vehiculeShape);
-            //System.out.println("Véhicule effacé de la cellule : " + position);
         }
     }
 

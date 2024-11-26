@@ -75,9 +75,7 @@ public class Simulation {
             return;
         }
 
-        Vector2D positionArrivee = sortiesPossibles.get(new Random().nextInt(sortiesPossibles.size()));
-
-        System.out.println("Départ : " + positionDepart + " | Arrivée : " + positionArrivee);
+        //System.out.println("Départ : " + positionDepart + " | Arrivée : " + positionArrivee);
 
         // génération du type de véhicule
         int random = new Random().nextInt(20) + 1;
@@ -85,7 +83,8 @@ public class Simulation {
 
         Color couleur = Vehicule.genererCouleurAleatoire();
 
-        if (random == 100) {
+
+        if (random == 1) {
             type = TypeVehicule.URGENCE;
             couleur = Color.WHITE;
         }
@@ -117,6 +116,55 @@ public class Simulation {
         //System.out.println("Véhicule ajouté à la position " + vehicule.getPosition());
     }
 
+    public void TgenererVehiculeAleatoire() throws IOException {
+        List<Vector2D> entrees = terrain.getEntrees(); // Récupérer les entrées du terrain
+        List<Vector2D> sorties = terrain.getSorties(); // Récupérer les sorties du terrain
+        if (vehicules.size() >= LIMITE_VEHICULES) {
+//            System.out.println("Limite de véhicules atteinte");
+            return;
+        }
+        // vérification du remplissage des entrées et sorties
+        if (entrees.isEmpty() || sorties.isEmpty()) {
+            System.err.println("Erreur : Aucune entrée ou sortie de disponible !");
+            return;
+        }
+
+        int a=0, b=3;
+        for(int i=0;i<LIMITE_VEHICULES-1;i++){
+            System.out.println("for de simulation iteration = "+i);
+            Vector2D positionDepart = entrees.get(a);
+            Vector2D positionArrivee = sorties.get(b);
+
+            // calcul de l'itinéraire
+            AStar aStar = new AStar(terrain);
+            List<Vector2D> itineraire = aStar.trouverChemin(positionDepart, positionArrivee);
+
+            Vehicule vehicule = new Vehicule(TypeVehicule.VOITURE, positionDepart, positionArrivee, itineraire, Vehicule.genererCouleurAleatoire());
+            VehiculeController vehiculeController = new VehiculeController(vehicule, terrain, terrainController);
+            vehicules.add(vehicule);
+            controleurs.add(vehiculeController);
+            Thread thread = new Thread(vehiculeController);
+            thread.start();
+
+            a++; b--;
+            if(b==0) {b=3; a=0;}
+         }
+        // calcul de l'itinéraire
+        AStar aStar = new AStar(terrain);
+
+        Vector2D positionDepart = entrees.get(2);
+        Vector2D positionArrivee = sorties.get(0);
+        List<Vector2D> itineraire = aStar.trouverChemin(positionDepart, positionArrivee);
+
+        VehiculeUrgence vehicule = new VehiculeUrgence(TypeVehicule.URGENCE, positionDepart, positionArrivee, itineraire, Color.WHITE);
+        VehiculeController vehiculeController = new VehiculeUrgenceController(vehicule, terrain, terrainController);
+        vehicules.add(vehicule);
+        controleurs.add(vehiculeController);
+
+        Thread thread = new Thread(vehiculeController);
+        thread.start();
+    }
+
     // Lancer les véhicules dans des threads
     public void lancerSimulation()
     {
@@ -128,7 +176,7 @@ public class Simulation {
                     throw new RuntimeException(e);
                 }
             });
-        }, 0, 1, TimeUnit.SECONDS); // Ajoute un véhicule toutes les secondes
+        }, 0, VehiculeController.VITESSE_SIMULATION_MS, TimeUnit.MILLISECONDS); // Ajoute un véhicule toutes les secondes
         // voir pour modifier afin de récupérer la constante de véhicule controller
     }
 
