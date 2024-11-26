@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
 <AnchorPane prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="univ.project.gestion_intersection_autonome.controllers.TerrainController">
    <children>
-      <GridPane fx:id="grilleInitiale" alignment="CENTER" gridLinesVisible="true" layoutX="176.0" layoutY="330.0" style="-fx-border-color: #ff000000;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <HBox alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <VBox fx:id="intersection" prefHeight="800.0" prefWidth="456.0" style="-fx-background-color: #ffffff;" HBox.hgrow="ALWAYS" />
+            <GridPane fx:id="grilleInitiale" alignment="CENTER" gridLinesVisible="true" prefHeight="800.0" prefWidth="746.0" style="-fx-border-color: #ff000000;">
         <!-- <columnConstraints>
             <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
             <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
@@ -20,5 +23,7 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS" />
         </rowConstraints> -->
       </GridPane>
+         </children>
+      </HBox>
    </children>
 </AnchorPane>

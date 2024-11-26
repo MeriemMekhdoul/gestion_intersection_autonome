@@ -23,7 +23,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
     protected List<VehiculeControllerListener> listeners = new ArrayList<>();
     protected IntersectionListener intersectionListener; //on n'a peut-être pas besoin d'une liste ?? une seule intersection suffit
     protected boolean enPause = false;
-    public static final int VITESSE_SIMULATION_MS = 500;
+    public static final int VITESSE_SIMULATION_MS = 900;
 
     public VehiculeController(Vehicule vehicule, Terrain terrain, TerrainController terrainController) {
         this.vehicule = vehicule;
@@ -98,10 +98,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
                 //ajouter le véhicule temporairement a la config de l'intersection
                 Intersection i = terrain.getIntersection(nouvellePosition);
                 i.ajouterVehiculeTemp(vehicule);
-                System.out.println("Véhicule " + vehicule.getId() +
-                        "à la position" + vehicule.getPosition() +
-                        "vient d'arriver en zone comm et s'est ajouté à la config = ");
-                i.afficherConfiguration();
+                //i.afficherConfiguration();
 
             }
         }
@@ -133,9 +130,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         Intersection intersection = terrain.getIntersection(anciennePosition);
         intersection.addVehiculeControllerListener(this);
 
-        //System.out.println("Entrée dans une intersection");
         ArrayList<Vector2D> deplacements = gestionIntersection();
-        //System.out.println("Itinéraire dans l'intersection : " + deplacements);
 
         // dessiner l'itinéraire sur la grille
         Platform.runLater(() -> {
@@ -166,15 +161,17 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
             }
 
             //construire map de Vehicule + itineraire
-            Map<Vehicule,ArrayList<Vector2D>> vehiculesEtItineraires = new HashMap<>();
+            Map<Vehicule,ArrayList<Vector2D>> vehiculesEngagesEtItineraires = new HashMap<>();
+            Map<Vehicule,ArrayList<Vector2D>> vehiculesAttenteEtItineraires = new HashMap<>();
+
             for (Message m : messagesVoitures) {
                 if (vehiculesEngages.contains(m.getv1())) {
-                    vehiculesEtItineraires.put(m.getv1(),m.getItineraire());
-                }
+                    vehiculesEngagesEtItineraires.put(m.getv1(),m.getItineraire());
+                } else
+                    vehiculesAttenteEtItineraires.put(m.getv1(),m.getItineraire());
             }
-            //int tempsAttente = calculs(messagesVoitures, deplacements, vehiculesEngages);
 
-            int tempsAttente = vehicule.calculTempsAttente(vehiculesEtItineraires,deplacements);
+            int tempsAttente = vehicule.calculTempsAttente(vehiculesEngagesEtItineraires,vehiculesAttenteEtItineraires,deplacements);
             pauseEntreMouvements(tempsAttente * VITESSE_SIMULATION_MS);
 
             intersection.editConfig(vehicule, EtatVehicule.ENGAGE);
@@ -190,7 +187,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         }
 
         intersection.supprimerVehicule(vehicule);
-        //intersection.removeVehiculeControllerListener(this);
+        intersection.removeVehiculeControllerListener(this);
     }
 
     /**
@@ -300,6 +297,18 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
     protected void avancerIntersection(List<Vector2D> deplacements) {
         for (Vector2D pos : deplacements) {
             anciennePosition = vehicule.getPosition().copy();
+
+            // vérification de l'occupation de la cellule
+            if (terrain.getCellule(pos).estOccupee()) {
+                //System.out.println("Cellule occupée");
+
+                // attente libération
+                while (terrain.getCellule(pos).estOccupee()) {
+                    //System.out.println("Attente libération cellule");
+                    pauseEntreMouvements(VITESSE_SIMULATION_MS/3);
+                }
+            }
+
             vehicule.move(pos);
             // Afficher les informations de déplacement
             //System.out.println("Le véhicule " + vehicule.getId() + " se déplace vers : " + vehicule.getPosition());
@@ -332,7 +341,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
     }
 
     protected void mettreAJourGraphique() {
-    //System.out.println("mettreAJourGraphique called with anciennePosition: " + anciennePosition + ", nouvellePosition: " + nouvellePosition);
+    //System.out.println("mettreAJourGraphique called with anciennePosition : " + anciennePosition + ", nouvellePosition: " + nouvellePosition);
         Platform.runLater(() -> {
             //System.out.println("Appel a terrainController.updateCellule");
             terrainController.updateCellule(anciennePosition, nouvellePosition, vehiculeShape);
@@ -424,16 +433,28 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         }
     }
 
-    public void mettreEnPause() {
-        enPause = true;
-        System.out.println("Véhicule mis en pause");
+    public void reprendreExecution() {
+        synchronized (this) { // Synchronisation sur l'objet courant
+            enPause = false;
+            System.out.println("Véhicule reprend son déplacement");
+            notify(); // Réveille un thread en attente
+        }
     }
 
-    public void reprendreExecution() {
-        enPause = false;
-        notify(); // Relance le thread si le véhicule est en pause
-        System.out.println("Véhicule reprend son déplacement");
+    public void mettreEnPause() {
+        synchronized (this) { // Synchronisation sur l'objet courant
+            enPause = true;
+            System.out.println("Véhicule mis en pause");
+            while (enPause) { // Boucle pour rester en attente tant que le véhicule est en pause
+                try {
+                    wait(); // Le thread se met en attente
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // Bonne pratique : restaurer l'état d'interruption
+                }
+            }
+        }
     }
+
 
     public Vehicule getVehicule() {
         return vehicule;

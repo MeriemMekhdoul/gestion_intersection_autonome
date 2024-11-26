@@ -2,6 +2,7 @@ package univ.project.gestion_intersection_autonome.controllers;
 
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Shape;
 import univ.project.gestion_intersection_autonome.classes.*;
 
@@ -18,6 +19,10 @@ import java.util.*;
 public class TerrainController implements Initializable {
     @FXML
     private GridPane grilleInitiale;
+
+    @FXML
+    private VBox intersection;
+
     private Terrain terrain;
     private Simulation simulation;
     public final int TAILLE_CELLULE = 15;
@@ -29,6 +34,12 @@ public class TerrainController implements Initializable {
         this.simulation = simulation;
         terrain = simulation.getTerrain();
     }
+
+
+    public VBox getIntersection() {
+        return intersection;
+    }
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -147,7 +158,8 @@ public class TerrainController implements Initializable {
             } else if (cellule.getTypeZone() == TypeZone.COMMUNICATION) {
                 rect.setFill(Color.BLACK);  // Communication
             }
-        } else {
+        }
+        else {
             rect.setFill(Color.FORESTGREEN); // Espace vide
         }
     }

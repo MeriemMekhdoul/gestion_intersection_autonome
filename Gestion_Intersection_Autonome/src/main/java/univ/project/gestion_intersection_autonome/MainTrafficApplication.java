@@ -5,6 +5,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import univ.project.gestion_intersection_autonome.classes.*;
 import univ.project.gestion_intersection_autonome.controllers.TerrainController;
@@ -25,6 +26,10 @@ public class MainTrafficApplication extends Application {
 
         // Récupérer l'instance de TerrainController créée par FXMLLoader
         TerrainController terrainController = fxmlLoader.getController();
+        VBox vbox = terrainController.getIntersection();
+
+        //terrain.getIntersections().get(0).setVBox(vbox);
+
         // Passer l'instance de TerrainController à la simulation
         simulation.setTerrainController(terrainController);
 

@@ -52,9 +52,10 @@ public class VehiculeUrgenceController extends VehiculeController {
 
     @Override
     protected void avancerIntersection(List<Vector2D> deplacements) {
-        if(signalEnvoye)
-            envoyerSignalUrgence(Objetmessage.ENTREE);
         super.avancerIntersection(deplacements);
+        //à la sortie de l'intersection, on débloque les voies ..
+        if(signalEnvoye)
+            envoyerSignalUrgence(Objetmessage.SORTIE);
     }
 
 

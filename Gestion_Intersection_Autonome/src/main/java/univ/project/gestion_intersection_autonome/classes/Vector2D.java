@@ -43,7 +43,7 @@ public class Vector2D
     public void setY(int y)
     {
         if (y < 0) {
-            throw new IllegalArgumentException("La valeur de Y ne peut pas être négative !");
+            throw new IllegalArgumentException("La valeur de Y ( = " + y + " ) ne peut pas être négative !");
         }
         this.y = y;
     }
