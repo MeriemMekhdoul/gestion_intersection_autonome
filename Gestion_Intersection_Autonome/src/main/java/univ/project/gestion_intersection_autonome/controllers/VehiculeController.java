@@ -23,7 +23,7 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
     protected List<VehiculeControllerListener> listeners = new ArrayList<>();
     protected IntersectionListener intersectionListener; //on n'a peut-être pas besoin d'une liste ?? une seule intersection suffit
     protected boolean enPause = false;
-    public static final int VITESSE_SIMULATION_MS = 900;
+    protected final int VITESSE_SIMULATION_MS = 100;
 
     public VehiculeController(Vehicule vehicule, Terrain terrain, TerrainController terrainController) {
         this.vehicule = vehicule;
@@ -66,19 +66,15 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         finDeplacement();
     }
     public void finDeplacement(){
-        //libérer la dernière cellule occupée
+        // Libérer la dernière cellule occupée
         Cellule cell = terrain.getCellule(nouvellePosition);
         cell.setOccupee(false);
         cell.setIdVoiture(0);
         cell.setVehicule(null);
 
-        //System.out.println("Le véhicule " + vehicule.getId() + " est arrivé à destination !");
-
         Platform.runLater(() -> {
-            terrainController.effacerVehicule(nouvellePosition, vehiculeShape);
-            //System.out.println("Véhicule " + vehicule.getId() + " effacé");
+            terrainController.vehiclePane.getChildren().remove(vehiculeShape);
             terrainController.getSimulation().supprimerVehicule(vehicule, this);
-            //System.out.println("Véhicule " + vehicule.getId() + " supprimé");
         });
     }
 
@@ -341,12 +337,11 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
     }
 
     protected void mettreAJourGraphique() {
-    //System.out.println("mettreAJourGraphique called with anciennePosition : " + anciennePosition + ", nouvellePosition: " + nouvellePosition);
         Platform.runLater(() -> {
-            //System.out.println("Appel a terrainController.updateCellule");
-            terrainController.updateCellule(anciennePosition, nouvellePosition, vehiculeShape);
+            terrainController.animerDeplacementVehicule(vehiculeShape, anciennePosition, nouvellePosition, VITESSE_SIMULATION_MS);
         });
     }
+
 
     protected void pauseEntreMouvements(int millisecondes) {
         try {
@@ -356,26 +351,39 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
         }
     }
 
-    protected Shape creerVehiculeShape(TypeVehicule typeVehicule)
-    {
+    protected Shape creerVehiculeShape(TypeVehicule typeVehicule) {
         Color couleurVehicule = vehicule.getCouleur();
+        Shape shape;
 
-        switch (typeVehicule)
-        {
-            /* case VOITURE -> {
-                return new Circle((double) terrainController.TAILLE_CELLULE / 2, couleurVehicule);
-            } */
-            case URGENCE -> {
-                return new Circle((double) terrainController.TAILLE_CELLULE / 2, Color.BLUE); // voir plus tard pour alterner rouge / bleu
+        double radius = terrainController.TAILLE_CELLULE / 2; // Ajuster si nécessaire
+
+        switch (typeVehicule) {
+            case VOITURE -> {
+                shape = new Circle(radius, couleurVehicule);
             }
-            case BUS -> {
-                return new Rectangle(10, 10, Color.BLUE); // voir plus tard
+            case URGENCE -> {
+                shape = new Circle(radius, Color.BLUE);
             }
             default -> {
-                return new Circle((double) terrainController.TAILLE_CELLULE / 2, couleurVehicule);
+                shape = new Circle(radius, couleurVehicule);
             }
         }
+
+        double initialX = vehicule.getPosition().getX() * terrainController.TAILLE_CELLULE + radius;
+        double initialY = vehicule.getPosition().getY() * terrainController.TAILLE_CELLULE + radius;
+
+        shape.setTranslateX(initialX);
+        shape.setTranslateY(initialY);
+
+        Platform.runLater(() -> {
+            terrainController.vehiclePane.getChildren().add(shape);
+        });
+
+        return shape;
     }
+
+
+
 
 
     //vehiculeController(s) en écoute de ce vehiculeController

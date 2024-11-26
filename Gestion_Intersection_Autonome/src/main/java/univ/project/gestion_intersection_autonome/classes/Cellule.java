@@ -6,7 +6,7 @@ public class Cellule {
     private TypeZone typeZone ;
     private boolean valide ;
     private boolean occupee ;
-    private final boolean[] directionsAutorisees = new boolean[4]; // N, E, S, O
+    private final boolean[] directionsAutorisees = new boolean[8]; // N, E, S, O
 
     // Constructeur par défaut
     public Cellule() {
@@ -65,11 +65,16 @@ public class Cellule {
     }
 
     // Méthode pour définir les directions autorisées
-     public void setDirectionsAutorisees(boolean nord, boolean est, boolean sud, boolean ouest) {
+     public void setDirectionsAutorisees(boolean nord, boolean est, boolean sud, boolean ouest , boolean nordouest, boolean nordest, boolean sudouest, boolean sudest ) {
         directionsAutorisees[0] = nord;
         directionsAutorisees[1] = est;
         directionsAutorisees[2] = sud;
         directionsAutorisees[3] = ouest;
+        directionsAutorisees[4] = nordouest;
+        directionsAutorisees[5] = nordest;
+        directionsAutorisees[6] = sudouest ;
+        directionsAutorisees[7] = sudest ;
+
     }
     public boolean[] getDirectionsAutorisees() {
         return directionsAutorisees;
@@ -88,6 +93,19 @@ public class Cellule {
             case OUEST -> {
                 return directionsAutorisees[3];
             }
+            case NORDOUEST -> {
+                return  directionsAutorisees[4];
+            }
+            case NORDEST -> {
+                return  directionsAutorisees[5];
+            }
+            case SUDOUEST -> {
+                return  directionsAutorisees[6];
+            }
+            case SUDEST -> {
+                return  directionsAutorisees[7];
+            }
+
             default -> {
                 return false;
             }
