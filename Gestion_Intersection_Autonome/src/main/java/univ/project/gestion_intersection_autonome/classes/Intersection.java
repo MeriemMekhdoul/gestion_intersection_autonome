@@ -6,20 +6,55 @@ import univ.project.gestion_intersection_autonome.controllers.VehiculeController
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * La classe Intersection représente une intersection dans un système de gestion de circulation autonome.
+ * Elle gère les véhicules présents dans l'intersection, l'état du trafic, et les communications avec d'autres intersections et véhicules.
+ * Elle implémente l'interface IntersectionListener pour recevoir les messages des autres intersections.
+ */
 public class Intersection implements IntersectionListener {
-    private final List<Vector2D> cellulesCommunication; // Liste des cellules qui appartiennent à l'intersection (à revoir)
+    // Liste des cellules associées à l'intersection pour la communication
+    private final List<Vector2D> cellulesCommunication;
+
+    // Liste des points d'entrée dans l'intersection
     private final ArrayList<Vector2D> pointsEntree;
-    private ConcurrentHashMap<Direction, Integer> etatTrafic;  //ajouter une énum état trafic ?
-    private /*final*/ Configuration configuration;
+
+    // Représente l'état du trafic pour chaque direction
+    private ConcurrentHashMap<Direction, Integer> etatTrafic;
+
+    // Configuration de l'intersection
+    private Configuration configuration;
+
+    // Terrain associé à l'intersection
     private final Terrain terrain;
+
+    // Liste des écouteurs d'intersection
     private List<IntersectionListener> listeners;
+
+    // Liste des écouteurs de contrôleurs de véhicules
     private List<VehiculeControllerListener> vehiculeControllers;
+
+    // Liste des véhicules bloqués dans l'intersection
     private ArrayList<Vehicule> vehiculesBloqués;
-    public static final int NB_VEHICULES_MAX = 2; // on considère qu'un embouteillage se forme si 2 cellules consécutives sont occupées
+
+    // Nombre maximal de véhicules avant de considérer qu'il y a embouteillage
+    public static final int NB_VEHICULES_MAX = 2;
+
+    // Indicateur si l'intersection est bloquée
     private boolean intersectionBloquee;
+
+    // Nombre de véhicules d'urgence présents dans l'intersection
     private int nbVehiculesUrgence;
+
+    // Carte des véhicules d'urgence présents dans l'intersection et leurs positions
     private Map<VehiculeUrgence, Vector2D> vehiculesUrgencePresents;
 
+    /**
+     * Constructeur de l'intersection.
+     *
+     * @param cellulesInfluence Liste des cellules associées à l'intersection
+     * @param _pointsEntree Liste des points d'entrée dans l'intersection
+     * @param terrain Terrain associé à l'intersection
+     */
     public Intersection(List<Vector2D> cellulesInfluence, ArrayList<Vector2D> _pointsEntree, Terrain terrain) {
         this.cellulesCommunication = cellulesInfluence;
         this.etatTrafic = new ConcurrentHashMap<>();
@@ -33,35 +68,81 @@ public class Intersection implements IntersectionListener {
         nbVehiculesUrgence = 0;
         vehiculesUrgencePresents = new HashMap<>();
     }
-    public void setVBox(VBox vbox){
+
+    /**
+     * Permet d'initialiser ou de modifier la configuration de l'intersection avec une instance de VBox.
+     *
+     * @param vbox Configuration visuelle de l'intersection
+     */
+    public void setVBox(VBox vbox) {
         this.configuration = new Configuration(vbox);
     }
 
+    /**
+     * Retourne la liste des points d'entrée dans l'intersection.
+     *
+     * @return Liste des points d'entrée
+     */
     public ArrayList<Vector2D> getPointsEntree() {
         return pointsEntree;
     }
+
+    /**
+     * Vérifie si une position donnée fait partie des cellules de l'intersection.
+     *
+     * @param position Position à vérifier
+     * @return true si la cellule appartient à l'intersection, sinon false
+     */
     public boolean contientCellule(Vector2D position) {
         return cellulesCommunication.contains(position);
     }
 
-    synchronized public void ajouterVehicule(Vehicule v, Message m){
-        configuration.nouveauVehicule(v,m);
+    /**
+     * Ajoute un véhicule à l'intersection avec un message associé.
+     *
+     * @param v Véhicule à ajouter
+     * @param m Message associé au véhicule
+     */
+    synchronized public void ajouterVehicule(Vehicule v, Message m) {
+        configuration.nouveauVehicule(v, m);
     }
-    synchronized public void ajouterVehiculeTemp(Vehicule v){
+
+    /**
+     * Ajoute temporairement un véhicule dans l'intersection.
+     *
+     * @param v Véhicule à ajouter temporairement
+     */
+    synchronized public void ajouterVehiculeTemp(Vehicule v) {
         configuration.nouveauVehiculeTemp(v);
     }
 
-    synchronized public void supprimerVehicule(Vehicule v){
+    /**
+     * Supprime un véhicule de l'intersection.
+     *
+     * @param v Véhicule à supprimer
+     */
+    synchronized public void supprimerVehicule(Vehicule v) {
         configuration.supprimerVehicule(v);
     }
 
+    /**
+     * Modifie l'état d'un véhicule dans l'intersection.
+     *
+     * @param v Véhicule à modifier
+     * @param etat Nouvel état du véhicule
+     */
     synchronized public void editConfig(Vehicule v, EtatVehicule etat) {
-        configuration.editEtat(v.getId(),etat);
+        configuration.editEtat(v.getId(), etat);
     }
 
+    /**
+     * Retourne la liste des véhicules en attente dans l'intersection.
+     *
+     * @return Liste des véhicules en attente
+     */
     public ArrayList<Vehicule> getVehiculesEnAttente() {
         ArrayList<Vehicule> vehiculeEnAttente = new ArrayList<>();
-        synchronized(configuration){
+        synchronized(configuration) {
             for (int id : configuration.getEtatVehicule().keySet()) {
                 Vehicule v = configuration.getVehicule(id);
                 if (configuration.getEtat(id) == EtatVehicule.ATTENTE) {
@@ -72,9 +153,14 @@ public class Intersection implements IntersectionListener {
         return vehiculeEnAttente;
     }
 
+    /**
+     * Retourne la liste des véhicules engagés dans l'intersection.
+     *
+     * @return Liste des véhicules engagés
+     */
     public ArrayList<Vehicule> getVehiculesEngages() {
         ArrayList<Vehicule> vehiculesEngages = new ArrayList<>();
-        synchronized(configuration){
+        synchronized(configuration) {
             for (int id : configuration.getEtatVehicule().keySet()) {
                 Vehicule v = configuration.getVehicule(id);
                 if (configuration.getEtat(id) == EtatVehicule.ENGAGE) {
@@ -85,27 +171,59 @@ public class Intersection implements IntersectionListener {
         return vehiculesEngages;
     }
 
-    public Message getMessage(Vehicule v){
+    /**
+     * Retourne le message associé à un véhicule donné.
+     *
+     * @param v Véhicule dont on veut obtenir le message
+     * @return Message associé au véhicule
+     */
+    public Message getMessage(Vehicule v) {
         return configuration.getMessage(v);
     }
 
+    /**
+     * Vérifie si l'intersection ne contient aucun véhicule.
+     *
+     * @return true si aucun véhicule n'est présent dans l'intersection, sinon false
+     */
     public boolean aucunVehicule() {
         return configuration.getVehicules().isEmpty();
     }
 
-    synchronized public List<Vehicule> getVehicules(){
+    /**
+     * Retourne la liste de tous les véhicules présents dans l'intersection.
+     *
+     * @return Liste des véhicules
+     */
+    synchronized public List<Vehicule> getVehicules() {
         return configuration.getVehicules();
     }
 
+    // Partie gestion des écouteurs
 
-    //listener intersection de l'intersection
+    /**
+     * Ajoute un écouteur pour les changements d'état de l'intersection.
+     *
+     * @param listener Ecouteur à ajouter
+     */
     public void addListener(IntersectionListener listener) {
         listeners.add(listener);
     }
-    public void removeListener (IntersectionListener listener){
+
+    /**
+     * Supprime un écouteur pour les changements d'état de l'intersection.
+     *
+     * @param listener Ecouteur à supprimer
+     */
+    public void removeListener(IntersectionListener listener) {
         listeners.remove(listener);
     }
 
+    /**
+     * Notifie tous les écouteurs de l'intersection avec un message.
+     *
+     * @param message Message à envoyer aux écouteurs
+     */
     private void notifyListeners(Message message) {
         for (IntersectionListener listener : listeners) {
             if (!listener.equals(message.getv1())) { // TODO: vehicle is not an intersection
@@ -113,28 +231,54 @@ public class Intersection implements IntersectionListener {
             }
         }
     }
-    public void sendMessageIntersection (Message message) {
+
+    /**
+     * Envoie un message à tous les écouteurs de l'intersection.
+     *
+     * @param message Message à envoyer
+     */
+    public void sendMessageIntersection(Message message) {
         notifyListeners(message); // Notifie tous les observateurs
     }
 
-    @Override //traitement message reçu d'une intersection
+    /**
+     * Traite un message reçu d'une autre intersection.
+     *
+     * @param message Message reçu
+     */
+    @Override
     public void messageIntersection(Message message) {
         System.out.println("Le véhicule de type \"" + message.getv1().getType() + "\" et id \"" + message.getv1().getId() +
                 "\" envoie ce message : " + message.getT() + ", objet : " + message.getObjet() +
                 ", itinéraire : " + message.getItineraire());
-
         System.out.println("recu");
     }
 
-    //listener vc de intersection
+    // Partie gestion des contrôleurs de véhicules
+
+    /**
+     * Ajoute un écouteur pour les contrôleurs de véhicules de l'intersection.
+     *
+     * @param listener Ecouteur à ajouter
+     */
     public void addVehiculeControllerListener(VehiculeControllerListener listener) {
         vehiculeControllers.add(listener);
     }
+
+    /**
+     * Supprime un écouteur pour les contrôleurs de véhicules de l'intersection.
+     *
+     * @param listener Ecouteur à supprimer
+     */
     public void removeVehiculeControllerListener(VehiculeControllerListener listener) {
         vehiculeControllers.remove(listener);
     }
 
-    //send message to all listeners
+    /**
+     * envoie un message pour les contrôleurs de véhicules de l'intersection.
+     *
+     * @param message  à envoyer
+     */
     public void sendMessageToVehiculeControllers(Message message) {
         for (VehiculeControllerListener listener : vehiculeControllers) {
             listener.onMessageReceivedFromIntersection(message);

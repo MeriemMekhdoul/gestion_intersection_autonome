@@ -7,7 +7,6 @@ import univ.project.gestion_intersection_autonome.controllers.VehiculeController
 import javafx.scene.paint.Color;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -16,6 +15,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * La classe Simulation gère l'exécution de la simulation de l'intersection,
+ * y compris la création de véhicules, leur gestion dans des threads et leur mouvement
+ * dans un terrain modélisé par un objet Terrain.
+ */
 public class Simulation {
 
     private final Terrain terrain;
@@ -27,8 +31,10 @@ public class Simulation {
     private final int HAUTEUR_TERRAIN = 40;
     private final int LIMITE_VEHICULES = 30;
 
-
-    //constructeur par défaut
+    /**
+     * Constructeur par défaut de la simulation.
+     * Initialise le terrain, les listes de véhicules et contrôleurs, et le planificateur.
+     */
     public Simulation() {
         terrain = new Terrain(LARGEUR_TERRAIN, HAUTEUR_TERRAIN);
         vehicules = new ArrayList<>();
@@ -36,34 +42,43 @@ public class Simulation {
         scheduler = Executors.newScheduledThreadPool(1);
     }
 
+    /**
+     * Retourne l'objet Terrain associé à cette simulation.
+     * @return Le terrain de la simulation.
+     */
     public Terrain getTerrain() {
         return terrain;
     }
 
-    //Générer aléatoirement un véhicule
-    public void genererVehiculeAleatoire() throws IOException
-    {
+    /**
+     * Génère aléatoirement un véhicule et l'ajoute à la simulation.
+     * Cette méthode vérifie les entrées et sorties disponibles et génère un véhicule
+     * avec un itinéraire valide basé sur l'algorithme A*.
+     * @throws IOException Si une erreur se produit lors de la génération du véhicule.
+     */
+    public void genererVehiculeAleatoire() throws IOException {
         if (vehicules.size() >= LIMITE_VEHICULES) {
-//            System.out.println("Limite de véhicules atteinte");
-            return;
+            return;  // Limite de véhicules atteinte, on ne génère pas de nouveaux véhicules.
         }
 
-        boolean voieGauche = new Random().nextBoolean(); // voie aléatoire
+        boolean voieGauche = new Random().nextBoolean(); // Choisir une voie aléatoire (gauche ou droite)
 
-        List<Vector2D> entrees = voieGauche ? terrain.getEntreesVoieGauche() : terrain.getEntreesVoieDroite(); // Récupérer les entrées du terrain
-        List<Vector2D> sorties = voieGauche ? terrain.getSortiesVoieGauche() : terrain.getSortiesVoieDroite(); // Récupérer les sorties du terrain
+        // Récupérer les entrées et sorties du terrain
+        List<Vector2D> entrees = voieGauche ? terrain.getEntreesVoieGauche() : terrain.getEntreesVoieDroite();
+        List<Vector2D> sorties = voieGauche ? terrain.getSortiesVoieGauche() : terrain.getSortiesVoieDroite();
 
-        // vérification du remplissage des entrées et sorties
+        // Vérification si les entrées ou sorties sont vides
         if (entrees.isEmpty() || sorties.isEmpty()) {
-            System.err.println("Erreur : Aucune entrée ou sortie de disponible !");
+            System.err.println("Erreur : Aucune entrée ou sortie disponible !");
             return;
         }
 
+        // Sélectionner une position de départ aléatoire parmi les entrées
         Vector2D positionDepart = entrees.get(new Random().nextInt(entrees.size()));
 
         ArrayList<Vector2D> sortiesPossibles = new ArrayList<>();
 
-        // on trie les sorties qui ne sont pas à côté de l'entrée
+        // Filtrer les sorties qui ne sont pas directement à côté de l'entrée
         for (Vector2D sortie : sorties) {
             if (!isSideBySide(positionDepart, sortie)) {
                 sortiesPossibles.add(sortie);
@@ -75,23 +90,20 @@ public class Simulation {
             return;
         }
 
+        // Sélectionner une sortie possible
         Vector2D positionArrivee = sortiesPossibles.get(new Random().nextInt(sortiesPossibles.size()));
 
-        //System.out.println("Départ : " + positionDepart + " | Arrivée : " + positionArrivee);
-
-        // génération du type de véhicule
+        // Générer un type de véhicule aléatoire et sa couleur
         int random = new Random().nextInt(20) + 1;
         TypeVehicule type = TypeVehicule.VOITURE;
-
         Color couleur = Vehicule.genererCouleurAleatoire();
-
 
         if (random == 1) {
             type = TypeVehicule.URGENCE;
-            couleur = Color.WHITE;
+            couleur = Color.WHITE;  // Si c'est un véhicule d'urgence, on lui attribue une couleur spéciale.
         }
 
-        // calcul de l'itinéraire
+        // Calculer l'itinéraire avec l'algorithme A*
         AStar aStar = new AStar(terrain);
         List<Vector2D> itineraire = aStar.trouverChemin(positionDepart, positionArrivee);
 
@@ -99,6 +111,7 @@ public class Simulation {
             throw new IllegalStateException("Aucun chemin trouvé de " + positionDepart + " à " + positionArrivee);
         }
 
+        // Créer le véhicule et le contrôleur de véhicule
         Vehicule vehicule;
         if (type == TypeVehicule.URGENCE)
             vehicule = new VehiculeUrgence(type, positionDepart, positionArrivee, itineraire, couleur);
@@ -110,17 +123,21 @@ public class Simulation {
             vehiculeController = new VehiculeUrgenceController((VehiculeUrgence) vehicule, terrain, terrainController);
         else
             vehiculeController = new VehiculeController(vehicule, terrain, terrainController);
+
+        // Ajouter le véhicule et son contrôleur à la simulation
         vehicules.add(vehicule);
         controleurs.add(vehiculeController);
 
+        // Démarrer le contrôleur du véhicule dans un nouveau thread
         Thread thread = new Thread(vehiculeController);
         thread.start();
-        //System.out.println("Véhicule ajouté à la position " + vehicule.getPosition());
     }
 
-    // Lancer les véhicules dans des threads
-    public void lancerSimulation()
-    {
+    /**
+     * Lance la simulation en générant des véhicules à intervalles réguliers.
+     * Cette méthode utilise un planificateur pour générer un véhicule toutes les secondes.
+     */
+    public void lancerSimulation() {
         scheduler.scheduleAtFixedRate(() -> {
             Platform.runLater(() -> {
                 try {
@@ -129,15 +146,19 @@ public class Simulation {
                     throw new RuntimeException(e);
                 }
             });
-        }, 0, VehiculeController.VITESSE_SIMULATION_MS, TimeUnit.MILLISECONDS); // Ajoute un véhicule toutes les secondes
-        // voir pour modifier afin de récupérer la constante de véhicule controller
+        }, 0, VehiculeController.VITESSE_SIMULATION_MS, TimeUnit.MILLISECONDS); // Ajoute un véhicule à chaque intervalle défini.
     }
 
-    // suppression du véhicule de la liste des vehicules et controlleurs
+    /**
+     * Supprime un véhicule et son contrôleur de la simulation.
+     * @param vehicule Le véhicule à supprimer.
+     * @param vehiculeController Le contrôleur du véhicule à supprimer.
+     */
     public void supprimerVehicule(Vehicule vehicule, VehiculeController vehiculeController) {
         vehicules.remove(vehicule);
         controleurs.remove(vehiculeController);
 
+        // Regénérer un véhicule après suppression
         Platform.runLater(() -> {
             try {
                 genererVehiculeAleatoire();
@@ -147,20 +168,22 @@ public class Simulation {
         });
     }
 
+    /**
+     * Définit le contrôleur de terrain pour cette simulation.
+     * @param terrainController Le contrôleur de terrain à associer.
+     */
     public void setTerrainController(TerrainController terrainController) {
         this.terrainController = terrainController;
         terrainController.setTerrain(terrain);
     }
 
-    // verifie si deux positions sont considérées comme à côté
+    /**
+     * Vérifie si deux positions sont à proximité l'une de l'autre, c'est-à-dire si leur distance est inférieure ou égale à 3 unités.
+     * @param pos1 La première position à comparer.
+     * @param pos2 La deuxième position à comparer.
+     * @return true si les positions sont considérées comme à côté, sinon false.
+     */
     private boolean isSideBySide(Vector2D pos1, Vector2D pos2) {
         return pos1.distance(pos2) <= 3;
     }
 }
-
-
-
-
-
-
-
