@@ -142,9 +142,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
         ArrayList<Vector2D> deplacements = gestionIntersection();
 
         // Dessiner l'itinéraire sur la grille
-        Platform.runLater(() -> {
-            terrainController.dessinerItineraire(deplacements, vehicule);
-        });
+        Platform.runLater(() -> terrainController.dessinerItineraire(deplacements, vehicule));
 
         Message message = new Message();
         message.setObjet(Objetmessage.INFORMATION);
@@ -185,9 +183,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
 
             avancerIntersection(deplacements);
 
-            Platform.runLater(() -> {
-                terrainController.effacerItineraire(vehicule, anciennePosition);
-            });
+            Platform.runLater(() -> terrainController.effacerItineraire(vehicule, anciennePosition));
             // À la sortie, envoyer un message de SORTIE (à qui ??) => intersection ou véhicules destinataires ?
         }
 
@@ -199,13 +195,13 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
      * Vérifie s'il y a un potentiel conflit dans l'intersection avec les autres véhicules.
      * Si un conflit est détecté, met à jour la liste des véhicules en conflit.
      *
-     * @param messagesReçus       Liste des messages contenant les informations sur les véhicules et leurs itinéraires.
+     * @param messagesRecus       Liste des messages contenant les informations sur les véhicules et leurs itinéraires.
      * @param itineraire          L'itinéraire du véhicule actuel.
      * @param vehiculesEnConflit  Liste des véhicules qui causent un conflit (mise à jour si conflit détecté).
      * @param itinerairesVoitures Liste des itinéraires des autres véhicules.
      * @return `true` s'il y a un conflit, sinon `false`.
      */
-    public boolean conflit(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEnConflit,
+    public boolean conflit(ArrayList<Message> messagesRecus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEnConflit,
                            ArrayList<ArrayList<Vector2D>> itinerairesVoitures) {
         // Vider la liste des véhicules en conflit pour un nouveau calcul
         vehiculesEnConflit.clear();
@@ -213,7 +209,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
         int i = 0;
 
         // Récupérer un tableau des itinéraires depuis les messages
-        for (Message message : messagesReçus) {
+        for (Message message : messagesRecus) {
             ArrayList<Vector2D> itineraireAutreVehicule = itinerairesVoitures.get(i);
             i++;
 
@@ -242,46 +238,6 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
             } else return false;
         }
         return false; // Pas de collision
-    }
-
-    /**
-     * Calcule le temps d'attente nécessaire avant d'entrer dans l'intersection en fonction des véhicules engagés et des conflits potentiels.
-     *
-     * @param messagesReçus    Liste des messages contenant les informations sur les véhicules et leurs itinéraires.
-     * @param itineraire       L'itinéraire du véhicule actuel.
-     * @param vehiculesEngages Liste des véhicules déjà engagés dans l'intersection.
-     * @return Le temps d'attente en unités de temps de simulation.
-     */
-    public int calculs(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEngages) {
-        ArrayList<Vehicule> vehiculesenconflit = new ArrayList<>();
-        int tempsAttente = 0;
-
-        ArrayList<ArrayList<Vector2D>> nouveauxItineraires = new ArrayList<>();
-
-        for (Message message : messagesReçus) {
-            ArrayList<Vector2D> itineraireAmodifier = message.getItineraire();
-
-            if (vehiculesEngages.contains(message.getv1())) {
-                Vector2D posActuV = message.getv1().getPosition().copy();
-                int index = itineraireAmodifier.indexOf(posActuV);
-                // Tronquer le tableau à partir de l'index
-                ArrayList<Vector2D> newItineraire = new ArrayList<>();
-                for (int i = index; i < itineraireAmodifier.size(); i++) {
-                    newItineraire.add(itineraireAmodifier.get(i));
-                }
-                nouveauxItineraires.add(newItineraire);
-            }
-            nouveauxItineraires.add(itineraireAmodifier);
-        }
-
-        if (conflit(messagesReçus, itineraire, vehiculesenconflit, nouveauxItineraires)) {
-            for (Vehicule v : vehiculesenconflit) {
-                if (vehiculesEngages.contains(v) && (v != vehicule)) {
-                    tempsAttente++;
-                }
-            }
-        }
-        return tempsAttente; // Retourner le temps d'attente
     }
 
     /**
@@ -354,9 +310,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
             cell1.setIdVoiture(0);
             cell1.setVehicule(null);
 
-            Platform.runLater(() -> {
-                terrainController.effacerItineraire(vehicule, anciennePosition);
-            });
+            Platform.runLater(() -> terrainController.effacerItineraire(vehicule, anciennePosition));
         }
 
         cell2.setOccupee(true);
@@ -368,9 +322,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
      * Met à jour l'interface graphique pour refléter la nouvelle position du véhicule.
      */
     protected void mettreAJourGraphique() {
-        Platform.runLater(() -> {
-            terrainController.animerDeplacementVehicule(vehiculeShape, anciennePosition, nouvellePosition, VITESSE_SIMULATION_MS);
-        });
+        Platform.runLater(() -> terrainController.animerDeplacementVehicule(vehiculeShape, anciennePosition, nouvellePosition, VITESSE_SIMULATION_MS));
     }
 
     /**
@@ -396,10 +348,9 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
         Color couleurVehicule = vehicule.getCouleur();
         Shape shape;
 
-        double radius = terrainController.TAILLE_CELLULE / 2; // Ajuster si nécessaire
+        double radius = (double) terrainController.TAILLE_CELLULE / 2; // Ajuster si nécessaire
 
         switch (typeVehicule) {
-            case VOITURE -> shape = new Circle(radius, couleurVehicule);
             case URGENCE -> shape = new Circle(radius, Color.BLUE);
             default -> shape = new Circle(radius, couleurVehicule);
         }
@@ -410,9 +361,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
         shape.setTranslateX(initialX);
         shape.setTranslateY(initialY);
 
-        Platform.runLater(() -> {
-            terrainController.vehiclePane.getChildren().add(shape);
-        });
+        Platform.runLater(() -> terrainController.vehiclePane.getChildren().add(shape));
 
         return shape;
     }
