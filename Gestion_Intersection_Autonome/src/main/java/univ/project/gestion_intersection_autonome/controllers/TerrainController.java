@@ -8,77 +8,105 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Shape;
 import javafx.util.Duration;
 import univ.project.gestion_intersection_autonome.classes.*;
-
-
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.net.URL;
 import java.util.*;
 
+/**
+ * Contrôleur pour gérer l'affichage et les interactions avec le terrain et les véhicules
+ * dans une simulation d'intersection autonome.
+ *
+ * Cette classe fournit des fonctionnalités pour dessiner la grille, gérer les itinéraires des véhicules
+ * et mettre à jour leurs positions sur le terrain.
+ */
 public class TerrainController implements Initializable {
+
+    /** Grille initiale représentant le terrain. */
     @FXML
     private GridPane grilleInitiale;
-    
+
+    /** Pane contenant les formes représentant les véhicules. */
     @FXML
     Pane vehiclePane;
 
+    /** VBox représentant l'intersection. */
     @FXML
     private VBox intersection;
 
+    /** Terrain simulé. */
     private Terrain terrain;
+
+    /** Simulation en cours. */
     private Simulation simulation;
+
+    /** Taille de chaque cellule de la grille. */
     public final int TAILLE_CELLULE = 15;
 
-    private Map<Vector2D, StackPane> mapStackPanes = new HashMap<>(); // stackspanes de chaque élément de la grille
+    /** Map associant les positions à leurs StackPane correspondants dans la grille. */
+    private Map<Vector2D, StackPane> mapStackPanes = new HashMap<>();
+
+    /** Map associant les positions aux rectangles représentant les itinéraires des véhicules. */
     private Map<Vector2D, ArrayList<Rectangle>> rectanglesItineraires = new HashMap<>();
 
-    public TerrainController(Simulation simulation) { //constructeur
+    /**
+     * Constructeur du contrôleur de terrain.
+     *
+     * @param simulation La simulation associée au terrain.
+     */
+    public TerrainController(Simulation simulation) {
         this.simulation = simulation;
-        terrain = simulation.getTerrain();
+        this.terrain = simulation.getTerrain();
     }
 
-
+    /**
+     * Retourne le VBox représentant l'intersection.
+     *
+     * @return Le VBox de l'intersection.
+     */
     public VBox getIntersection() {
         return intersection;
     }
 
-
+    /**
+     * Initialise le contrôleur. Appelé automatiquement par JavaFX après le chargement de la scène.
+     *
+     * @param url            L'URL de localisation.
+     * @param resourceBundle Les ressources associées.
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         dessinerGrille();
     }
+
+    /**
+     * Définit le terrain à utiliser dans le contrôleur.
+     *
+     * @param terrain Le terrain à utiliser.
+     */
     public void setTerrain(Terrain terrain) {
         this.terrain = terrain;
     }
 
-    private void dessinerGrille()
-    {
+    /**
+     * Dessine la grille représentant le terrain.
+     * La couleur de chaque cellule est définie en fonction de son type (route, zone de conflit, communication, etc.).
+     */
+    private void dessinerGrille() {
         Cellule[][] grille = terrain.getGrille();
-
-        // Vider la grille avant de dessiner si elle contient déjà des éléments
         grilleInitiale.getChildren().clear();
-
-        // Vider la map si elle contient déjà des éléments
         mapStackPanes.clear();
 
-        for (int i = 0; i < terrain.getLargeur(); i++)
-        {
-            for (int j = 0; j < terrain.getHauteur(); j++)
-            {
-                // Créer une StackPane pour chaque cellule
+        for (int i = 0; i < terrain.getLargeur(); i++) {
+            for (int j = 0; j < terrain.getHauteur(); j++) {
                 StackPane stackPane = new StackPane();
-
-                // Créer un rectangle pour chaque cellule
-                Rectangle rectBackground = new Rectangle(TAILLE_CELLULE,TAILLE_CELLULE);
+                Rectangle rectBackground = new Rectangle(TAILLE_CELLULE, TAILLE_CELLULE);
                 setCouleurCellule(rectBackground, grille[i][j]);
-
                 stackPane.getChildren().add(rectBackground);
 
-                // Créer un rectangle pour l'itinéraire
                 if (grille[i][j].getTypeZone() == TypeZone.CONFLIT || grille[i][j].getTypeZone() == TypeZone.COMMUNICATION) {
                     Rectangle rectItineraire = new Rectangle(TAILLE_CELLULE, TAILLE_CELLULE);
                     rectItineraire.setFill(Color.TRANSPARENT);
@@ -86,61 +114,48 @@ public class TerrainController implements Initializable {
                     stackPane.getChildren().add(rectItineraire);
                 }
 
-                grilleInitiale.add(stackPane, i, j); // Ajouter la stack pane à la position (i , j) de la grille
-
-                Vector2D position = new Vector2D(i, j); // ajout de la stackpane dans la map
-                mapStackPanes.put(position, stackPane);
+                grilleInitiale.add(stackPane, i, j);
+                mapStackPanes.put(new Vector2D(i, j), stackPane);
             }
         }
     }
 
-    // Permet de dessiner l'itinéraire des véhicules lors de la traversée d'une intersection
-    public synchronized void dessinerItineraire(ArrayList<Vector2D> itineraire, Vehicule vehicule)
-    {
-        for (Vector2D position : itineraire) // parcourt de l'itinéraire
-        {
+    /**
+     * Dessine l'itinéraire d'un véhicule sur le terrain.
+     *
+     * @param itineraire L'itinéraire à dessiner.
+     * @param vehicule   Le véhicule associé à l'itinéraire.
+     */
+    public synchronized void dessinerItineraire(ArrayList<Vector2D> itineraire, Vehicule vehicule) {
+        for (Vector2D position : itineraire) {
             Cellule cellule = terrain.getCellule(position);
-
-            // affichage uniquement sur les zones de communication et conflit
-            if (cellule != null && (cellule.getTypeZone() == TypeZone.COMMUNICATION || cellule.getTypeZone() == TypeZone.CONFLIT))
-            {
+            if (cellule != null && (cellule.getTypeZone() == TypeZone.COMMUNICATION || cellule.getTypeZone() == TypeZone.CONFLIT)) {
                 StackPane stackPane = mapStackPanes.get(position);
-
-                if (stackPane != null)
-                {
+                if (stackPane != null) {
                     Rectangle rectItineraire = new Rectangle(TAILLE_CELLULE, TAILLE_CELLULE);
-                    rectItineraire.setFill(vehicule.getCouleur().deriveColor(0, 1.0, 1.0, 0.5)); // couleur transparente
-                    rectItineraire.setUserData("rectItineraire_" + vehicule.getId()); // lié à l'id de la voiture pour éviter les conflits
-
-                    // il faut créer un rectangle pour chaque véhicule pour pouvoir les superposer
+                    rectItineraire.setFill(vehicule.getCouleur().deriveColor(0, 1.0, 1.0, 0.5));
+                    rectItineraire.setUserData("rectItineraire_" + vehicule.getId());
                     stackPane.getChildren().add(rectItineraire);
-
-                    // verifie si une liste de rectangles existe déjà pour la position donnée dans la map rectanglesItineraires
-                    // si ce n'est pas le cas, elle crée une nouvelle arraylist
-                    // ajout le rectItineraire à la liste associée à cette position
                     rectanglesItineraires.computeIfAbsent(position, k -> new ArrayList<>()).add(rectItineraire);
                 }
             }
         }
     }
 
-    // synchronized evite les pb de concurrence entre les threads
-    public synchronized void effacerItineraire(Vehicule vehicule, Vector2D position)
-    {
+    /**
+     * Efface l'itinéraire d'un véhicule à une position donnée.
+     *
+     * @param vehicule Le véhicule dont l'itinéraire doit être effacé.
+     * @param position La position où l'itinéraire doit être supprimé.
+     */
+    public synchronized void effacerItineraire(Vehicule vehicule, Vector2D position) {
         List<Rectangle> listeRectangles = rectanglesItineraires.get(position);
-
-        if (listeRectangles != null)
-        {
-            Iterator<Rectangle> iterator = listeRectangles.iterator(); // permet de parcourir la liste
-
-            while (iterator.hasNext())
-            {
+        if (listeRectangles != null) {
+            Iterator<Rectangle> iterator = listeRectangles.iterator();
+            while (iterator.hasNext()) {
                 Rectangle rect = iterator.next();
-
-                if (rect.getUserData().equals("rectItineraire_" + vehicule.getId()))
-                {
+                if (rect.getUserData().equals("rectItineraire_" + vehicule.getId())) {
                     StackPane stackPane = mapStackPanes.get(position);
-
                     if (stackPane != null) {
                         stackPane.getChildren().remove(rect);
                     }
@@ -154,76 +169,96 @@ public class TerrainController implements Initializable {
         }
     }
 
-
-    // Définir la couleur de la cellule selon son type
+    /**
+     * Définit la couleur d'une cellule en fonction de son type.
+     *
+     * @param rect    Le rectangle représentant la cellule.
+     * @param cellule La cellule associée.
+     */
     private void setCouleurCellule(Rectangle rect, Cellule cellule) {
         if (cellule.estValide()) {
-            rect.setFill(Color.DARKSLATEGRAY);  // Route
+            rect.setFill(Color.DARKSLATEGRAY);
             if (cellule.getTypeZone() == TypeZone.CONFLIT) {
-                rect.setFill(Color.BLACK);  // Zone de conflit
+                rect.setFill(Color.BLACK);
             } else if (cellule.getTypeZone() == TypeZone.COMMUNICATION) {
-                rect.setFill(Color.BLACK);  // Communication
+                rect.setFill(Color.BLACK);
             }
-        }
-        else {
-            rect.setFill(Color.FORESTGREEN); // Espace vide
+        } else {
+            rect.setFill(Color.FORESTGREEN);
         }
     }
 
-    public void updateCellule(Vector2D anciennePosition, Vector2D nouvellePosition, Shape vehiculeShape)
-    {
+    /**
+     * Met à jour la position d'un véhicule sur la grille.
+     *
+     * @param anciennePosition La position précédente du véhicule.
+     * @param nouvellePosition La nouvelle position du véhicule.
+     * @param vehiculeShape    La forme représentant le véhicule.
+     */
+    public void updateCellule(Vector2D anciennePosition, Vector2D nouvellePosition, Shape vehiculeShape) {
         if (!anciennePosition.equals(nouvellePosition)) {
             effacerVehicule(anciennePosition, vehiculeShape);
         }
         dessinerVehicule(nouvellePosition, vehiculeShape);
     }
 
-
-    public void dessinerVehicule(Vector2D position, Shape vehiculeShape)
-    {
+    /**
+     * Dessine un véhicule à une position donnée.
+     *
+     * @param position      La position où dessiner le véhicule.
+     * @param vehiculeShape La forme représentant le véhicule.
+     */
+    public void dessinerVehicule(Vector2D position, Shape vehiculeShape) {
         StackPane cellule = mapStackPanes.get(position);
-
-        if (cellule != null) {
-            if (!cellule.getChildren().contains(vehiculeShape))
-            {
-                // gestion couleur véhicule d'urgence
-                if (vehiculeShape.getFill() == Color.BLUE) {
-                    vehiculeShape.setFill(Color.RED);
-                }
-                else if (vehiculeShape.getFill() == Color.RED){
-                    vehiculeShape.setFill(Color.BLUE);
-                }
-
-                cellule.getChildren().add(vehiculeShape);
-                //System.out.println("Véhicule dessiné à la cellule : " + position);
-            } else {
-                //System.out.println("Véhicule déjà présent dans la cellule : " + position); // à supprimer après vérif case occupée
-            }
+        if (cellule != null && !cellule.getChildren().contains(vehiculeShape)) {
+            cellule.getChildren().add(vehiculeShape);
         }
-
     }
 
-    public void effacerVehicule(Vector2D position, Shape vehiculeShape)
-    {
+    /**
+     * Efface un véhicule de la grille à une position donnée.
+     *
+     * @param position      La position où effacer le véhicule.
+     * @param vehiculeShape La forme représentant le véhicule.
+     */
+    public void effacerVehicule(Vector2D position, Shape vehiculeShape) {
         StackPane cellule = mapStackPanes.get(position);
-
         if (cellule != null) {
             cellule.getChildren().remove(vehiculeShape);
         }
     }
 
+    /**
+     * Retourne la simulation associée.
+     *
+     * @return La simulation.
+     */
     public Simulation getSimulation() {
         return simulation;
     }
 
+    /**
+     * Anime le déplacement d'un véhicule entre deux positions sur la grille.
+     *
+     * Cette méthode utilise une transition de type `TranslateTransition` pour animer
+     * le déplacement d'une forme représentant un véhicule.
+     *
+     * @param vehiculeShape    La forme représentant le véhicule à animer.
+     * @param anciennePosition La position initiale du véhicule.
+     * @param nouvellePosition La position finale du véhicule.
+     * @param dureeMs          La durée de l'animation en millisecondes.
+     */
     public void animerDeplacementVehicule(Shape vehiculeShape, Vector2D anciennePosition, Vector2D nouvellePosition, int dureeMs) {
+        // Calculer les nouvelles coordonnées du véhicule sur la grille
         double newX = nouvellePosition.getX() * TAILLE_CELLULE + TAILLE_CELLULE / 2;
         double newY = nouvellePosition.getY() * TAILLE_CELLULE + TAILLE_CELLULE / 2;
 
+        // Créer une transition pour déplacer le véhicule
         TranslateTransition transition = new TranslateTransition(Duration.millis(dureeMs), vehiculeShape);
         transition.setToX(newX);
         transition.setToY(newY);
 
+        // Lancer l'animation
         transition.play();
     }
 }

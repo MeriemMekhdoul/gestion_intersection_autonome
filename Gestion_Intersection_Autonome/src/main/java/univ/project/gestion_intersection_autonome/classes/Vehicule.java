@@ -5,19 +5,70 @@ import java.util.*;
 import java.io.*;
 import java.util.List;
 
-public class Vehicule /*implements VehiculeListener*/ {
-    // Données membres
-    private final int id; // sécurise en empêchant toute modification
-    private TypeVehicule type;  //final non ?
+/**
+ * Classe représentant un véhicule dans une intersection autonome.
+ *
+ * Un véhicule est caractérisé par son identifiant unique, son type, ses positions de départ et d'arrivée,
+ * sa position actuelle, son itinéraire et sa couleur. La classe gère aussi les conflits entre les itinéraires
+ * des véhicules et calcule les temps d'attente dans ces cas.
+ */
+public class Vehicule {
+
+    /**
+     * Identifiant unique du véhicule.
+     */
+    private final int id;
+
+    /**
+     * Type du véhicule (par exemple VOITURE, URGENCE).
+     */
+    private TypeVehicule type;
+
+    /**
+     * Position actuelle du véhicule.
+     */
     private Vector2D position;
+
+    /**
+     * Position de départ du véhicule.
+     */
     private Vector2D positionDepart;
+
+    /**
+     * Position d'arrivée du véhicule.
+     */
     private Vector2D positionArrivee;
-    private static int idCompteur = 1;// génère un ID pour chaque véhicule
+
+    /**
+     * Compteur pour générer les identifiants uniques des véhicules.
+     */
+    private static int idCompteur = 1;
+
+    /**
+     * Indique si le véhicule est actuellement en attente.
+     */
     private boolean enAttente;
+
+    /**
+     * Itinéraire complet du véhicule.
+     */
     private final List<Vector2D> itineraire;
+
+    /**
+     * Couleur du véhicule.
+     */
     private final Color couleur;
 
-    // Constructeur paramétré
+    /**
+     * Constructeur paramétré.
+     *
+     * @param type            Type du véhicule.
+     * @param positionDepart  Position de départ du véhicule.
+     * @param positionArrivee Position d'arrivée du véhicule.
+     * @param itineraire      Liste des positions composant l'itinéraire.
+     * @param couleur         Couleur du véhicule.
+     * @throws IOException Si une erreur d'entrée-sortie se produit.
+     */
     public Vehicule(TypeVehicule type, Vector2D positionDepart, Vector2D positionArrivee, List<Vector2D> itineraire, Color couleur) throws IOException {
         this.id = idCompteur++;
         this.type = type;
@@ -29,31 +80,31 @@ public class Vehicule /*implements VehiculeListener*/ {
         this.couleur = couleur;
     }
 
+    /**
+     * Déplace le véhicule à une nouvelle position.
+     *
+     * @param pos Nouvelle position du véhicule.
+     */
     public void move(Vector2D pos) {
         position.setX(pos.getX());
         position.setY(pos.getY());
     }
 
-
-    public boolean estArrivee() {
-        return position.equals(positionArrivee);
-    }
-
-
-    // generer une couleur aléatoire
-    public static Color genererCouleurAleatoire()
-    {
+    /**
+     * Génère une couleur aléatoire pour un véhicule parmi une liste prédéfinie.
+     *
+     * @return Une couleur aléatoire.
+     */
+    public static Color genererCouleurAleatoire() {
         List<Color> listeCouleurs = Arrays.asList(
                 Color.CRIMSON, Color.DEEPPINK, Color.MEDIUMPURPLE, Color.GOLD,
                 Color.ORCHID, Color.MEDIUMSEAGREEN, Color.LIGHTSEAGREEN
         );
 
         int couleurRandom = new Random().nextInt(listeCouleurs.size());
-
         return listeCouleurs.get(couleurRandom);
     }
 
-    // Getters et setters
     public int getId() {
         return id;
     }
@@ -68,26 +119,6 @@ public class Vehicule /*implements VehiculeListener*/ {
 
     public Vector2D getPosition() {
         return position;
-    }
-
-    public void setPosition(Vector2D position) {
-        this.position = position;
-    }
-
-    public Vector2D getPositionDepart() {
-        return positionDepart;
-    }
-
-    public void setPositionDepart(Vector2D positionDepart) {
-        this.positionDepart = positionDepart;
-    }
-
-    public Vector2D getPositionArrivee() {
-        return positionArrivee;
-    }
-
-    public void setPositionArrivee(Vector2D positionArrivee) {
-        this.positionArrivee = positionArrivee;
     }
 
     public ArrayList<Vector2D> getItineraire() {
@@ -107,7 +138,6 @@ public class Vehicule /*implements VehiculeListener*/ {
                 '}';
     }
 
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -121,30 +151,29 @@ public class Vehicule /*implements VehiculeListener*/ {
         return Objects.hash(id);
     }
 
-    public boolean isEnAttente() {
-        return enAttente;
-    }
-
-    synchronized public void setEnAttente(boolean enAttente) {
+    /**
+     * Modifie l'état d'attente du véhicule.
+     *
+     * @param enAttente {@code true} si le véhicule est en attente, sinon {@code false}.
+     */
+    public synchronized void setEnAttente(boolean enAttente) {
         this.enAttente = enAttente;
-        System.out.println("vehicule : "+ id + " etat changé et mis à : " + enAttente);
+        System.out.println("Vehicule : " + id + " état changé et mis à : " + enAttente);
     }
 
     /**
-     * Calcule le temps d'attente du véhicule actuel en fonction des itinéraires
-     * des autres véhicules potentiellement en conflit.
+     * Calcule le temps d'attente pour le véhicule actuel en fonction des itinéraires
+     * des autres véhicules engagés et en attente.
      *
-     * @param vehiculesEngagesEtItineraires Un map contenant chaque véhicule et son itinéraire respectif.
-     * @param itineraire             L'itinéraire du véhicule actuel.
-     * @return Le temps d'attente en secondes causé par les conflits potentiels avec d'autres véhicules.
+     * @param vehiculesEngagesEtItineraires Les itinéraires des véhicules déjà engagés.
+     * @param vehiculesAttenteEtItineraires Les itinéraires des véhicules en attente.
+     * @param itineraire                    L'itinéraire du véhicule actuel.
+     * @return Le temps d'attente total (en secondes).
      */
-
     public int calculTempsAttente(
             Map<Vehicule, ArrayList<Vector2D>> vehiculesEngagesEtItineraires,
             Map<Vehicule, ArrayList<Vector2D>> vehiculesAttenteEtItineraires,
             ArrayList<Vector2D> itineraire) {
-
-        //Créer nouveaux itin à partir de la position actuelle du vehicule
         Map<Vehicule, ArrayList<Vector2D>> nouveauxItineraires = creerNouveauxItineraires(vehiculesEngagesEtItineraires);
 
         ArrayList<Vehicule> vehiculesEnConflit = new ArrayList<>();
@@ -165,7 +194,15 @@ public class Vehicule /*implements VehiculeListener*/ {
         return tempsAttente;
     }
 
-    // Méthode pour gérer les conflits avec les véhicules en attente
+    /**
+     * Gère les conflits avec les véhicules en attente et calcule le temps d'attente supplémentaire
+     * en fonction des itinéraires potentiellement conflictuels.
+     *
+     * @param vehiculesAttenteEtItineraires Les itinéraires des véhicules en attente.
+     * @param tempsAttenteActuel            Le temps d'attente déjà calculé.
+     * @param itineraire                    L'itinéraire du véhicule actuel.
+     * @return Le temps d'attente supplémentaire à ajouter.
+     */
     private int gererConflitsAvecVehiculesAttente(Map<Vehicule, ArrayList<Vector2D>> vehiculesAttenteEtItineraires, int tempsAttenteActuel, ArrayList<Vector2D> itineraire) {
         boolean[] diagonale = new boolean[1];
 
@@ -173,7 +210,7 @@ public class Vehicule /*implements VehiculeListener*/ {
             Vehicule vehiculeEnAttente = entry.getKey();
             ArrayList<Vector2D> itineraireVehiculeAttente = entry.getValue();
 
-            // Calculer l'itinéraire effectif du véhicule en attente après son temps d'attente actuel
+            // Calculer l'itinéraire effectif après le temps d'attente actuel
             ArrayList<Vector2D> itineraireModifie = extraireItineraireApresTemps(itineraireVehiculeAttente, tempsAttenteActuel);
             int tempsAttenteSupplementaire = 0;
 
@@ -197,17 +234,27 @@ public class Vehicule /*implements VehiculeListener*/ {
         return tempsAttenteActuel;
     }
 
-    // Méthode pour extraire l'itinéraire après un certain temps d'attente
+    /**
+     * Extrait les positions restantes de l'itinéraire après un certain temps d'attente.
+     *
+     * @param itineraire   L'itinéraire complet du véhicule.
+     * @param tempsAttente Le temps d'attente écoulé.
+     * @return Une liste contenant les positions restantes de l'itinéraire.
+     */
     private ArrayList<Vector2D> extraireItineraireApresTemps(ArrayList<Vector2D> itineraire, int tempsAttente) {
         if (tempsAttente >= itineraire.size()) {
-            return new ArrayList<>(); // Si le temps d'attente dépasse ou égale la taille de l'itinéraire, il est vide
+            return new ArrayList<>(); // L'itinéraire est vide si le temps d'attente dépasse sa taille
         }
         return new ArrayList<>(itineraire.subList(tempsAttente, itineraire.size()));
     }
 
-    // Méthode pour créer de nouveaux itinéraires à partir des positions actuelles
+    /**
+     * Crée de nouveaux itinéraires basés sur les positions actuelles des véhicules.
+     *
+     * @param vehiculesEtItineraires Les itinéraires complets des véhicules.
+     * @return Un map associant chaque véhicule à son itinéraire restant.
+     */
     private Map<Vehicule, ArrayList<Vector2D>> creerNouveauxItineraires(Map<Vehicule, ArrayList<Vector2D>> vehiculesEtItineraires) {
-
         Map<Vehicule, ArrayList<Vector2D>> nouveauxItineraires = new HashMap<>();
 
         for (Vehicule vehicule : vehiculesEtItineraires.keySet()) {
@@ -225,7 +272,14 @@ public class Vehicule /*implements VehiculeListener*/ {
         return nouveauxItineraires;
     }
 
-    // Méthode pour extraire l'itinéraire restant à partir de la position actuelle du véhicule
+    /**
+     * Extrait les positions restantes de l'itinéraire en fonction de la position actuelle du véhicule.
+     *
+     * @param vehicule          Le véhicule dont l'itinéraire est analysé.
+     * @param itineraireComplet L'itinéraire complet du véhicule.
+     * @return Une liste contenant les positions restantes.
+     * @throws IndexOutOfBoundsException Si la position actuelle n'est pas trouvée dans l'itinéraire.
+     */
     private ArrayList<Vector2D> extraireItineraireRestant(Vehicule vehicule, ArrayList<Vector2D> itineraireComplet) {
         Vector2D positionActuelle = vehicule.getPosition();
         int index = trouverIndexPosition(itineraireComplet, positionActuelle);
@@ -243,7 +297,13 @@ public class Vehicule /*implements VehiculeListener*/ {
 
     }
 
-    // Méthode pour trouver l'indice de la position actuelle dans l'itinéraire
+    /**
+     * Trouve l'indice de la position actuelle dans l'itinéraire complet.
+     *
+     * @param itineraire       L'itinéraire complet du véhicule.
+     * @param positionActuelle La position actuelle du véhicule.
+     * @return L'indice de la position actuelle, ou -1 si elle n'est pas trouvée.
+     */
     private int trouverIndexPosition(ArrayList<Vector2D> itineraire, Vector2D positionActuelle) {
         for (int i = 0; i < itineraire.size(); i++) {
             //System.out.println(positionActuelle + " // get index : i = " + i + "itin.get(i) = " +itineraire.get(i));
@@ -251,14 +311,17 @@ public class Vehicule /*implements VehiculeListener*/ {
                 return i;
             }
         }
-        return -1; // Non trouvé
+        return -1; // Position non trouvée
     }
 
 
-    // Méthode pour calculer le temps d'attente en fonction des véhicules en conflit
-    private int calculerTempsAttentePourConflit(ArrayList<Vehicule> vehiculesEnConflit,
-                                                Map<Vehicule,ArrayList<Vector2D>> vehiculesDiagonalesEtItineraire, ArrayList<Vector2D> itineraire)
-    {
+    /**
+     * Calcule le temps d'attente supplémentaire causé par les conflits avec les autres véhicules.
+     *
+     * @param vehiculesEnConflit La liste des véhicules en conflit.
+     * @return Le temps d'attente total en secondes.
+     */
+    private int calculerTempsAttentePourConflit(ArrayList<Vehicule> vehiculesEnConflit, Map<Vehicule,ArrayList<Vector2D>> vehiculesDiagonalesEtItineraire, ArrayList<Vector2D> itineraire) {
         int tempsAttente = 0;
         for (Vehicule vehicule : vehiculesEnConflit) {
             if (vehicule.getId() != this.id) {//TODO: pourquoi ca c'est nécessaire ??
@@ -278,13 +341,12 @@ public class Vehicule /*implements VehiculeListener*/ {
     }
 
     /**
-     * Vérifie s'il existe un conflit potentiel entre l'itinéraire du véhicule actuel et ceux des autres véhicules.
-     * Si un conflit est détecté, met à jour la liste des véhicules en conflit.
+     * Vérifie s'il existe un conflit entre l'itinéraire actuel et ceux des autres véhicules.
      *
-     * @param vehiculesEtItineraires Un map contenant chaque véhicule et son itinéraire respectif.
-     * @param itineraire             L'itinéraire du véhicule actuel dans l'intersection.
-     * @param vehiculesEnConflit      La liste des véhicules qui causent un conflit (mise à jour si un conflit est détecté).
-     * @return `true` s'il existe un conflit avec un ou plusieurs véhicules, sinon `false`.
+     * @param vehiculesEtItineraires Un map contenant les itinéraires des autres véhicules.
+     * @param itineraire             L'itinéraire du véhicule actuel.
+     * @param vehiculesEnConflit     La liste des véhicules causant un conflit (mise à jour).
+     * @return {@code true} si un conflit est détecté, sinon {@code false}.
      */
     public boolean conflit(Map<Vehicule,ArrayList<Vector2D>> vehiculesEtItineraires,
                            ArrayList<Vector2D> itineraire,
@@ -294,9 +356,8 @@ public class Vehicule /*implements VehiculeListener*/ {
         vehiculesEnConflit.clear();
         boolean[] diagonale = new boolean[1];
 
-        // Récupérer un tableau des itinéraires depuis les messages
         for (Vehicule v : vehiculesEtItineraires.keySet()) {
-            ArrayList<Vector2D> itineraireAutreVehicule = vehiculesEtItineraires.get(v);//message.getItineraire();
+            ArrayList<Vector2D> itineraireAutreVehicule = vehiculesEtItineraires.get(v);
 
             // Si une collision est détectée entre les itinéraires
             if (compareItineraire(itineraire, itineraireAutreVehicule,diagonale)) {
@@ -313,11 +374,11 @@ public class Vehicule /*implements VehiculeListener*/ {
     }
 
     /**
-     * Compare deux itinéraires pour détecter une éventuelle collision. (à renommer en détécterCollision())
+     * Compare deux itinéraires pour détecter une collision potentielle.
      *
-     * @param itin1 Le premier itinéraire.
-     * @param itin2 Le second itinéraire.
-     * @return `true` s'il y a une collision, sinon `false`.
+     * @param itin1 Premier itinéraire.
+     * @param itin2 Deuxième itinéraire.
+     * @return {@code true} s'il y a une collision, sinon {@code false}.
      */
     public boolean compareItineraire(ArrayList<Vector2D> itin1, ArrayList<Vector2D> itin2, boolean[] diagonale) {
 
