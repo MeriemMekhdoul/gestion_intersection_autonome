@@ -26,7 +26,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
     protected List<VehiculeControllerListener> listeners = new ArrayList<>();
     protected IntersectionListener intersectionListener; // Écouteur pour l'intersection
     protected boolean enPause = false;
-    public static final int VITESSE_SIMULATION_MS = 100;
+    public static final int VITESSE_SIMULATION_MS = 300;
 
     /**
      * Constructeur du contrôleur de véhicule.
