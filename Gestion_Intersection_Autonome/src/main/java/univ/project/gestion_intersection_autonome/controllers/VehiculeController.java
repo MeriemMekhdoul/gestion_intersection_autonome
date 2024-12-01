@@ -168,105 +168,20 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
             }
 
             int tempsAttente = vehicule.calculTempsAttente(vehiculesEngagesEtItineraires,vehiculesAttenteEtItineraires,deplacements);
+            System.out.println("VEHICLE ACTUEL id = " + vehicule.getId() + "pos = " + vehicule.getPosition() + "temps attente estimé = " + tempsAttente + " mon itin: " + deplacements);
             pauseEntreMouvements(tempsAttente * VITESSE_SIMULATION_MS);
 
             intersection.editConfig(vehicule, EtatVehicule.ENGAGE);
-            //Envoyer un message avant de s'engager ??
 
             avancerIntersection(deplacements);
 
-            Platform.runLater(() -> {
-                terrainController.effacerItineraire(vehicule, anciennePosition);
-            });
-            //à la sortie envoyer un msg de SORTIE (à qui ??) => intersection ou véhiculesDestinataires ?
-            //}
+            Platform.runLater(() -> terrainController.effacerItineraire(vehicule, anciennePosition));
+
         }
 
         intersection.supprimerVehicule(vehicule);
         intersection.removeVehiculeControllerListener(this);
     }
-
-    /**
-     * La fonction vérifie s'il y aura un potentiel conflit dans l'intersection.
-     * Si un conflit est détecté, retourne `true` et met à jour la liste des véhicules impliqués dans le conflit.
-     * Sinon, retourne `false` et la liste reste vide.
-     *
-     * @param messagesReçus      Liste des messages contenant les informations sur les véhicules et leurs itinéraires.
-     * @param itineraire         L'itinéraire du véhicule actuel.
-     * @param vehiculesEnConflit Liste des véhicules qui causent un conflit (mise à jour si conflit détecté).
-     * @return `true` s'il y a un conflit, sinon `false`.
-     */
-    public boolean conflit(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEnConflit
-            , ArrayList<ArrayList<Vector2D>> itinerairesVoitures) {
-        // Vider la liste des véhicules en conflit pour un nouveau calcul
-        vehiculesEnConflit.clear();
-
-        int i = 0;
-
-        // Récupérer un tableau des itinéraires depuis les messages
-        for (Message message : messagesReçus) {
-            ArrayList<Vector2D> itineraireAutreVehicule = itinerairesVoitures.get(i);//message.getItineraire();
-            i++;
-
-            // Si une collision est détectée entre les itinéraires
-            if (compareItineraire(itineraire, itineraireAutreVehicule)) {
-                // Ajouter le véhicule en conflit à la liste
-                vehiculesEnConflit.add(message.getv1());
-            }
-        }
-        // Si des véhicules en conflit sont détectés, retourner vrai
-        return !vehiculesEnConflit.isEmpty();
-    }
-
-    /**
-     * Compare deux itinéraires pour détecter une éventuelle collision. (à renommer en détécterCollision())
-     *
-     * @param itin1 Le premier itinéraire.
-     * @param itin2 Le second itinéraire.
-     * @return `true` s'il y a une collision, sinon `false`.
-     */
-    public boolean compareItineraire(ArrayList<Vector2D> itin1, ArrayList<Vector2D> itin2) {
-        for (int i = 0; i < itin1.size(); i++) {
-            if (i < itin2.size()) {
-                if (itin1.get(i).equals(itin2.get(i)))
-                    return true;
-            } else return false;
-        }
-        return false; //pas de collision
-    }
-
-    public int calculs(ArrayList<Message> messagesReçus, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEngages) {
-        ArrayList<Vehicule> vehiculesenconflit = new ArrayList<>();
-        int tempsAttente = 0;
-
-        ArrayList<ArrayList<Vector2D>> nouveauxItineraires = new ArrayList<>();
-
-        for (Message message : messagesReçus) {
-            ArrayList<Vector2D> itineraireAmodifier = message.getItineraire();
-
-            if (vehiculesEngages.contains(message.getv1())) {
-                Vector2D posActuV = message.getv1().getPosition().copy();
-                int index = itineraireAmodifier.indexOf(posActuV);
-                //trunk tableau a partir de l'index
-                ArrayList<Vector2D> newItineraire = new ArrayList<>();
-                for (int i = index; i < itineraireAmodifier.size(); i++) {
-                    newItineraire.add(itineraireAmodifier.get(i));
-                }
-                nouveauxItineraires.add(newItineraire);
-            }
-            nouveauxItineraires.add(itineraireAmodifier);
-        }
-
-        if (conflit(messagesReçus, itineraire, vehiculesenconflit, nouveauxItineraires)) {
-            for (Vehicule v : vehiculesenconflit) {
-                if (vehiculesEngages.contains(v) && (v != vehicule)) {
-                    tempsAttente++;
-                }
-            }
-        }
-        return tempsAttente; // Retourner le temps d'attente
-    }
-
 
     protected boolean estDansCommunication(Vector2D position) {
         return terrain.getCellule(position).getTypeZone() == TypeZone.COMMUNICATION;
@@ -299,10 +214,10 @@ public class VehiculeController implements Runnable,VehiculeControllerListener {
                 //System.out.println("Cellule occupée");
 
                 // attente libération
-                while (terrain.getCellule(pos).estOccupee()) {
+                //while (terrain.getCellule(pos).estOccupee()) {
                     //System.out.println("Attente libération cellule");
-                    pauseEntreMouvements(VITESSE_SIMULATION_MS/3);
-                }
+                    pauseEntreMouvements(VITESSE_SIMULATION_MS);
+                //}
             }
 
             vehicule.move(pos);

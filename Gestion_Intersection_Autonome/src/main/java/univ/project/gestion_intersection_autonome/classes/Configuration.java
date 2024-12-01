@@ -22,78 +22,6 @@ public class Configuration {
         tempsArrivee = new ConcurrentHashMap<>();
         etatVehicule = new ConcurrentHashMap<>();
     }
-    public Configuration(VBox _vbox){
-        vehicules = new CopyOnWriteArrayList<>();
-        tempsArrivee = new ConcurrentHashMap<>();
-        etatVehicule = new ConcurrentHashMap<>();
-        vbox = _vbox;
-    }
-
-    // Méthode pour ajouter un véhicule et son label dans la VBox
-    public void ajouterVehiculeAvecLabel(Vehicule vehicule) {
-        vehicules.add(vehicule);
-
-        // Créer un label pour ce véhicule
-        Label label = new Label(vehicule.getType().toString() +" " + vehicule.getId() + " | " + getNomCouleur(vehicule.getCouleur()) + " | " + etatVehicule.get(vehicule.getId()).toString());
-        label.setId("vehicule-" + vehicule.getId()); // Assigner un ID unique au label
-        label.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
-
-
-        // Ajouter le label à la VBox
-        vbox.getChildren().add(label);
-    }
-    public void modifierLabel(Vehicule vehicule, EtatVehicule nouvelEtat) {
-
-        // Identifier le label à modifier dans la VBox
-        for (Node node : vbox.getChildren()) {
-            if (node instanceof Label) {
-                Label label = (Label) node;
-
-                // Vérifier que c'est le label du véhicule concerné
-                if (label.getId().equals("vehicule-" + vehicule.getId())) {
-                    // Mettre à jour le texte du label
-                    label.setText(vehicule.getType().toString() + " " + vehicule.getId() + " | " +
-                            getNomCouleur(vehicule.getCouleur()) + " | " + nouvelEtat.toString());
-                    break;
-                }
-            }
-        }
-    }
-
-    private String getNomCouleur(Color couleur) {
-        for (Field field : Color.class.getFields()) {
-            try {
-                if (field.getType().equals(Color.class) && field.get(null).equals(couleur)) {
-                    return field.getName(); // Retourne le nom de la couleur (ex: RED, BLUE)
-                }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-        // Si ce n'est pas une couleur nommée, retourner "Couleur personnalisée"
-        return "Couleur personnalisée";
-    }
-
-
-    // Méthode pour supprimer un véhicule et son label de la VBox
-    public void supprimerVehiculeEtLabel(Vehicule vehicule) {
-        // Supprimer le véhicule de la liste
-        vehicules.remove(vehicule);
-
-        // Rechercher et supprimer le label correspondant dans la VBox
-        Label labelToRemove = null;
-        for (javafx.scene.Node node : vbox.getChildren()) {
-            if (node instanceof Label && node.getId().equals("vehicule-" + vehicule.getId())) {
-                labelToRemove = (Label) node;
-                break;
-            }
-        }
-
-        if (labelToRemove != null) {
-            vbox.getChildren().remove(labelToRemove);
-        }
-    }
-
 
     synchronized public List<Vehicule> getVehiculesTemp() {
         return vehicules;
@@ -105,9 +33,6 @@ public class Configuration {
     synchronized public void nouveauVehicule(Vehicule v, Message m){
         if(!vehicules.contains(v)) {
             vehicules.add(v);
-            /*Platform.runLater(() ->{
-                ajouterVehiculeAvecLabel(v);
-            });*/
         }
         tempsArrivee.put(v,m);
         etatVehicule.put(v.getId(),EtatVehicule.ATTENTE);
@@ -117,9 +42,6 @@ public class Configuration {
         if(!vehicules.contains(v)) {
             vehicules.add(v);
             etatVehicule.put(v.getId(),EtatVehicule.ATTENTE);
-            /*Platform.runLater(() ->{
-                ajouterVehiculeAvecLabel(v);
-            });*/
         }
     }
 
@@ -137,9 +59,6 @@ public class Configuration {
         // Si le véhicule est trouvé, mettre à jour son état et modifier le label
         if (vehicule != null) {
             etatVehicule.put(id, etat); // Mettre à jour l'état dans la map
-            /*Platform.runLater(() ->{
-                modifierLabel(vehicule,etat);
-            });*/
         } else {
             System.out.println("Véhicule avec l'ID " + id + " non trouvé.");
         }
@@ -154,9 +73,6 @@ public class Configuration {
 
     synchronized public void supprimerVehicule(Vehicule v){
         vehicules.remove(v);
-        /*Platform.runLater(() ->{
-            supprimerVehiculeEtLabel(v);
-        });*/
         tempsArrivee.remove(v);
         etatVehicule.remove(v.getId());
     }

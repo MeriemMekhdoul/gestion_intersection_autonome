@@ -138,70 +138,28 @@ public class Vehicule /*implements VehiculeListener*/ {
      * @param itineraire             L'itinéraire du véhicule actuel.
      * @return Le temps d'attente en secondes causé par les conflits potentiels avec d'autres véhicules.
      */
-    /*public int calculTempsAttente(Map<Vehicule,ArrayList<Vector2D>> vehiculesEngagesEtItineraires, Map<Vehicule,ArrayList<Vector2D>> vehiculesAttenteEtItineraires, ArrayList<Vector2D> itineraire) {
-        ArrayList<Vehicule> vehiculesenconflit = new ArrayList<>();
-        Map<Vehicule,ArrayList<Vector2D>> newMap = new HashMap<>();
-        int tempsAttente = 0;
-
-        for (Vehicule v : vehiculesEngagesEtItineraires.keySet()) {
-            ArrayList<Vector2D> itineraireAmodifierList = vehiculesEngagesEtItineraires.get(v);
-            Vector2D[] itineraireAmodifier = itineraireAmodifierList.toArray(new Vector2D[0]); // Conversion en tableau
-            System.out.println("je suis dans calculTempsAttente : ID = " + v.getId() + " pos actuelle : " + v.getPosition() + " itineraire restant : " + Arrays.toString(itineraireAmodifier));
-
-            Vector2D posActuV = v.getPosition();
-            int index = -1;
-
-            // Trouver l'indice de la position actuelle dans le tableau
-            for (int i = 0; i < itineraireAmodifier.length; i++) {
-                if (itineraireAmodifier[i].equals(posActuV)) {
-                    index = i;
-                    break;
-                }
-            }
-
-            if (index == -1) {
-                throw new IndexOutOfBoundsException("Position actuelle non trouvée dans l'itinéraire !");
-            }
-
-            // Copier le reste de l'itinéraire à partir de l'indice trouvé
-            int newLength = itineraireAmodifier.length - index;
-            Vector2D[] newItineraireArray = new Vector2D[newLength];
-            System.arraycopy(itineraireAmodifier, index, newItineraireArray, 0, newLength);
-
-            // Convertir le tableau en ArrayList
-            ArrayList<Vector2D> newItineraire = new ArrayList<>(Arrays.asList(newItineraireArray));
-
-            // Ajouter à newMap
-            newMap.put(v, newItineraire);
-        }
-
-        if(conflit(newMap,itineraire,vehiculesenconflit)) {
-            for (Vehicule v : vehiculesenconflit) {
-                if (v.getId() != this.id) {
-                    tempsAttente++;
-                }
-            }
-        }
-        return tempsAttente; // Retourner le temps d'attente
-    }*/
 
     public int calculTempsAttente(
             Map<Vehicule, ArrayList<Vector2D>> vehiculesEngagesEtItineraires,
             Map<Vehicule, ArrayList<Vector2D>> vehiculesAttenteEtItineraires,
             ArrayList<Vector2D> itineraire) {
 
+        //Créer nouveaux itin à partir de la position actuelle du vehicule
         Map<Vehicule, ArrayList<Vector2D>> nouveauxItineraires = creerNouveauxItineraires(vehiculesEngagesEtItineraires);
+
         ArrayList<Vehicule> vehiculesEnConflit = new ArrayList<>();
+        Map<Vehicule,ArrayList<Vector2D>> vehiculesDiagonalesEtItineraire = new HashMap<>();
+
         int tempsAttente = 0;
 
-        if (verifierConflit(nouveauxItineraires, itineraire, vehiculesEnConflit)) {
-            tempsAttente = calculerTempsAttentePourConflit(vehiculesEnConflit);
-            System.out.println("temps d'attente calculé avec vehicules engagés seulement : "  +tempsAttente);
+        //vehicules engagés uniquement
+        if (conflit(nouveauxItineraires, itineraire, vehiculesEnConflit,vehiculesDiagonalesEtItineraire)) {
+            tempsAttente = calculerTempsAttentePourConflit(vehiculesEnConflit, vehiculesDiagonalesEtItineraire, itineraire);
         }
 
-        if (tempsAttente > 0) { //TODO: vérifier si ce n'est pas pour tout
+        //véhicules en attente
+        if (tempsAttente > 0) {
             tempsAttente += gererConflitsAvecVehiculesAttente(vehiculesAttenteEtItineraires, tempsAttente, itineraire);
-            System.out.println("temps d'attente calculé avec vehicules en attente : "  +tempsAttente);
         }
 
         return tempsAttente;
@@ -209,22 +167,34 @@ public class Vehicule /*implements VehiculeListener*/ {
 
     // Méthode pour gérer les conflits avec les véhicules en attente
     private int gererConflitsAvecVehiculesAttente(Map<Vehicule, ArrayList<Vector2D>> vehiculesAttenteEtItineraires, int tempsAttenteActuel, ArrayList<Vector2D> itineraire) {
-        int tempsAttenteSupplementaire = 0;
+        boolean[] diagonale = new boolean[1];
 
         for (Map.Entry<Vehicule, ArrayList<Vector2D>> entry : vehiculesAttenteEtItineraires.entrySet()) {
-            //Vehicule vehiculeEnAttente = entry.getKey();
+            Vehicule vehiculeEnAttente = entry.getKey();
             ArrayList<Vector2D> itineraireVehiculeAttente = entry.getValue();
 
             // Calculer l'itinéraire effectif du véhicule en attente après son temps d'attente actuel
             ArrayList<Vector2D> itineraireModifie = extraireItineraireApresTemps(itineraireVehiculeAttente, tempsAttenteActuel);
+            int tempsAttenteSupplementaire = 0;
 
             // Vérifier les conflits avec l'itinéraire actuel
-            if (compareItineraire(itineraireModifie, itineraire)) {
-                tempsAttenteSupplementaire++;  // Ajouter 1 seconde d'attente
+            if (compareItineraire(itineraire,itineraireModifie,diagonale)) {
+                if(!diagonale[0]) {
+                    System.out.println("V:" + this.getId() + " traite : ID = " + vehiculeEnAttente.getId() + " pos: " + vehiculeEnAttente.getPosition() +
+                            "itin = " + itineraireModifie + "n'est pas dans la diagonale mais cause un conflit");
+                    tempsAttenteSupplementaire++;  // Ajouter 1 seconde d'attente
+                }
+                else {
+                    tempsAttenteSupplementaire += (itineraireModifie.size() -1);
+                    System.out.println("V:" + this.getId() + " MON ITINERAIRE : " + itineraire + "IDautrevoiture = " + vehiculeEnAttente.getId() + " pos: " + vehiculeEnAttente.getPosition() +
+                            "itin = " + itineraireModifie + "est dans la diagonale \n temps attente actuel : " +
+                            tempsAttenteActuel + "nouveau temps = " + tempsAttenteSupplementaire);
+                }
             }
+            tempsAttenteActuel += tempsAttenteSupplementaire;
         }
 
-        return tempsAttenteSupplementaire;
+        return tempsAttenteActuel;
     }
 
     // Méthode pour extraire l'itinéraire après un certain temps d'attente
@@ -243,7 +213,13 @@ public class Vehicule /*implements VehiculeListener*/ {
         for (Vehicule vehicule : vehiculesEtItineraires.keySet()) {
             ArrayList<Vector2D> itineraireComplet = vehiculesEtItineraires.get(vehicule);
             ArrayList<Vector2D> nouvelItineraire = extraireItineraireRestant(vehicule, itineraireComplet);
-            nouveauxItineraires.put(vehicule, nouvelItineraire);
+
+            System.out.println("V:" + this.getId() + " traite : ID=" + vehicule.getId() + "pos actuelle = " + vehicule.getPosition()
+                    + "itin complet = " + itineraireComplet + "itintronqué = " + nouvelItineraire);
+
+            if (nouvelItineraire != null){
+                nouveauxItineraires.put(vehicule, nouvelItineraire);
+            }
         }
 
         return nouveauxItineraires;
@@ -255,16 +231,22 @@ public class Vehicule /*implements VehiculeListener*/ {
         int index = trouverIndexPosition(itineraireComplet, positionActuelle);
 
         if (index == -1) {
-            throw new IndexOutOfBoundsException("Position actuelle non trouvée dans l'itinéraire !");
+  /*          System.err.println("index = -1, ID = " + vehicule.getId() + " soit elle est sortie, soit erreur");
+            System.err.println("posActuelle = " + vehicule.getPosition() + " itineraire complet = " + itineraireComplet);
+*/
+            return null; //TODO: null veut peut etre dire que le vehicule ne s'est pas encore engagé, donc i = 0 ..
+            //throw new IndexOutOfBoundsException("Position actuelle non trouvée dans l'itinéraire !");
         }
 
         // Extraire le sous-itinéraire restant
-        return new ArrayList<>(itineraireComplet.subList(index, itineraireComplet.size()));
+            return new ArrayList<>(itineraireComplet.subList(index, itineraireComplet.size()));
+
     }
 
     // Méthode pour trouver l'indice de la position actuelle dans l'itinéraire
     private int trouverIndexPosition(ArrayList<Vector2D> itineraire, Vector2D positionActuelle) {
         for (int i = 0; i < itineraire.size(); i++) {
+            //System.out.println(positionActuelle + " // get index : i = " + i + "itin.get(i) = " +itineraire.get(i));
             if (itineraire.get(i).equals(positionActuelle)) {
                 return i;
             }
@@ -272,17 +254,24 @@ public class Vehicule /*implements VehiculeListener*/ {
         return -1; // Non trouvé
     }
 
-    // Méthode pour vérifier s'il y a des conflits entre les itinéraires
-    private boolean verifierConflit(Map<Vehicule, ArrayList<Vector2D>> nouveauxItineraires, ArrayList<Vector2D> itineraire, ArrayList<Vehicule> vehiculesEnConflit) {
-        return conflit(nouveauxItineraires, itineraire, vehiculesEnConflit);
-    }
 
     // Méthode pour calculer le temps d'attente en fonction des véhicules en conflit
-    private int calculerTempsAttentePourConflit(ArrayList<Vehicule> vehiculesEnConflit) {
+    private int calculerTempsAttentePourConflit(ArrayList<Vehicule> vehiculesEnConflit,
+                                                Map<Vehicule,ArrayList<Vector2D>> vehiculesDiagonalesEtItineraire, ArrayList<Vector2D> itineraire)
+    {
         int tempsAttente = 0;
         for (Vehicule vehicule : vehiculesEnConflit) {
-            if (vehicule.getId() != this.id) {
+            if (vehicule.getId() != this.id) {//TODO: pourquoi ca c'est nécessaire ??
                 tempsAttente++;
+            }
+        }
+        if (!vehiculesDiagonalesEtItineraire.isEmpty()){
+            for (Vehicule vehicule : vehiculesDiagonalesEtItineraire.keySet()) {
+                if (vehicule.getId() != this.id) {//TODO: pourquoi ca c'est nécessaire ??
+                    tempsAttente += gererConflitsAvecVehiculesAttente(vehiculesDiagonalesEtItineraire,tempsAttente,itineraire);
+                    //tempsAttente += vehiculesDiagonalesEtItineraire.get(vehicule).size();
+
+                }
             }
         }
         return tempsAttente;
@@ -297,22 +286,30 @@ public class Vehicule /*implements VehiculeListener*/ {
      * @param vehiculesEnConflit      La liste des véhicules qui causent un conflit (mise à jour si un conflit est détecté).
      * @return `true` s'il existe un conflit avec un ou plusieurs véhicules, sinon `false`.
      */
-    public boolean conflit(Map<Vehicule,ArrayList<Vector2D>> vehiculesEtItineraires, ArrayList<Vector2D> itineraire,ArrayList<Vehicule> vehiculesEnConflit) {
+    public boolean conflit(Map<Vehicule,ArrayList<Vector2D>> vehiculesEtItineraires,
+                           ArrayList<Vector2D> itineraire,
+                           ArrayList<Vehicule> vehiculesEnConflit,
+                           Map<Vehicule,ArrayList<Vector2D>> vehiculesDiagonalesEtItineraire) {
         // Vider la liste des véhicules en conflit pour un nouveau calcul
         vehiculesEnConflit.clear();
+        boolean[] diagonale = new boolean[1];
 
         // Récupérer un tableau des itinéraires depuis les messages
         for (Vehicule v : vehiculesEtItineraires.keySet()) {
             ArrayList<Vector2D> itineraireAutreVehicule = vehiculesEtItineraires.get(v);//message.getItineraire();
 
             // Si une collision est détectée entre les itinéraires
-            if (compareItineraire(itineraire, itineraireAutreVehicule)) {
-                // Ajouter le véhicule en conflit à la liste
-                vehiculesEnConflit.add(v);
+            if (compareItineraire(itineraire, itineraireAutreVehicule,diagonale)) {
+                if(!diagonale[0])
+                    // Ajouter le véhicule en conflit à la liste
+                    vehiculesEnConflit.add(v);
+                else
+                    vehiculesDiagonalesEtItineraire.put(v,itineraireAutreVehicule);
             }
         }
+
         // Si des véhicules en conflit sont détectés, retourner vrai
-        return !vehiculesEnConflit.isEmpty();
+        return !(vehiculesEnConflit.isEmpty() && vehiculesDiagonalesEtItineraire.isEmpty());
     }
 
     /**
@@ -322,15 +319,35 @@ public class Vehicule /*implements VehiculeListener*/ {
      * @param itin2 Le second itinéraire.
      * @return `true` s'il y a une collision, sinon `false`.
      */
-    public boolean compareItineraire(ArrayList<Vector2D> itin1, ArrayList<Vector2D> itin2) {
-        for (int i = 0; i < itin1.size(); i++) {
-            if (i < itin2.size()) {
-                if (itin1.get(i).equals(itin2.get(i)))
+    public boolean compareItineraire(ArrayList<Vector2D> itin1, ArrayList<Vector2D> itin2, boolean[] diagonale) {
+
+        // Vérifie toutes les sous-parties de deux éléments successifs dans itin1
+        for (int i = 0; i < itin1.size() - 1; i++) {
+            // Obtenir la sous-partie de deux éléments successifs dans itin1
+            Vector2D first = itin1.get(i);
+            Vector2D second = itin1.get(i + 1);
+
+            // Inverser la sous-partie pour vérifier dans itin2
+            for (int j = 0; j < itin2.size() - 1; j++) {
+                System.out.println("VID= " + this.getId() + " fst = " + first + "snd =  " + second + "itin2["+j+"] = "+itin2.get(j) +"itin2["+j+1+"] = "+itin2.get(j+1));
+                if (itin2.get(j).equals(second) && itin2.get(j + 1).equals(first)) {
+                    System.out.println("VID= " + this.getId() + " a détecté une diagonale");
+                    diagonale[0] = true; // Collision diagonale détectée
                     return true;
-            } else return false;
+                }
+            }
         }
-        return false; //pas de collision
+
+        // Vérifie si deux cases avec le même indice ont le même contenu
+        for (int i = 0; i < Math.min(itin1.size(), itin2.size()); i++) {
+            if (itin1.get(i).equals(itin2.get(i))) {
+                diagonale[0] = false; // Collision simple détectée
+                return true;
+            }
+        }
+
+        diagonale[0] = false; // Pas de collision
+        return false;
     }
 
-
-}
+    }

@@ -26,9 +26,6 @@ public class MainTrafficApplication extends Application {
 
         // Récupérer l'instance de TerrainController créée par FXMLLoader
         TerrainController terrainController = fxmlLoader.getController();
-        VBox vbox = terrainController.getIntersection();
-
-        //terrain.getIntersections().get(0).setVBox(vbox);
 
         // Passer l'instance de TerrainController à la simulation
         simulation.setTerrainController(terrainController);

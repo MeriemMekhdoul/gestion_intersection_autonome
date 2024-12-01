@@ -33,9 +33,6 @@ public class Intersection implements IntersectionListener {
         nbVehiculesUrgence = 0;
         vehiculesUrgencePresents = new HashMap<>();
     }
-    public void setVBox(VBox vbox){
-        this.configuration = new Configuration(vbox);
-    }
 
     public ArrayList<Vector2D> getPointsEntree() {
         return pointsEntree;
@@ -165,7 +162,10 @@ public class Intersection implements IntersectionListener {
         /*if (Objects.requireNonNull(message.getObjet()) == Objetmessage.MARCHE) {
             controller.notify();
         }*/
-        controller.onMessageReceivedFromIntersection(message);
+        if(controller == null)
+            System.err.println("contrôleur non trouvé.... ");
+        else
+            controller.onMessageReceivedFromIntersection(message);
     }
 
     /**
@@ -181,9 +181,9 @@ public class Intersection implements IntersectionListener {
 
         // Obtenir la voie par laquelle le véhicule arrive (lecture, pas besoin de protection)
         Vector2D voieEntree = getVoieEntree(message.getv1().getPosition().copy());
-        System.out.println("VEHICULE ID = " + message.getv1().getId() +
+        /*System.out.println("VEHICULE ID = " + message.getv1().getId() +
                 " position actuelle du véhicule : " + message.getv1().getPosition() +
-                " voie d'entrée : " + voieEntree);
+                " voie d'entrée : " + voieEntree);*/
 
         // Synchroniser uniquement la partie critique
         synchronized (this) {
@@ -193,21 +193,21 @@ public class Intersection implements IntersectionListener {
                     //TODO: vérifier le cast ou généraliser le type de la map
                     vehiculesUrgencePresents.put((VehiculeUrgence) message.getv1(),voieEntree);
                     if (intersectionBloquee) {
-                        System.out.println("[véhicule : " + message.getv1().getId() + " ] doit débloquer sa voie : " + voieEntree);
+                        //System.out.println("[véhicule : " + message.getv1().getId() + " ] doit débloquer sa voie : " + voieEntree);
                         Vehicule vehiculeAnotifier = debloquerVoie(voieEntree);
                         if (vehiculeAnotifier != null) { // is null dans le cas ou la case de la voir d'entrée est vide, donc ne contient aucun véhicule
                             notifyController(vehiculeAnotifier, Objetmessage.MARCHE);
                         }
                     } else {
-                        System.out.println("[véhicule : " + message.getv1().getId() + " ] entre en " + voieEntree + " mais ne débloque rien");
+                        //System.out.println("[véhicule : " + message.getv1().getId() + " ] entre en " + voieEntree + " mais ne débloque rien");
                         intersectionBloquee = true;
                         execEntreeVehiculeUrgence(message, voieEntree);
                     }
                 }
                 case SORTIE -> {
                     if (nbVehiculesUrgence > 1) {
-                        System.out.println("[véhicule : " + message.getv1().getId() + " ] s'est engagé dans l'intersection par : " + voieEntree +
-                                "MAIS il y a d'autres véhicules dans l'I.");
+                        /*System.out.println("[véhicule : " + message.getv1().getId() + " ] s'est engagé dans l'intersection par : " + voieEntree +
+                                "MAIS il y a d'autres véhicules dans l'I.");*/
 
                         nbVehiculesUrgence--;
                         vehiculesUrgencePresents.remove((VehiculeUrgence) message.getv1());
@@ -216,13 +216,13 @@ public class Intersection implements IntersectionListener {
                         for (VehiculeUrgence autreVehiculeUrgence: vehiculesUrgencePresents.keySet()) {
                             Vector2D voieEntreeAutreVehicule = vehiculesUrgencePresents.get(autreVehiculeUrgence);
                             if(voieEntreeAutreVehicule == voieEntree) {
-                                System.out.println("[véhicule : " + message.getv1().getId() + " ] a trouvé un autre VU dans sa voie (donc ne doit pas la bloquer)");
+                                //System.out.println("[véhicule : " + message.getv1().getId() + " ] a trouvé un autre VU dans sa voie (donc ne doit pas la bloquer)");
                                 bloquer = false;
                                 break;
                             }
                         }
                         if (bloquer) {
-                            System.out.println("[véhicule : " + message.getv1().getId() + " ] doit bloquer sa voie derriere lui car personne d'autre derriere : " + voieEntree);
+                            //System.out.println("[véhicule : " + message.getv1().getId() + " ] doit bloquer sa voie derriere lui car personne d'autre derriere : " + voieEntree);
 
                             Vehicule vehiculeBloque = bloquerVoie(voieEntree);
                             if (vehiculeBloque != null) {
@@ -237,7 +237,7 @@ public class Intersection implements IntersectionListener {
                         nbVehiculesUrgence--;
                         vehiculesUrgencePresents.remove((VehiculeUrgence) message.getv1());
 
-                        System.out.println("[véhicule : " + message.getv1().getId() + " ] s'est engagé et aucun VU dans l'I.");
+                        //System.out.println("[véhicule : " + message.getv1().getId() + " ] s'est engagé et aucun VU dans l'I.");
 
                         execSortieVehiculeUrgence(message.getEntreeUrgence());
                     }
@@ -254,14 +254,14 @@ public class Intersection implements IntersectionListener {
      * @return Le véhicule bloqué, ou `null` s'il n'y avait aucun véhicule à bloquer.
      */
     private Vehicule bloquerVoie(Vector2D voieEntree) {
-        System.out.println("Blocage : position " + voieEntree);
+        //System.out.println("Blocage : position " + voieEntree);
 
         if (terrain.getCellule(voieEntree).contientVehicule()) {
             Vehicule vehicule = terrain.getCellule(voieEntree).getVehicule();
 
             if (vehicule != null) {
                 vehicule.setEnAttente(true);
-                System.out.println("Véhicule bloqué : " + vehicule.getId());
+                //System.out.println("Véhicule bloqué : " + vehicule.getId());
                 return vehicule;
             }
         }
@@ -278,12 +278,12 @@ public class Intersection implements IntersectionListener {
      * @return Le véhicule débloqué, ou `null` s'il n'y avait aucun véhicule à débloquer.
      */
     private Vehicule debloquerVoie(Vector2D voieEntree) {
-        System.out.println("Déblocage : position " + voieEntree);
+        //System.out.println("Déblocage : position " + voieEntree);
 
         for (Vehicule vehicule : vehiculesBloqués) {
             if (terrain.getCellule(voieEntree).getIdVoiture() == vehicule.getId()) {
                 vehicule.setEnAttente(false);
-                System.out.println("Véhicule débloqué : " + vehicule.getId());
+                //System.out.println("Véhicule débloqué : " + vehicule.getId());
                 return vehicule;
             }
         }
@@ -316,7 +316,7 @@ public class Intersection implements IntersectionListener {
      * @param voieEntree La position de la voie d'entrée utilisée par le véhicule d'urgence.
      */
     public void execSortieVehiculeUrgence(Vector2D voieEntree){
-        System.out.println("EXEC SORTIE VEHICULE URGENCE /// voie entree = " + voieEntree);
+        //System.out.println("EXEC SORTIE VEHICULE URGENCE /// voie entree = " + voieEntree);
         //libérer les cases ET les véhicules
         //get les vehicules qui sont en attente pour leur envoyer un signal et les remettre en marche
         ArrayList<Vehicule> vehiculesEnAttente = setEtatCellulesEtVehicules(false, voieEntree);
@@ -333,7 +333,7 @@ public class Intersection implements IntersectionListener {
      * @param voieEntree La position de la voie d'entrée utilisée par le véhicule d'urgence.
      */
     public void execEntreeVehiculeUrgence(Message message, Vector2D voieEntree) {
-        System.out.println("EXEC ENTREE VEHICULE URGENCE /// voie entree = " + voieEntree);
+        //System.out.println("EXEC ENTREE VEHICULE URGENCE /// voie entree = " + voieEntree);
 
         // Bloquer les entrées et envoyer un signal d'arrêt aux véhicules en attente
         ArrayList<Vehicule> vehiculesEnAttente = setEtatCellulesEtVehicules(true, voieEntree);

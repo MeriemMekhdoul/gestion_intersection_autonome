@@ -23,9 +23,9 @@ public class Simulation {
     private TerrainController terrainController;
     private ArrayList<VehiculeController> controleurs;
     private ScheduledExecutorService scheduler;
-    private final int LARGEUR_TERRAIN = 40;
-    private final int HAUTEUR_TERRAIN = 40;
-    private final int LIMITE_VEHICULES = 30;
+    private final int LARGEUR_TERRAIN = 20;
+    private final int HAUTEUR_TERRAIN = 20;
+    private final int LIMITE_VEHICULES = 10;
 
 
     //constructeur par défaut
@@ -86,7 +86,7 @@ public class Simulation {
         Color couleur = Vehicule.genererCouleurAleatoire();
 
 
-        if (random == 1) {
+        if (random == 100) {
             type = TypeVehicule.URGENCE;
             couleur = Color.WHITE;
         }
