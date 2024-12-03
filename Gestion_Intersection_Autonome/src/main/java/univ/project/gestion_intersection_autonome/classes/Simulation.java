@@ -98,7 +98,7 @@ public class Simulation {
         TypeVehicule type = TypeVehicule.VOITURE;
         Color couleur = Vehicule.genererCouleurAleatoire();
 
-        if (random == 1) {
+        if (random == 100) {
             type = TypeVehicule.URGENCE;
             couleur = Color.WHITE;  // Si c'est un véhicule d'urgence, on lui attribue une couleur spéciale.
         }

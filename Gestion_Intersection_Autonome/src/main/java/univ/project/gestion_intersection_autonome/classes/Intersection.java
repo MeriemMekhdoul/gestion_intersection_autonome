@@ -48,6 +48,7 @@ public class Intersection implements IntersectionListener {
     // Carte des véhicules d'urgence présents dans l'intersection et leurs positions
     private Map<VehiculeUrgence, Vector2D> vehiculesUrgencePresents;
 
+
     /**
      * Constructeur de l'intersection.
      *
@@ -67,6 +68,16 @@ public class Intersection implements IntersectionListener {
         intersectionBloquee = false;
         nbVehiculesUrgence = 0;
         vehiculesUrgencePresents = new HashMap<>();
+
+        // Ajouter un shutdown hook pour le nettoyage à la fin de l'exécution
+        Runtime.getRuntime().addShutdownHook(new Thread(this::cleanUp));
+    }
+
+    private void cleanUp() {
+        //Nettoyage de la Configuration
+        if (configuration != null) {
+            configuration.shutdown();
+        }
     }
 
     /**
@@ -96,15 +107,6 @@ public class Intersection implements IntersectionListener {
      */
     synchronized public void ajouterVehicule(Vehicule v, Message m) {
         configuration.nouveauVehicule(v, m);
-    }
-
-    /**
-     * Ajoute temporairement un véhicule dans l'intersection.
-     *
-     * @param v Véhicule à ajouter temporairement
-     */
-    synchronized public void ajouterVehiculeTemp(Vehicule v) {
-        configuration.nouveauVehiculeTemp(v);
     }
 
     /**
@@ -188,6 +190,9 @@ public class Intersection implements IntersectionListener {
      */
     synchronized public List<Vehicule> getVehicules() {
         return configuration.getVehicules();
+    }
+    synchronized public List<Vehicule> getVehicules(Vehicule v) {
+        return configuration.getVehicules(v);
     }
 
     // Partie gestion des écouteurs
@@ -706,6 +711,14 @@ public class Intersection implements IntersectionListener {
 
     public void afficherConfiguration(){
         System.out.println(configuration);
+    }
+
+    public void ajouterTempsAttente(int id, int temps){
+        configuration.ajouterTempsAttente(id,temps);
+    }
+
+    public int getTempsAttente(int id){
+        return configuration.getTempsAttente(id);
     }
 
 
