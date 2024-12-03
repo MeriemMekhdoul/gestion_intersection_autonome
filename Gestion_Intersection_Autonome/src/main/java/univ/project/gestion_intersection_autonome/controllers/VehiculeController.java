@@ -106,9 +106,6 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
             // Mettre à jour l'attribut "entreeIntersection" pour savoir si on arrive de nouveau dans une intersection ou pas
             if (estDansCommunication(nouvellePosition)) {
                 entreeIntersection = true;
-                // Ajouter le véhicule temporairement à la configuration de l'intersection
-                Intersection i = terrain.getIntersection(nouvellePosition);
-                i.ajouterVehiculeTemp(vehicule);
             }
         }
     }
@@ -139,27 +136,29 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
         Intersection intersection = terrain.getIntersection(anciennePosition);
         intersection.addVehiculeControllerListener(this);
 
-        ArrayList<Vector2D> deplacements = gestionIntersection();
-
-        // Dessiner l'itinéraire sur la grille
-        Platform.runLater(() -> terrainController.dessinerItineraire(deplacements, vehicule));
+        ArrayList<Vector2D> deplacements = getItinIntersection();
 
         Message message = new Message();
         message.setObjet(Objetmessage.INFORMATION);
         message.setv1(vehicule);
         message.setItineraire(deplacements);
 
-        intersection.ajouterVehicule(vehicule, message); // L'ajouter à la configuration
+        intersection.ajouterVehicule(vehicule, message); // L'ajouter à la configuration (état = ATTENTE)
+
         ArrayList<Vehicule> vehiculesEngages = intersection.getVehiculesEngages(); // Les véhicules engagés
 
-        List<Vehicule> vehiculesDansIntersection = intersection.getVehicules();
+        //get tous les vehicules avant moi
+        List<Vehicule> vehiculesDansIntersection = intersection.getVehicules(vehicule);
 
-        if (vehiculesDansIntersection.size() == 1) {
+        if (vehiculesDansIntersection.size() == 1) { // le véhicule actuel est présent uniquement
             intersection.editConfig(vehicule, EtatVehicule.ENGAGE);
+            intersection.ajouterTempsAttente(vehicule.getId(),0);
+            // Dessiner l'itinéraire sur la grille
+            Platform.runLater(() -> terrainController.dessinerItineraire(deplacements, vehicule));
             avancerIntersection(deplacements);
-        } else {
-            // Entrer dans le mode négociation, calculs et gestion des priorités
-            // Récupérer les infos (itinéraires) des autres
+        }
+        else {
+            // Récupérer les infos (itinéraires) des autres véhicules
             ArrayList<Message> messagesVoitures = new ArrayList<>();
             for (Vehicule v : vehiculesDansIntersection) {
                 messagesVoitures.add(intersection.getMessage(v));
@@ -172,20 +171,51 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
             for (Message m : messagesVoitures) {
                 if (vehiculesEngages.contains(m.getv1())) {
                     vehiculesEngagesEtItineraires.put(m.getv1(), m.getItineraire());
-                } else
-                    vehiculesAttenteEtItineraires.put(m.getv1(), m.getItineraire());
+                } else {
+                    if(m.getv1().getId() != vehicule.getId())
+                        vehiculesAttenteEtItineraires.put(m.getv1(), m.getItineraire());
+                }
             }
 
-            int tempsAttente = vehicule.calculTempsAttente(vehiculesEngagesEtItineraires,vehiculesAttenteEtItineraires,deplacements);
+            int tempsAttente = vehicule.calculTempsAttenteVehiculesEngages(vehiculesEngagesEtItineraires,deplacements);
+
+            //s'il reste des véhicules en attente à prendre en compte
+            if (!vehiculesAttenteEtItineraires.isEmpty()){
+                System.out.println("VID caller : " + vehicule.getId() + "\n");
+                intersection.afficherConfiguration();
+                //get TA des véhicules en attente
+                for (Vehicule v: vehiculesAttenteEtItineraires.keySet()) {
+                    //get temps attente
+                    int ta = intersection.getTempsAttente(v.getId());
+                    while(ta == -1){ //attendre que le véhiciule en attente devant nous finisse son calcul
+                        pauseEntreMouvements(VITESSE_SIMULATION_MS);
+                        ta = intersection.getTempsAttente(v.getId());
+                    }
+
+                    if(ta>0){
+                        //rallonger l'ancien itinéraire du véhicule en attente après son temps d'attente
+                        ArrayList<Vector2D> nouvelItin = v.rallongerItineraire(vehiculesAttenteEtItineraires.get(v),ta,vehicule.getPosition());
+
+                        //modifier l'itinéraire dans la map vehiculesEtItineraires
+                        vehiculesAttenteEtItineraires.put(v,nouvelItin);
+                    } //sinon laisser tel quel
+                }
+                //check conflit avec ces vehicules et update temps d'attente
+                tempsAttente += vehicule.calculTempsAttenteVehiculesAttente(vehiculesAttenteEtItineraires,tempsAttente,deplacements);
+            }
+
+            //s'il n'y en a pas ou après avoir fait les calculs
+            intersection.ajouterTempsAttente(vehicule.getId(),tempsAttente);
             System.out.println("VEHICLE ACTUEL id = " + vehicule.getId() + "pos = " + vehicule.getPosition() + "temps attente estimé = " + tempsAttente + " mon itin: " + deplacements);
             pauseEntreMouvements(tempsAttente * VITESSE_SIMULATION_MS);
 
             intersection.editConfig(vehicule, EtatVehicule.ENGAGE);
-
+            // Dessiner l'itinéraire sur la grille
+            Platform.runLater(() -> terrainController.dessinerItineraire(deplacements, vehicule));
             avancerIntersection(deplacements);
 
             Platform.runLater(() -> terrainController.effacerItineraire(vehicule, anciennePosition));
-            // À la sortie, envoyer un message de SORTIE (à qui ??) => intersection ou véhicules destinataires ?
+
         }
 
         intersection.supprimerVehicule(vehicule);
@@ -201,7 +231,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
      *
      * @return Une liste de positions représentant l'itinéraire dans l'intersection.
      */
-    public ArrayList<Vector2D> gestionIntersection() {
+    public ArrayList<Vector2D> getItinIntersection() {
         List<Vector2D> itineraire = vehicule.getItineraire();
         ArrayList<Vector2D> deplacements = new ArrayList<>();
 
@@ -340,7 +370,8 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
      */
     protected void notifyListeners(Message message) {
         for (VehiculeControllerListener listener : listeners) {
-            if (!listener.equals(message.getv1())) {
+            if (!listener.equals(message.getv1())) //TODO: vehiculeController(listener) != vehicule (m.getv1())
+            {
                 listener.messageVc(message);
             }
         }
