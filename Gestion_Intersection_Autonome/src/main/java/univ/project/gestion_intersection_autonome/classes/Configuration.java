@@ -1,20 +1,19 @@
 package univ.project.gestion_intersection_autonome.classes;
 
-import javafx.application.Platform;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 
-import java.lang.reflect.Field;
+import univ.project.gestion_intersection_autonome.controllers.VehiculeController;
+
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 
-public class Configuration {
+public class Configuration{
     private List<Vehicule> vehicules;
     private ConcurrentHashMap<Vehicule, Message> tempsArrivee;
     private ConcurrentHashMap<Integer, EtatVehicule> etatVehicule;
+    private ConcurrentHashMap<Integer, Integer> tempsAttente;
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
 
     /**
      * Constructeur par défaut de la configuration.
@@ -24,48 +23,8 @@ public class Configuration {
         vehicules = new CopyOnWriteArrayList<>();
         tempsArrivee = new ConcurrentHashMap<>();
         etatVehicule = new ConcurrentHashMap<>();
-    }
-
-    /**
-     * Ajoute un véhicule à la configuration et crée un label pour l'afficher dans la VBox.
-     * @param vehicule Le véhicule à ajouter.
-     */
-    public void ajouterVehiculeAvecLabel(Vehicule vehicule) {
-        vehicules.add(vehicule);
-
-        Label label = new Label(vehicule.getType().toString() + " " + vehicule.getId() + " | " + getNomCouleur(vehicule.getCouleur()) + " | " + etatVehicule.get(vehicule.getId()).toString());
-        label.setId("vehicule-" + vehicule.getId());
-        label.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
-
-    }
-
-
-    /**
-     * Obtient le nom d'une couleur à partir de l'objet Color.
-     * @param couleur L'objet Color à convertir en nom.
-     * @return Le nom de la couleur en tant que chaîne de caractères.
-     */
-    private String getNomCouleur(Color couleur) {
-        for (Field field : Color.class.getFields()) {
-            try {
-                if (field.getType().equals(Color.class) && field.get(null).equals(couleur)) {
-                    return field.getName();
-                }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-        return "Couleur personnalisée";
-    }
-
-
-    /**
-     * Retourne la liste des véhicules dans la configuration (temporaire).
-     * @return Une liste des véhicules présents dans la configuration.
-     */
-
-    synchronized public List<Vehicule> getVehiculesTemp() {
-        return vehicules;
+        tempsAttente = new ConcurrentHashMap<>();
+        lancerDecrementationAutomatique(); // Démarrer le compte à rebours automatiquement
     }
 
     /**
@@ -76,6 +35,20 @@ public class Configuration {
         return new ArrayList<>(tempsArrivee.keySet());
     }
 
+    public List<Vehicule> getVehicules(Vehicule v) {
+        List<Vehicule> vehiculesAvant = new ArrayList<>();
+
+        for (Vehicule vehicule : vehicules) {
+            if (vehicule.equals(v)) {
+                break; // On arrête la boucle dès qu'on atteint le véhicule `v`
+            }
+            vehiculesAvant.add(vehicule); // Ajouter les véhicules avant `v`
+        }
+
+        return vehiculesAvant;
+    }
+
+
     /**
      * Ajoute un véhicule et son message associé à la configuration.
      * @param v Le véhicule à ajouter.
@@ -84,19 +57,9 @@ public class Configuration {
     synchronized public void nouveauVehicule(Vehicule v, Message m){
         if(!vehicules.contains(v)) {
             vehicules.add(v);
-        }
-        tempsArrivee.put(v, m);
-        etatVehicule.put(v.getId(), EtatVehicule.ATTENTE);
-    }
-
-    /**
-     * Ajoute temporairement un véhicule sans message associé.
-     * @param v Le véhicule à ajouter.
-     */
-    synchronized public void nouveauVehiculeTemp(Vehicule v){
-        if(!vehicules.contains(v)) {
-            vehicules.add(v);
+            tempsArrivee.put(v, m);
             etatVehicule.put(v.getId(), EtatVehicule.ATTENTE);
+            tempsAttente.put(v.getId(),-1);
         }
     }
 
@@ -147,6 +110,7 @@ public class Configuration {
         vehicules.remove(v);
         tempsArrivee.remove(v);
         etatVehicule.remove(v.getId());
+        tempsAttente.remove(v.getId());
     }
 
     /**
@@ -184,7 +148,7 @@ public class Configuration {
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
-        s.append("id Véhicule | Objet Message | Temps Arrivée | État\n");
+        s.append("id Véhicule | Objet Message | Temps Arrivée | État | tempsAttente\n");
         s.append("----------------------------------------------------\n");
 
         for (Vehicule v : vehicules) {
@@ -194,8 +158,9 @@ public class Configuration {
             String objetMessage = (m != null && m.getObjet() != null) ? m.getObjet().toString() : "Aucun message";
             String tempsArriveeStr = (m != null && m.getT() != null) ? m.getT().toString() : "Inconnu";
             String etatStr = (etat != null) ? etat.toString() : "État inconnu";
+            int tempAttente = tempsAttente.get(v.getId());
 
-            s.append(String.format("id = %d | %s | %s | %s\n", v.getId(), objetMessage, tempsArriveeStr, etatStr));
+            s.append(String.format("id = %d | %s | %s | %s | %d\n", v.getId(), objetMessage, tempsArriveeStr, etatStr, tempAttente));
         }
         return s.toString();
     }
@@ -211,5 +176,52 @@ public class Configuration {
                 return v;
         }
         return null;
+    }
+
+    /**
+     * Lancer un compte à rebours qui décrémente les temps d'attente toutes les VAR_CONST millisecondes.
+     */
+    private void lancerDecrementationAutomatique() {
+        scheduler.scheduleAtFixedRate(() -> {
+            tempsAttente.forEach((id, temps) -> {
+                if (temps > 0) { // Décrémenter uniquement si temps > 0
+                    tempsAttente.put(id, temps - 1);
+                }
+            });
+        }, 0, VehiculeController.VITESSE_SIMULATION_MS, TimeUnit.MILLISECONDS);
+    }
+
+
+    /**
+     * Ajoute ou met à jour le temps d'attente d'un véhicule.
+     * @param id    L'ID du véhicule.
+     * @param temps Le temps d'attente à ajouter ou mettre à jour.
+     */
+    public synchronized void ajouterTempsAttente(int id, int temps) {
+        tempsAttente.put(id, temps);
+    }
+
+    /**
+     * Retourne le temps d'attente d'un véhicule donné.
+     * @param id L'ID du véhicule.
+     * @return Le temps d'attente actuel du véhicule.
+     */
+    public int getTempsAttente(int id) {
+        return tempsAttente.getOrDefault(id, -1);
+    }
+
+
+    /**
+     * Méthode pour arrêter proprement toutes les ressources gérées par la configuration.
+     */
+    public void shutdown() {
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(1, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            scheduler.shutdownNow();
+        }
     }
 }
