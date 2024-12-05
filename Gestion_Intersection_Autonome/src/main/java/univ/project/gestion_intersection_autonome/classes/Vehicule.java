@@ -57,7 +57,7 @@ public class Vehicule {
     /**
      * Couleur du véhicule.
      */
-    private final Color couleur;
+    private Color couleur;
 
     /**
      * Constructeur paramétré.
@@ -129,6 +129,10 @@ public class Vehicule {
         return couleur;
     }
 
+    public void setCouleur(Color couleur) {
+        this.couleur = couleur;
+    }
+
     @Override
     public String toString() {
         return "Vehicule{" +
@@ -158,7 +162,7 @@ public class Vehicule {
      */
     public synchronized void setEnAttente(boolean enAttente) {
         this.enAttente = enAttente;
-        System.out.println("Vehicule : " + id + " état changé et mis à : " + enAttente);
+//        System.out.println("Vehicule : " + id + " état changé et mis à : " + enAttente);
     }
 
 
