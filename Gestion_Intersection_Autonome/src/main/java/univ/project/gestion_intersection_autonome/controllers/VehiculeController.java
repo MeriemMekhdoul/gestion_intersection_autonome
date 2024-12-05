@@ -1,15 +1,15 @@
 package univ.project.gestion_intersection_autonome.controllers;
 
 import javafx.application.Platform;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import univ.project.gestion_intersection_autonome.classes.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Contrôleur de véhicule qui gère le déplacement du véhicule sur le terrain,
@@ -27,6 +27,26 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
     protected IntersectionListener intersectionListener; // Écouteur pour l'intersection
     protected boolean enPause = false;
     public static final int VITESSE_SIMULATION_MS = 300;
+    protected boolean togglePoliceImage = false;
+
+    public static final Map<Image, Color> imageToColorMap = new HashMap<>();
+
+    static {
+        try {
+            imageToColorMap.put(new Image(VehiculeController.class.getResource("/images/cars/voiture_rouge.png").toExternalForm()), Color.CRIMSON);
+            imageToColorMap.put(new Image(VehiculeController.class.getResource("/images/cars/voiture_rose.png").toExternalForm()), Color.DEEPPINK);
+            imageToColorMap.put(new Image(VehiculeController.class.getResource("/images/cars/voiture_violette.png").toExternalForm()), Color.MEDIUMPURPLE);
+            imageToColorMap.put(new Image(VehiculeController.class.getResource("/images/cars/voiture_jaune.png").toExternalForm()), Color.GOLD);
+            imageToColorMap.put(new Image(VehiculeController.class.getResource("/images/cars/voiture_verte.png").toExternalForm()), Color.MEDIUMSEAGREEN);
+            imageToColorMap.put(new Image(VehiculeController.class.getResource("/images/cars/voiture_bleue.png").toExternalForm()), Color.LIGHTSEAGREEN);
+            imageToColorMap.put(new Image(VehiculeController.class.getResource("/images/cars/voiture_orange.png").toExternalForm()), Color.ORANGE);
+            imageToColorMap.put(new Image(VehiculeController.class.getResource("/images/cars/police1.png").toExternalForm()), Color.WHITE);
+            imageToColorMap.put(new Image(VehiculeController.class.getResource("/images/cars/police2.png").toExternalForm()), Color.WHITE);
+        }
+        catch (Exception e) {
+            System.err.println("Erreur lors du chargement des images : " + e.getMessage());
+        }
+    }
 
     /**
      * Constructeur du contrôleur de véhicule.
@@ -61,7 +81,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
                         wait(); // Attend que 'enPause' soit false
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
-                        System.out.println("Le thread du véhicule a été interrompu.");
+//                        System.out.println("Le thread du véhicule a été interrompu.");
                     }
                 }
             }
@@ -181,7 +201,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
 
             //s'il reste des véhicules en attente à prendre en compte
             if (!vehiculesAttenteEtItineraires.isEmpty()){
-                System.out.println("VID caller : " + vehicule.getId() + "\n");
+//                System.out.println("VID caller : " + vehicule.getId() + "\n");
                 intersection.afficherConfiguration();
                 //get TA des véhicules en attente
                 for (Vehicule v: vehiculesAttenteEtItineraires.keySet()) {
@@ -206,7 +226,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
 
             //s'il n'y en a pas ou après avoir fait les calculs
             intersection.ajouterTempsAttente(vehicule.getId(),tempsAttente);
-            System.out.println("VEHICLE ACTUEL id = " + vehicule.getId() + "pos = " + vehicule.getPosition() + "temps attente estimé = " + tempsAttente + " mon itin: " + deplacements);
+//            System.out.println("VEHICLE ACTUEL id = " + vehicule.getId() + "pos = " + vehicule.getPosition() + "temps attente estimé = " + tempsAttente + " mon itin: " + deplacements);
             pauseEntreMouvements(tempsAttente * VITESSE_SIMULATION_MS);
 
             intersection.editConfig(vehicule, EtatVehicule.ENGAGE);
@@ -300,9 +320,22 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
     /**
      * Met à jour l'interface graphique pour refléter la nouvelle position du véhicule.
      */
-    protected void mettreAJourGraphique() {
-        Platform.runLater(() -> terrainController.animerDeplacementVehicule(vehiculeShape, anciennePosition, nouvellePosition, VITESSE_SIMULATION_MS));
+    protected void mettreAJourGraphique()
+    {
+        Platform.runLater(() -> {
+            if (vehicule.getType() == TypeVehicule.URGENCE) {
+                // Alterner les images pour l'animation du gyrophare
+                Image nextImage = togglePoliceImage ? getImageByPath("/images/cars/police1.png") : getImageByPath("/images/cars/police2.png");
+                vehiculeShape.setFill(new ImagePattern(nextImage));
+                togglePoliceImage = !togglePoliceImage;
+            }
+
+            // Animer le déplacement
+            terrainController.animerDeplacementVehicule(vehiculeShape, anciennePosition, nouvellePosition, VITESSE_SIMULATION_MS);
+        });
     }
+
+
 
     /**
      * Met en pause le thread du véhicule pour un certain temps.
@@ -324,25 +357,50 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
      * @return La forme graphique représentant le véhicule.
      */
     protected Shape creerVehiculeShape(TypeVehicule typeVehicule) {
-        Color couleurVehicule = vehicule.getCouleur();
-        Shape shape;
+        Shape shape = new Rectangle(terrainController.TAILLE_CELLULE, terrainController.TAILLE_CELLULE);
+        Image assignedImage = null;
 
-        double radius = (double) terrainController.TAILLE_CELLULE / 2; // Ajuster si nécessaire
+        if (typeVehicule == TypeVehicule.URGENCE) {
+            assignedImage = togglePoliceImage
+                    ? getImageByPath("/images/cars/police1.png")
+                    : getImageByPath("/images/cars/police2.png");
+            togglePoliceImage = !togglePoliceImage;
+        } else {
+            List<Image> regularImages = new ArrayList<>(imageToColorMap.keySet());
+            regularImages.removeIf(img -> imageToColorMap.get(img).equals(Color.WHITE)); // Exclure les images de police
 
-        switch (typeVehicule) {
-            case URGENCE -> shape = new Circle(radius, Color.BLUE);
-            default -> shape = new Circle(radius, couleurVehicule);
+            Random random = new Random();
+            assignedImage = regularImages.get(random.nextInt(regularImages.size()));
         }
 
-        double initialX = vehicule.getPosition().getX() * terrainController.TAILLE_CELLULE + radius;
-        double initialY = vehicule.getPosition().getY() * terrainController.TAILLE_CELLULE + radius;
+        if (assignedImage == null) {
+            System.err.println("Aucune image assignée au véhicule de type : " + typeVehicule);
+            return shape; // Retourne une forme par défaut ou gérez comme vous le souhaitez
+        }
 
+        shape.setFill(new ImagePattern(assignedImage));
+        vehicule.setCouleur(imageToColorMap.get(assignedImage));
+
+        // Positionnement initial du véhicule
+        double initialX = vehicule.getPosition().getX() * terrainController.TAILLE_CELLULE;
+        double initialY = vehicule.getPosition().getY() * terrainController.TAILLE_CELLULE;
         shape.setTranslateX(initialX);
         shape.setTranslateY(initialY);
 
         Platform.runLater(() -> terrainController.vehiclePane.getChildren().add(shape));
 
         return shape;
+    }
+
+
+    /**
+     * Méthode utilitaire pour récupérer une image par chemin.
+     *
+     * @param path Chemin relatif de l'image.
+     * @return L'image correspondante ou null si non trouvée.
+     */
+    private Image getImageByPath(String path) {
+        return imageToColorMap.keySet().stream().filter(img -> img.getUrl().contains(path)).findFirst().orElse(null);
     }
 
     /**
