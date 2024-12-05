@@ -1,11 +1,14 @@
 package univ.project.gestion_intersection_autonome.controllers;
 
 import javafx.animation.TranslateTransition;
+import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Shape;
+import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
 import univ.project.gestion_intersection_autonome.classes.*;
 import javafx.fxml.FXML;
@@ -44,13 +47,18 @@ public class TerrainController implements Initializable {
     private Simulation simulation;
 
     /** Taille de chaque cellule de la grille. */
-    public final int TAILLE_CELLULE = 15;
+    public final int TAILLE_CELLULE = 20;
 
     /** Map associant les positions à leurs StackPane correspondants dans la grille. */
     private Map<Vector2D, StackPane> mapStackPanes = new HashMap<>();
 
     /** Map associant les positions aux rectangles représentant les itinéraires des véhicules. */
     private Map<Vector2D, ArrayList<Rectangle>> rectanglesItineraires = new HashMap<>();
+
+    private static final Image intersectionImage = new Image(TerrainController.class.getResource("/images/terrain/intersection.jpg").toExternalForm());
+    private static final Image roadImage = new Image(TerrainController.class.getResource("/images/terrain/road.jpg").toExternalForm());
+    private static final Image grassImage = new Image(TerrainController.class.getResource("/images/terrain/grass.jpg").toExternalForm());
+
 
     /**
      * Constructeur du contrôleur de terrain.
@@ -104,7 +112,7 @@ public class TerrainController implements Initializable {
             for (int j = 0; j < terrain.getHauteur(); j++) {
                 StackPane stackPane = new StackPane();
                 Rectangle rectBackground = new Rectangle(TAILLE_CELLULE, TAILLE_CELLULE);
-                setCouleurCellule(rectBackground, grille[i][j]);
+                setFondCellule(rectBackground, grille[i][j]);
                 stackPane.getChildren().add(rectBackground);
 
                 if (grille[i][j].getTypeZone() == TypeZone.CONFLIT || grille[i][j].getTypeZone() == TypeZone.COMMUNICATION) {
@@ -132,7 +140,7 @@ public class TerrainController implements Initializable {
             if (cellule != null && (cellule.getTypeZone() == TypeZone.COMMUNICATION || cellule.getTypeZone() == TypeZone.CONFLIT)) {
                 StackPane stackPane = mapStackPanes.get(position);
                 if (stackPane != null) {
-                    Rectangle rectItineraire = new Rectangle(TAILLE_CELLULE, TAILLE_CELLULE);
+                    Rectangle rectItineraire = new Rectangle(TAILLE_CELLULE / 4, TAILLE_CELLULE / 4);
                     rectItineraire.setFill(vehicule.getCouleur().deriveColor(0, 1.0, 1.0, 0.5));
                     rectItineraire.setUserData("rectItineraire_" + vehicule.getId());
                     stackPane.getChildren().add(rectItineraire);
@@ -170,23 +178,25 @@ public class TerrainController implements Initializable {
     }
 
     /**
-     * Définit la couleur d'une cellule en fonction de son type.
+     * Définit le fond d'une cellule en fonction de son type.
      *
      * @param rect    Le rectangle représentant la cellule.
      * @param cellule La cellule associée.
      */
-    private void setCouleurCellule(Rectangle rect, Cellule cellule) {
-        if (cellule.estValide()) {
-            rect.setFill(Color.DARKSLATEGRAY);
-            if (cellule.getTypeZone() == TypeZone.CONFLIT) {
-                rect.setFill(Color.BLACK);
-            } else if (cellule.getTypeZone() == TypeZone.COMMUNICATION) {
-                rect.setFill(Color.BLACK);
+    private void setFondCellule(Rectangle rect, Cellule cellule)
+    {
+        if (cellule.estValide())
+        {
+            rect.setFill(new ImagePattern(roadImage));
+
+            if (cellule.getTypeZone() == TypeZone.CONFLIT || cellule.getTypeZone() == TypeZone.COMMUNICATION) {
+                rect.setFill(new ImagePattern(intersectionImage));
             }
         } else {
-            rect.setFill(Color.FORESTGREEN);
+            rect.setFill(new ImagePattern(grassImage));
         }
     }
+
 
     /**
      * Met à jour la position d'un véhicule sur la grille.
@@ -248,17 +258,77 @@ public class TerrainController implements Initializable {
      * @param nouvellePosition La position finale du véhicule.
      * @param dureeMs          La durée de l'animation en millisecondes.
      */
-    public void animerDeplacementVehicule(Shape vehiculeShape, Vector2D anciennePosition, Vector2D nouvellePosition, int dureeMs) {
-        // Calculer les nouvelles coordonnées du véhicule sur la grille
-        double newX = nouvellePosition.getX() * TAILLE_CELLULE + TAILLE_CELLULE / 2;
-        double newY = nouvellePosition.getY() * TAILLE_CELLULE + TAILLE_CELLULE / 2;
+    public void animerDeplacementVehicule(Shape vehiculeShape, Vector2D anciennePosition, Vector2D nouvellePosition, int dureeMs)
+    {
+        double centerX = nouvellePosition.getX() * TAILLE_CELLULE + TAILLE_CELLULE / 2;
+        double centerY = nouvellePosition.getY() * TAILLE_CELLULE + TAILLE_CELLULE / 2;
 
-        // Créer une transition pour déplacer le véhicule
+        // calcul rotation
+        Direction direction = getDirection(anciennePosition, nouvellePosition);
+        int rotation = getRotationFromDirection(direction);
+
+        // centrage du véhicule
+        double vehiculeWidth = ((Rectangle) vehiculeShape).getWidth();
+        double vehiculeHeight = ((Rectangle) vehiculeShape).getHeight();
+        double offsetX = centerX - vehiculeWidth / 2;
+        double offsetY = centerY - vehiculeHeight / 2;
+
+        // rotation
+        vehiculeShape.getTransforms().clear();
+        vehiculeShape.getTransforms().add(new Rotate(rotation, vehiculeWidth / 2, vehiculeHeight / 2));
+
+        // animation
         TranslateTransition transition = new TranslateTransition(Duration.millis(dureeMs), vehiculeShape);
-        transition.setToX(newX);
-        transition.setToY(newY);
+        transition.setToX(offsetX);
+        transition.setToY(offsetY);
 
-        // Lancer l'animation
         transition.play();
+    }
+
+
+    public Direction getDirection(Vector2D anciennePosition, Vector2D nouvellePosition)
+    {
+        int deltaX = nouvellePosition.getX() - anciennePosition.getX();
+        int deltaY = nouvellePosition.getY() - anciennePosition.getY();
+
+        if (deltaX == 0 && deltaY == 1) {
+            return Direction.SUD;
+        }
+        else if (deltaX == 0 && deltaY == -1) {
+            return Direction.NORD;
+        }
+        else if (deltaX == 1 && deltaY == 0) {
+            return Direction.EST;
+        }
+        else if (deltaX == -1 && deltaY == 0) {
+            return Direction.OUEST;
+        }
+        else if (deltaX == 1 && deltaY == 1) {
+            return Direction.SUDEST;
+        }
+        else if (deltaX == -1 && deltaY == 1) {
+            return Direction.SUDOUEST;
+        }
+        else if (deltaX == 1 && deltaY == -1) {
+            return Direction.NORDEST;
+        }
+        else {
+            return Direction.NORDOUEST;
+        }
+    }
+
+    public int getRotationFromDirection(Direction direction)
+    {
+        return switch (direction)
+        {
+            case NORD -> 0;
+            case SUD -> 180;
+            case EST -> 90;
+            case OUEST -> -90;
+            case NORDEST -> 45;
+            case NORDOUEST -> -45;
+            case SUDEST -> 135;
+            case SUDOUEST -> -135;
+        };
     }
 }
