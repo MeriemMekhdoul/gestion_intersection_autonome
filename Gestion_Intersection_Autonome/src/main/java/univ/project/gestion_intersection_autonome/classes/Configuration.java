@@ -158,9 +158,9 @@ public class Configuration{
             String objetMessage = (m != null && m.getObjet() != null) ? m.getObjet().toString() : "Aucun message";
             String tempsArriveeStr = (m != null && m.getT() != null) ? m.getT().toString() : "Inconnu";
             String etatStr = (etat != null) ? etat.toString() : "État inconnu";
-            int tempAttente = tempsAttente.get(v.getId());
+            String tempAttente = (tempsAttente.get(v.getId()) != null) ? tempsAttente.get(v.getId()).toString() : "temps null";
 
-            s.append(String.format("id = %d | %s | %s | %s | %d\n", v.getId(), objetMessage, tempsArriveeStr, etatStr, tempAttente));
+            s.append(String.format("id = %d | %s | %s | %s | %s\n", v.getId(), objetMessage, tempsArriveeStr, etatStr, tempAttente));
         }
         return s.toString();
     }
