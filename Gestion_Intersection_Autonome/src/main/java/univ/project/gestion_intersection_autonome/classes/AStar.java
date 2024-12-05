@@ -26,7 +26,7 @@ public class AStar {
      *         ou une liste vide si aucun chemin n'est trouvé.
      */
     public List<Vector2D> trouverChemin(Vector2D positionDepart, Vector2D positionArrivee) {
-        System.out.println("Recherche du chemin de " + positionDepart + " à " + positionArrivee);
+//        System.out.println("Recherche du chemin de " + positionDepart + " à " + positionArrivee);
 
         // Liste de priorité des noeuds à explorer
         PriorityQueue<Noeud> openList = new PriorityQueue<>();

@@ -85,7 +85,7 @@ public class Configuration{
         if (vehicule != null) {
             etatVehicule.put(id, etat);
         } else {
-            System.out.println("Véhicule avec l'ID " + id + " non trouvé.");
+//            System.out.println("Véhicule avec l'ID " + id + " non trouvé.");
         }
     }
 

@@ -112,7 +112,7 @@ public class VehiculeUrgenceController extends VehiculeController {
             intersection.addVehiculeControllerListener(this);
             addIntersectionListener(intersection);
 
-            System.out.println("Embouteillage détecté par le véhicule d'urgence " + vehicule.getId());
+//            System.out.println("Embouteillage détecté par le véhicule d'urgence " + vehicule.getId());
             envoyerSignalUrgence(Objetmessage.PASSAGE);
         }
     }
@@ -138,7 +138,7 @@ public class VehiculeUrgenceController extends VehiculeController {
         message.setv1(vehicule);
         message.setEntreeUrgence(vehicule.getPosition().copy());
 
-        System.out.println("Signal d'urgence envoyé à l'intersection par le véhicule " + vehicule.getId());
+//        System.out.println("Signal d'urgence envoyé à l'intersection par le véhicule " + vehicule.getId());
         sendMessageToIntersections(message);
         signalEnvoye = true;
     }

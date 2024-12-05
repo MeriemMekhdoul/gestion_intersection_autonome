@@ -244,10 +244,10 @@ public class Intersection implements IntersectionListener {
      */
     @Override
     public void messageIntersection(Message message) {
-        System.out.println("Le véhicule de type \"" + message.getv1().getType() + "\" et id \"" + message.getv1().getId() +
-                "\" envoie ce message : " + message.getT() + ", objet : " + message.getObjet() +
-                ", itinéraire : " + message.getItineraire());
-        System.out.println("recu");
+//        System.out.println("Le véhicule de type \"" + message.getv1().getType() + "\" et id \"" + message.getv1().getId() +
+//                "\" envoie ce message : " + message.getT() + ", objet : " + message.getObjet() +
+//                ", itinéraire : " + message.getItineraire());
+//        System.out.println("recu");
     }
 
     // Partie gestion des contrôleurs de véhicules
@@ -710,7 +710,7 @@ public class Intersection implements IntersectionListener {
     }
 
     public void afficherConfiguration(){
-        System.out.println(configuration);
+        //System.out.println(configuration);
     }
 
     public void ajouterTempsAttente(int id, int temps){
