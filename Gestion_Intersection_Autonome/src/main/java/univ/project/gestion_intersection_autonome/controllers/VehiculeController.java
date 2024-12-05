@@ -284,7 +284,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
 
                 // attente libération
                 //while (terrain.getCellule(pos).estOccupee()) {
-                    //System.out.println("Attente libération cellule");
+                    //System.out.println("VID = " + vehicule.getId() + ": attente libération cellule");
                     pauseEntreMouvements(VITESSE_SIMULATION_MS);
                 //}
             }
@@ -499,6 +499,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
     public void reprendreExecution() {
         synchronized (this) { // Synchronisation sur l'objet courant
             enPause = false;
+            vehicule.setEnAttente(false);
             System.out.println("Véhicule reprend son déplacement");
             notify(); // Réveille un thread en attente
         }
@@ -510,6 +511,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
     public void mettreEnPause() {
         synchronized (this) { // Synchronisation sur l'objet courant
             enPause = true;
+            vehicule.setEnAttente(true);
             System.out.println("Véhicule mis en pause");
             while (enPause) { // Boucle pour rester en attente tant que le véhicule est en pause
                 try {

@@ -59,6 +59,8 @@ public class Vehicule {
      */
     private Color couleur;
 
+
+
     /**
      * Constructeur paramétré.
      *
@@ -165,6 +167,9 @@ public class Vehicule {
 //        System.out.println("Vehicule : " + id + " état changé et mis à : " + enAttente);
     }
 
+    public synchronized boolean isEnAttente() {
+        return this.enAttente;
+    }
 
     /**
      * Gère les conflits avec les véhicules en attente et calcule le temps d'attente supplémentaire
@@ -340,7 +345,7 @@ public class Vehicule {
             // Inverser la sous-partie pour vérifier dans autreItineraire
             for (int j = 0; j < autreItineraire.size() - 1; j++) {
                 if (autreItineraire.get(j).equals(second) && autreItineraire.get(j + 1).equals(first)) {
-                    return autreItineraire.size() -1;
+                    return autreItineraire.size();
                 }
             }
         }

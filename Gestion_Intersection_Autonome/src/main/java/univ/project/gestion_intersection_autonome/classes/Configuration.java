@@ -185,7 +185,9 @@ public class Configuration{
         scheduler.scheduleAtFixedRate(() -> {
             tempsAttente.forEach((id, temps) -> {
                 if (temps > 0) { // Décrémenter uniquement si temps > 0
-                    tempsAttente.put(id, temps - 1);
+                    Vehicule v = getVehicule(id);
+                    if(!v.isEnAttente())
+                        tempsAttente.put(id, temps - 1);
                 }
             });
         }, 0, VehiculeController.VITESSE_SIMULATION_MS, TimeUnit.MILLISECONDS);
