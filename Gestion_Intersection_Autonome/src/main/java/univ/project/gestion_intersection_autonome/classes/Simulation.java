@@ -27,8 +27,8 @@ public class Simulation {
     private TerrainController terrainController;
     private ArrayList<VehiculeController> controleurs;
     private ScheduledExecutorService scheduler;
-    private final int LARGEUR_TERRAIN = 40;
-    private final int HAUTEUR_TERRAIN = 40;
+    private final int LARGEUR_TERRAIN = 20;
+    private final int HAUTEUR_TERRAIN = 20;
     private final int LIMITE_VEHICULES = 20;
 
     /**

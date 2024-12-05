@@ -26,7 +26,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
     protected List<VehiculeControllerListener> listeners = new ArrayList<>();
     protected IntersectionListener intersectionListener; // Écouteur pour l'intersection
     protected boolean enPause = false;
-    public static final int VITESSE_SIMULATION_MS = 300;
+    public static final int VITESSE_SIMULATION_MS = 500;
 
     /**
      * Constructeur du contrôleur de véhicule.
@@ -264,7 +264,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
 
                 // attente libération
                 //while (terrain.getCellule(pos).estOccupee()) {
-                    //System.out.println("Attente libération cellule");
+                    //System.out.println("VID = " + vehicule.getId() + ": attente libération cellule");
                     pauseEntreMouvements(VITESSE_SIMULATION_MS);
                 //}
             }
@@ -327,15 +327,15 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
         Color couleurVehicule = vehicule.getCouleur();
         Shape shape;
 
-        double radius = (double) terrainController.TAILLE_CELLULE / 2; // Ajuster si nécessaire
+        double radius = (double) terrainController.TAILLE_CELLULE / 4; // Ajuster si nécessaire
 
         switch (typeVehicule) {
             case URGENCE -> shape = new Circle(radius, Color.BLUE);
             default -> shape = new Circle(radius, couleurVehicule);
         }
 
-        double initialX = vehicule.getPosition().getX() * terrainController.TAILLE_CELLULE + radius;
-        double initialY = vehicule.getPosition().getY() * terrainController.TAILLE_CELLULE + radius;
+        double initialX = vehicule.getPosition().getX() * terrainController.TAILLE_CELLULE/2 + radius;
+        double initialY = vehicule.getPosition().getY() * terrainController.TAILLE_CELLULE/2 + radius;
 
         shape.setTranslateX(initialX);
         shape.setTranslateY(initialY);
@@ -441,6 +441,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
     public void reprendreExecution() {
         synchronized (this) { // Synchronisation sur l'objet courant
             enPause = false;
+            vehicule.setEnAttente(false);
             System.out.println("Véhicule reprend son déplacement");
             notify(); // Réveille un thread en attente
         }
@@ -452,6 +453,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
     public void mettreEnPause() {
         synchronized (this) { // Synchronisation sur l'objet courant
             enPause = true;
+            vehicule.setEnAttente(true);
             System.out.println("Véhicule mis en pause");
             while (enPause) { // Boucle pour rester en attente tant que le véhicule est en pause
                 try {

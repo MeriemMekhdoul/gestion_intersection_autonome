@@ -44,7 +44,7 @@ public class TerrainController implements Initializable {
     private Simulation simulation;
 
     /** Taille de chaque cellule de la grille. */
-    public final int TAILLE_CELLULE = 15;
+    public final int TAILLE_CELLULE = 30;
 
     /** Map associant les positions à leurs StackPane correspondants dans la grille. */
     private Map<Vector2D, StackPane> mapStackPanes = new HashMap<>();
