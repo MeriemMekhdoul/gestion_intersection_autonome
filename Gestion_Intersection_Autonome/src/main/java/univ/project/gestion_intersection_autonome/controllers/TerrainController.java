@@ -288,33 +288,51 @@ public class TerrainController implements Initializable {
 
     public Direction getDirection(Vector2D anciennePosition, Vector2D nouvellePosition)
     {
+        Direction direction = Direction.NORD;
+
+        // fixe la position de départ
+        if (anciennePosition.equals(nouvellePosition))
+        {
+            int x = nouvellePosition.getX();
+            int y = nouvellePosition.getY();
+
+            if (y == 0) {
+                direction = Direction.SUD;
+            }
+            else if (x == 0) {
+                direction = Direction.EST;
+            }
+        }
+
         int deltaX = nouvellePosition.getX() - anciennePosition.getX();
         int deltaY = nouvellePosition.getY() - anciennePosition.getY();
 
         if (deltaX == 0 && deltaY == 1) {
-            return Direction.SUD;
+            direction = Direction.SUD;
         }
         else if (deltaX == 0 && deltaY == -1) {
-            return Direction.NORD;
+            direction = Direction.NORD;
         }
         else if (deltaX == 1 && deltaY == 0) {
-            return Direction.EST;
+            direction = Direction.EST;
         }
         else if (deltaX == -1 && deltaY == 0) {
-            return Direction.OUEST;
+            direction = Direction.OUEST;
         }
         else if (deltaX == 1 && deltaY == 1) {
-            return Direction.SUDEST;
+            direction = Direction.SUDEST;
         }
         else if (deltaX == -1 && deltaY == 1) {
-            return Direction.SUDOUEST;
+            direction = Direction.SUDOUEST;
         }
         else if (deltaX == 1 && deltaY == -1) {
-            return Direction.NORDEST;
+            direction = Direction.NORDEST;
         }
-        else {
-            return Direction.NORDOUEST;
+        else if (deltaX == -1 && deltaY == -1) {
+            direction = Direction.NORDOUEST;
         }
+        
+        return direction;
     }
 
     public int getRotationFromDirection(Direction direction)
