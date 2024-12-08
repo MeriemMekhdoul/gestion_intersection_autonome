@@ -188,8 +188,10 @@ public class Vehicule {
 
             // Calculer l'itinéraire effectif après le temps d'attente actuel
             ArrayList<Vector2D> autreItin = extraireItineraireApresTemps(itineraireVehiculeAttente, tempsAttente);
+            System.out.println("[V_ATTENTE]: VID = " + this.getId() + " itin = " + monItineraire + " TRAITE : ID = " + entry.getKey().getId() + " pos = " + entry.getKey().getPosition() + " itin = " + autreItin);
 
             int temp = detectionConflitDiagonale(monItineraire,autreItin);
+
             //TODO: c'est le meme code que dans calculTempsAttenteVehiculesengages
             if (temp == 0){ //diagonale non détectée
                 //vérifier les autres cas de collisions
@@ -198,6 +200,8 @@ public class Vehicule {
                     //vérifier le dernier cas
                     temp = detectionCheminsCroises(monItineraire,autreItin);
                 }
+            } else { //diagonale detectée
+                System.out.println("[V_ATTENTE]: VID : " + this.getId() + " a detecté une diagonale. POS Act = " + position + " mon itin = " + monItineraire + " AUTRE VID : " + entry.getKey().getId() + "itin = " + autreItin);
             }
             tempsAttente = Math.max(tempsAttente,temp);
         }
@@ -291,7 +295,7 @@ public class Vehicule {
             int temp;
             ArrayList<Vector2D> itin = nouveauxItinerairesEtVehicules.get(autreVehicule);
             ArrayList<Vector2D> autreItin = extraireItineraireApresTemps(itin,tempsAttente);
-
+            System.out.println("[V_ENGAGES]: VID = " + this.getId() + " itin = " + monItineraire + " TRAITE : ID = " + autreVehicule.getId() + " pos = " + autreVehicule.getPosition() + " itin = " + autreItin);
             temp = detectionConflitDiagonale(monItineraire,autreItin);
             //TODO: rajouter un booléen d'abord ??
             if (temp == 0){ //diagonale non détectée
@@ -302,6 +306,9 @@ public class Vehicule {
                     temp = detectionCheminsCroises(monItineraire,autreItin);
                 }
             }// si diagonale détectée ça ne rentre forcément pas dans les autres cas
+            else {
+                System.out.println("[V_ENGAGES]: VID : " + this.getId() + " a detecté une diagonale. POS Act = " + position + " mon itin = " + monItineraire + " AUTRE VID : " +autreVehicule.getId() + "itin = " + autreItin);
+            }
             //pour chaque vehicule je décide si je garde l'ancien temps calculé parce qu'il est supérieur au nouveau temps spécifique
             //au vehicule actuel, donc tempsAttente couvre la collision, sinon je prends le nouveau car supérieur
             tempsAttente = Math.max(tempsAttente,temp);
