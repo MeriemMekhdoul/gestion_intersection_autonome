@@ -226,7 +226,6 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
 
             //s'il n'y en a pas ou après avoir fait les calculs
             intersection.ajouterTempsAttente(vehicule.getId(),tempsAttente);
-//            System.out.println("VEHICLE ACTUEL id = " + vehicule.getId() + "pos = " + vehicule.getPosition() + "temps attente estimé = " + tempsAttente + " mon itin: " + deplacements);
             pauseEntreMouvements(tempsAttente * VITESSE_SIMULATION_MS);
 
             intersection.editConfig(vehicule, EtatVehicule.ENGAGE);
@@ -280,11 +279,7 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
 
             // Vérification de l'occupation de la cellule
             if (terrain.getCellule(pos).estOccupee()) {
-                //System.out.println("Cellule occupée");
-
-                // attente libération
                 //while (terrain.getCellule(pos).estOccupee()) {
-                    //System.out.println("VID = " + vehicule.getId() + ": attente libération cellule");
                     pauseEntreMouvements(VITESSE_SIMULATION_MS);
                 //}
             }
@@ -479,8 +474,6 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
      */
     @Override
     public void onMessageReceivedFromIntersection(Message message) {
-        System.out.println("Le véhicule de type \"" + vehicule.getType() + "\" avec l'id \"" + vehicule.getId() + "\" a reçu ce message de " + message.getObjet());
-
         // Traitement du message en fonction de l'objet
         switch (message.getObjet()) {
             case MARCHE ->
@@ -500,7 +493,6 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
         synchronized (this) { // Synchronisation sur l'objet courant
             enPause = false;
             vehicule.setEnAttente(false);
-            System.out.println("Véhicule reprend son déplacement");
             notify(); // Réveille un thread en attente
         }
     }
@@ -512,7 +504,6 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
         synchronized (this) { // Synchronisation sur l'objet courant
             enPause = true;
             vehicule.setEnAttente(true);
-            System.out.println("Véhicule mis en pause");
             while (enPause) { // Boucle pour rester en attente tant que le véhicule est en pause
                 try {
                     wait(); // Le thread se met en attente

@@ -164,7 +164,6 @@ public class Vehicule {
      */
     public synchronized void setEnAttente(boolean enAttente) {
         this.enAttente = enAttente;
-//        System.out.println("Vehicule : " + id + " état changé et mis à : " + enAttente);
     }
 
     public synchronized boolean isEnAttente() {
@@ -188,11 +187,9 @@ public class Vehicule {
 
             // Calculer l'itinéraire effectif après le temps d'attente actuel
             ArrayList<Vector2D> autreItin = extraireItineraireApresTemps(itineraireVehiculeAttente, tempsAttente);
-            System.out.println("[V_ATTENTE]: VID = " + this.getId() + " itin = " + monItineraire + " TRAITE : ID = " + entry.getKey().getId() + " pos = " + entry.getKey().getPosition() + " itin = " + autreItin);
 
             int temp = detectionConflitDiagonale(monItineraire,autreItin);
 
-            //TODO: c'est le meme code que dans calculTempsAttenteVehiculesengages
             if (temp == 0){ //diagonale non détectée
                 //vérifier les autres cas de collisions
                 temp = detectionCollisionSimple(monItineraire,autreItin);
@@ -200,10 +197,10 @@ public class Vehicule {
                     //vérifier le dernier cas
                     temp = detectionCheminsCroises(monItineraire,autreItin);
                 }
-            } else { //diagonale detectée
-                System.out.println("[V_ATTENTE]: VID : " + this.getId() + " a detecté une diagonale. POS Act = " + position + " mon itin = " + monItineraire + " AUTRE VID : " + entry.getKey().getId() + "itin = " + autreItin);
             }
-            tempsAttente = Math.max(tempsAttente,temp);
+            //tempsAttente = Math.max(tempsAttente,temp);
+            tempsAttente += temp;
+
         }
 
         return tempsAttente;
@@ -278,7 +275,6 @@ public class Vehicule {
     //TODO: remplacer cette methode par getIndexOf()...
     private int trouverIndexPosition(ArrayList<Vector2D> itineraire, Vector2D positionActuelle) {
         for (int i = 0; i < itineraire.size(); i++) {
-            //System.out.println(positionActuelle + " // get index : i = " + i + "itin.get(i) = " +itineraire.get(i));
             if (itineraire.get(i).equals(positionActuelle)) {
                 return i;
             }
@@ -295,9 +291,8 @@ public class Vehicule {
             int temp;
             ArrayList<Vector2D> itin = nouveauxItinerairesEtVehicules.get(autreVehicule);
             ArrayList<Vector2D> autreItin = extraireItineraireApresTemps(itin,tempsAttente);
-            System.out.println("[V_ENGAGES]: VID = " + this.getId() + " itin = " + monItineraire + " TRAITE : ID = " + autreVehicule.getId() + " pos = " + autreVehicule.getPosition() + " itin = " + autreItin);
             temp = detectionConflitDiagonale(monItineraire,autreItin);
-            //TODO: rajouter un booléen d'abord ??
+
             if (temp == 0){ //diagonale non détectée
                 //vérifier les autres cas de collisions
                 temp = detectionCollisionSimple(monItineraire,autreItin);
@@ -305,13 +300,11 @@ public class Vehicule {
                     //vérifier le dernier cas
                     temp = detectionCheminsCroises(monItineraire,autreItin);
                 }
-            }// si diagonale détectée ça ne rentre forcément pas dans les autres cas
-            else {
-                System.out.println("[V_ENGAGES]: VID : " + this.getId() + " a detecté une diagonale. POS Act = " + position + " mon itin = " + monItineraire + " AUTRE VID : " +autreVehicule.getId() + "itin = " + autreItin);
             }
             //pour chaque vehicule je décide si je garde l'ancien temps calculé parce qu'il est supérieur au nouveau temps spécifique
             //au vehicule actuel, donc tempsAttente couvre la collision, sinon je prends le nouveau car supérieur
-            tempsAttente = Math.max(tempsAttente,temp);
+            tempsAttente += temp;
+            //tempsAttente = Math.max(tempsAttente,temp);
         }
         
         return tempsAttente;
@@ -371,47 +364,77 @@ public class Vehicule {
         return 0;
     }
 
-    //TODO: revoir cette fonction
-    private int detectionCheminsCroises(ArrayList<Vector2D> monItineraire, ArrayList<Vector2D> autreItineraire){
-        // Parcours de chaque segment de mon itinéraire
-        /*for (int i = 0; i < monItineraire.size() - 1; i++) {
-            Vector2D startMon = monItineraire.get(i);
-            Vector2D endMon = monItineraire.get(i + 1);
+    private int detectionCheminsCroises(ArrayList<Vector2D> monItineraire, ArrayList<Vector2D> autreItineraire) {
+        if(!monItineraire.isEmpty() && !autreItineraire.isEmpty()) {
+            Vector2D posD1 = monItineraire.get(0);
+            Vector2D posA1 = monItineraire.get(monItineraire.size() - 1);
 
-            // Parcours de chaque segment de l'autre itinéraire
-            for (int j = 0; j < autreItineraire.size() - 1; j++) {
-                Vector2D startAutre = autreItineraire.get(j);
-                Vector2D endAutre = autreItineraire.get(j + 1);
+            Vector2D posD2 = autreItineraire.get(0);
+            Vector2D posA2 = autreItineraire.get(autreItineraire.size() - 1);
 
-                // Vérification si les segments se croisent selon les cas que vous avez décrits
-                if (intersectionX(startMon, endMon, startAutre, endAutre)) {
-                    return 1;
-                }
+            if (segmentsSeCroisent(posD1, posA1, posD2, posA2)) {
+                return 1; // Les segments se croisent
             }
-        } */
-        return 0;
+        }
+        return 0; // Les segments ne se croisent pas
+    }
+    private boolean segmentsSeCroisent(Vector2D p1, Vector2D q1, Vector2D p2, Vector2D q2) {
+        // Vérifie l'orientation des points
+        int o1 = orientation(p1, q1, p2);
+        int o2 = orientation(p1, q1, q2);
+        int o3 = orientation(p2, q2, p1);
+        int o4 = orientation(p2, q2, q1);
+
+        // Cas général : les segments se croisent si les orientations sont différentes
+        if (o1 != o2 && o3 != o4) {
+            // Vérifier si l'intersection est dans les limites des segments
+            Vector2D intersection = calculIntersection(p1, q1, p2, q2);
+            return intersection != null && pointDansSegment(p1, q1, intersection) && pointDansSegment(p2, q2, intersection);
+        }
+
+        return false;
+    }
+
+    private int orientation(Vector2D p, Vector2D q, Vector2D r) {
+        double val = (q.getY() - p.getY()) * (r.getX() - q.getX()) - (q.getX() - p.getX()) * (r.getY() - q.getY());
+        if (val == 0) return 0; // Colinéaire
+        return (val > 0) ? 1 : 2; // Horaire ou antihoraire
     }
 
     /**
      * Vérifie si deux segments se croisent selon les cas définis dans l'énoncé.
-     * @param A Le premier point du premier segment
-     * @param B Le deuxième point du premier segment
-     * @param C Le premier point du deuxième segment
-     * @param D Le deuxième point du deuxième segment
+     * @param p1 Le premier point du premier segment
+     * @param q1 Le deuxième point du premier segment
+     * @param p2 Le premier point du deuxième segment
+     * @param q2 Le deuxième point du deuxième segment
      * @return true si les segments se croisent, false sinon
      */
-    //TODO: revoir la logique de la fonction, elle n'est pas complète
-    private boolean intersectionX(Vector2D A, Vector2D B, Vector2D C, Vector2D D) {
+    private Vector2D calculIntersection(Vector2D p1, Vector2D q1, Vector2D p2, Vector2D q2) {
+        double a1 = q1.getY() - p1.getY();
+        double b1 = p1.getX() - q1.getX();
+        double c1 = a1 * p1.getX() + b1 * p1.getY();
 
-        // Cas 1 : Vérifier si les segments forment un "X" avec i constant et j change
-        if (A.getX() == C.getX() && B.getX() == D.getX() && A.getY() != B.getY() && C.getY() != D.getY()) {
-            // (i, j) -> (i+1, j+1) et (i+1, j) -> (i, j+1) croisement dans X
-            return false;
+        double a2 = q2.getY() - p2.getY();
+        double b2 = p2.getX() - q2.getX();
+        double c2 = a2 * p2.getX() + b2 * p2.getY();
+
+        double determinant = a1 * b2 - a2 * b1;
+
+        if (determinant == 0) {
+            return null; // Les lignes sont parallèles
         }
 
-        // Cas 2 : Vérifier si les segments forment un "X" avec i constant et j change
-        // (i, j) -> (i+1, j+1) et (i, j+1) -> (i+1, j) croisement dans X
-        //return A.getX() == C.getX() && B.getX() == D.getX() && A.getX() == C.getX()+1 && C.getX() != D.getX();
-        return false;
+        double x = (b2 * c1 - b1 * c2) / determinant;
+        double y = (a1 * c2 - a2 * c1) / determinant;
+
+        return new Vector2D((int) x, (int) y);
     }
+
+    private boolean pointDansSegment(Vector2D p, Vector2D q, Vector2D r) {
+        return Math.min(p.getX(), q.getX()) <= r.getX() && r.getX() <= Math.max(p.getX(), q.getX()) &&
+                Math.min(p.getY(), q.getY()) <= r.getY() && r.getY() <= Math.max(p.getY(), q.getY());
+    }
+
+
+
 }
