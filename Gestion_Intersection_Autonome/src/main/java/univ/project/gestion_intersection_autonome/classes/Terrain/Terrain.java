@@ -1,4 +1,7 @@
-package univ.project.gestion_intersection_autonome.classes;
+package univ.project.gestion_intersection_autonome.classes.Terrain;
+
+import univ.project.gestion_intersection_autonome.classes.Agents.Intersection;
+import univ.project.gestion_intersection_autonome.classes.Enums.TypeZone;
 
 import java.util.*;
 

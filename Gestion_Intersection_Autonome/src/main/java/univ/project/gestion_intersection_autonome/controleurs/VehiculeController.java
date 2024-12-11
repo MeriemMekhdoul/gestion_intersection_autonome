@@ -1,13 +1,21 @@
-package univ.project.gestion_intersection_autonome.controllers;
+package univ.project.gestion_intersection_autonome.controleurs;
 
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import univ.project.gestion_intersection_autonome.classes.*;
+import univ.project.gestion_intersection_autonome.classes.Agents.Intersection;
+import univ.project.gestion_intersection_autonome.classes.Agents.Vehicule;
+import univ.project.gestion_intersection_autonome.classes.Enums.EtatVehicule;
+import univ.project.gestion_intersection_autonome.classes.Enums.Objetmessage;
+import univ.project.gestion_intersection_autonome.classes.Enums.TypeVehicule;
+import univ.project.gestion_intersection_autonome.classes.Enums.TypeZone;
+import univ.project.gestion_intersection_autonome.classes.Terrain.Cellule;
+import univ.project.gestion_intersection_autonome.classes.Terrain.Terrain;
+import univ.project.gestion_intersection_autonome.classes.Terrain.Vector2D;
 
 import java.util.*;
 
@@ -81,7 +89,6 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
                         wait(); // Attend que 'enPause' soit false
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
-//                        System.out.println("Le thread du véhicule a été interrompu.");
                     }
                 }
             }
@@ -201,8 +208,6 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
 
             //s'il reste des véhicules en attente à prendre en compte
             if (!vehiculesAttenteEtItineraires.isEmpty()){
-//                System.out.println("VID caller : " + vehicule.getId() + "\n");
-                intersection.afficherConfiguration();
                 //get TA des véhicules en attente
                 for (Vehicule v: vehiculesAttenteEtItineraires.keySet()) {
                     //get temps attente
@@ -398,46 +403,6 @@ public class VehiculeController implements Runnable, VehiculeControllerListener 
         return imageToColorMap.keySet().stream().filter(img -> img.getUrl().contains(path)).findFirst().orElse(null);
     }
 
-    /**
-     * Ajoute un écouteur pour les messages du véhicule.
-     *
-     * @param listener L'écouteur à ajouter.
-     */
-    public void addListener(VehiculeControllerListener listener) {
-        listeners.add(listener);
-    }
-
-    /**
-     * Retire un écouteur des messages du véhicule.
-     *
-     * @param listener L'écouteur à retirer.
-     */
-    public void removeListener(VehiculeControllerListener listener) {
-        listeners.remove(listener);
-    }
-
-    /**
-     * Notifie tous les écouteurs d'un nouveau message.
-     *
-     * @param message Le message à envoyer aux écouteurs.
-     */
-    protected void notifyListeners(Message message) {
-        for (VehiculeControllerListener listener : listeners) {
-            if (!listener.equals(message.getv1())) //TODO: vehiculeController(listener) != vehicule (m.getv1())
-            {
-                listener.messageVc(message);
-            }
-        }
-    }
-
-    /**
-     * Envoie un message à tous les écouteurs du véhicule.
-     *
-     * @param message Le message à envoyer.
-     */
-    public void sendMessageVc(Message message) {
-        notifyListeners(message); // Notifie tous les observateurs
-    }
 
     /**
      * Gère la réception d'un message d'un autre véhicule.

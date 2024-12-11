@@ -1,6 +1,9 @@
-package univ.project.gestion_intersection_autonome.classes;
+package univ.project.gestion_intersection_autonome.classes.Agents;
 
 import javafx.scene.paint.Color;
+import univ.project.gestion_intersection_autonome.classes.Enums.TypeVehicule;
+import univ.project.gestion_intersection_autonome.classes.Terrain.Vector2D;
+
 import java.util.*;
 import java.io.*;
 import java.util.List;
@@ -198,7 +201,6 @@ public class Vehicule {
                     temp = detectionCheminsCroises(monItineraire,autreItin);
                 }
             }
-            //tempsAttente = Math.max(tempsAttente,temp);
             tempsAttente += temp;
 
         }
@@ -251,7 +253,7 @@ public class Vehicule {
      */
     private ArrayList<Vector2D> extraireItineraireRestant(Vehicule vehicule, ArrayList<Vector2D> itineraireComplet, boolean engage) {
         Vector2D positionActuelle = vehicule.getPosition();
-        int index = trouverIndexPosition(itineraireComplet, positionActuelle);
+        int index = itineraireComplet.indexOf(positionActuelle);
 
         if (index == -1) {
             if (engage) //il s'est engagé donc si la position n'existe pas, c'est qu'il est sorti de l'intersection
@@ -263,23 +265,6 @@ public class Vehicule {
         // Extraire le sous-itinéraire restant
         return new ArrayList<>(itineraireComplet.subList(index, itineraireComplet.size()));
 
-    }
-
-    /**
-     * Trouve l'indice de la position actuelle dans l'itinéraire complet.
-     *
-     * @param itineraire       L'itinéraire complet du véhicule.
-     * @param positionActuelle La position actuelle du véhicule.
-     * @return L'indice de la position actuelle, ou -1 si elle n'est pas trouvée.
-     */
-    //TODO: remplacer cette methode par getIndexOf()...
-    private int trouverIndexPosition(ArrayList<Vector2D> itineraire, Vector2D positionActuelle) {
-        for (int i = 0; i < itineraire.size(); i++) {
-            if (itineraire.get(i).equals(positionActuelle)) {
-                return i;
-            }
-        }
-        return -1; // Position non trouvée
     }
 
     public int calculTempsAttenteVehiculesEngages(Map<Vehicule, ArrayList<Vector2D>> vehiculesEngagesEtItineraires, ArrayList<Vector2D> monItineraire){
@@ -304,7 +289,6 @@ public class Vehicule {
             //pour chaque vehicule je décide si je garde l'ancien temps calculé parce qu'il est supérieur au nouveau temps spécifique
             //au vehicule actuel, donc tempsAttente couvre la collision, sinon je prends le nouveau car supérieur
             tempsAttente += temp;
-            //tempsAttente = Math.max(tempsAttente,temp);
         }
         
         return tempsAttente;

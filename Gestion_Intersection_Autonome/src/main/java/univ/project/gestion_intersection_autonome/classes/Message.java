@@ -1,5 +1,10 @@
 package univ.project.gestion_intersection_autonome.classes;
 
+import univ.project.gestion_intersection_autonome.classes.Agents.Vehicule;
+import univ.project.gestion_intersection_autonome.classes.Agents.VehiculeUrgence;
+import univ.project.gestion_intersection_autonome.classes.Enums.Objetmessage;
+import univ.project.gestion_intersection_autonome.classes.Terrain.Vector2D;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Objects;

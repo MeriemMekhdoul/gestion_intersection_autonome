@@ -1,4 +1,4 @@
-package univ.project.gestion_intersection_autonome.classes;
+package univ.project.gestion_intersection_autonome.classes.Enums;
 
 /**
  * Enumération représentant les directions possibles pour les véhicules dans le système.

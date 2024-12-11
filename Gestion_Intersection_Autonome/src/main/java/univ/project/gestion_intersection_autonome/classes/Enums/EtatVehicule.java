@@ -1,4 +1,4 @@
-package univ.project.gestion_intersection_autonome.classes;
+package univ.project.gestion_intersection_autonome.classes.Enums;
 /**
  * Enumération représentant les différents états possibles d'un véhicule dans le système.
  * Les états permettent de définir si un véhicule est engagé dans l'intersection ou en attente.

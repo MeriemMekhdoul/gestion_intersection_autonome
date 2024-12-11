@@ -1,7 +1,11 @@
-package univ.project.gestion_intersection_autonome.classes;
+package univ.project.gestion_intersection_autonome.controleurs;
 
-import univ.project.gestion_intersection_autonome.controllers.TerrainController;
-import univ.project.gestion_intersection_autonome.controllers.VehiculeController;
+import univ.project.gestion_intersection_autonome.classes.*;
+import univ.project.gestion_intersection_autonome.classes.Agents.Intersection;
+import univ.project.gestion_intersection_autonome.classes.Agents.VehiculeUrgence;
+import univ.project.gestion_intersection_autonome.classes.Enums.Objetmessage;
+import univ.project.gestion_intersection_autonome.classes.Terrain.Terrain;
+import univ.project.gestion_intersection_autonome.classes.Terrain.Vector2D;
 
 import java.util.List;
 

@@ -1,16 +1,21 @@
 package univ.project.gestion_intersection_autonome.classes;
 
 import javafx.application.Platform;
-import univ.project.gestion_intersection_autonome.controllers.TerrainController;
-import univ.project.gestion_intersection_autonome.controllers.VehiculeController;
+import univ.project.gestion_intersection_autonome.classes.Agents.Vehicule;
+import univ.project.gestion_intersection_autonome.classes.Agents.VehiculeUrgence;
+import univ.project.gestion_intersection_autonome.classes.Enums.TypeVehicule;
+import univ.project.gestion_intersection_autonome.classes.Terrain.Terrain;
+import univ.project.gestion_intersection_autonome.classes.Terrain.Vector2D;
+import univ.project.gestion_intersection_autonome.controleurs.TerrainController;
+import univ.project.gestion_intersection_autonome.controleurs.VehiculeController;
 
 import javafx.scene.paint.Color;
+import univ.project.gestion_intersection_autonome.controleurs.VehiculeUrgenceController;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -23,10 +28,10 @@ import java.util.concurrent.TimeUnit;
 public class Simulation {
 
     private final Terrain terrain;
-    private ArrayList<Vehicule> vehicules;
+    private final ArrayList<Vehicule> vehicules;
     private TerrainController terrainController;
-    private ArrayList<VehiculeController> controleurs;
-    private ScheduledExecutorService scheduler;
+    private final ArrayList<VehiculeController> controleurs;
+    private final ScheduledExecutorService scheduler;
     private final int LARGEUR_TERRAIN = 40;
     private final int HAUTEUR_TERRAIN = 40;
     private final int LIMITE_VEHICULES = 20;

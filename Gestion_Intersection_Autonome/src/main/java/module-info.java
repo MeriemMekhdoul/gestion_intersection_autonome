@@ -9,7 +9,10 @@ module univ.project.gestion_intersection_autonome {
     opens univ.project.gestion_intersection_autonome to javafx.fxml;
     exports univ.project.gestion_intersection_autonome;
 
-    opens univ.project.gestion_intersection_autonome.controllers to javafx.fxml;
-    exports univ.project.gestion_intersection_autonome.controllers;
+    opens univ.project.gestion_intersection_autonome.controleurs to javafx.fxml;
+    exports univ.project.gestion_intersection_autonome.controleurs;
     exports univ.project.gestion_intersection_autonome.classes;
+    exports univ.project.gestion_intersection_autonome.classes.Agents;
+    exports univ.project.gestion_intersection_autonome.classes.Enums;
+    exports univ.project.gestion_intersection_autonome.classes.Terrain;
 }

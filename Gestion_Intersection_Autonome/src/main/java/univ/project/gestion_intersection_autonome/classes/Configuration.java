@@ -1,7 +1,9 @@
 package univ.project.gestion_intersection_autonome.classes;
 
 
-import univ.project.gestion_intersection_autonome.controllers.VehiculeController;
+import univ.project.gestion_intersection_autonome.classes.Agents.Vehicule;
+import univ.project.gestion_intersection_autonome.classes.Enums.EtatVehicule;
+import univ.project.gestion_intersection_autonome.controleurs.VehiculeController;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -84,8 +86,6 @@ public class Configuration{
 
         if (vehicule != null) {
             etatVehicule.put(id, etat);
-        } else {
-//            System.out.println("Véhicule avec l'ID " + id + " non trouvé.");
         }
     }
 

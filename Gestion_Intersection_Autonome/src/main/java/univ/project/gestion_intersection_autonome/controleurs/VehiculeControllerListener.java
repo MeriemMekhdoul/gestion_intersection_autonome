@@ -1,4 +1,6 @@
-package univ.project.gestion_intersection_autonome.classes;
+package univ.project.gestion_intersection_autonome.controleurs;
+
+import univ.project.gestion_intersection_autonome.classes.Message;
 
 /**
  * Interface pour écouter les événements provenant du contrôleur de véhicules.

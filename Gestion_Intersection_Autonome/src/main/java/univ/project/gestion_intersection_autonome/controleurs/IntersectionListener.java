@@ -1,4 +1,6 @@
-package univ.project.gestion_intersection_autonome.classes;
+package univ.project.gestion_intersection_autonome.controleurs;
+
+import univ.project.gestion_intersection_autonome.classes.Message;
 
 /**
  * Interface définissant les méthodes nécessaires pour écouter les messages provenant d'autres intersections

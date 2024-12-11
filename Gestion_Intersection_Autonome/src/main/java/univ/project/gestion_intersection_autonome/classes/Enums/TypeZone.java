@@ -1,4 +1,4 @@
-package univ.project.gestion_intersection_autonome.classes;
+package univ.project.gestion_intersection_autonome.classes.Enums;
 
 /**
  * Enumération des types de zones dans une intersection autonome.

@@ -1,4 +1,8 @@
-package univ.project.gestion_intersection_autonome.classes;
+package univ.project.gestion_intersection_autonome.classes.Terrain;
+
+import univ.project.gestion_intersection_autonome.classes.Agents.Vehicule;
+import univ.project.gestion_intersection_autonome.classes.Enums.Direction;
+import univ.project.gestion_intersection_autonome.classes.Enums.TypeZone;
 
 /**
  * Représente une cellule dans le terrain du système de gestion des intersections autonomes.

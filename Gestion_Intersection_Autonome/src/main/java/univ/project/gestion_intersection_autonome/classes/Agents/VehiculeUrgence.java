@@ -1,6 +1,9 @@
-package univ.project.gestion_intersection_autonome.classes;
+package univ.project.gestion_intersection_autonome.classes.Agents;
 
 import javafx.scene.paint.Color;
+import univ.project.gestion_intersection_autonome.classes.Enums.TypeVehicule;
+import univ.project.gestion_intersection_autonome.classes.Terrain.Vector2D;
+
 import java.io.IOException;
 import java.util.List;
 

@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="univ.project.gestion_intersection_autonome.controllers.TerrainController">
+<AnchorPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="univ.project.gestion_intersection_autonome.controleurs.TerrainController">
     <children>
                 <VBox fx:id="intersection" prefHeight="800.0" prefWidth="456.0" style="-fx-background-color: #ffffff;" HBox.hgrow="ALWAYS" />
         <StackPane fx:id="stackPane" prefWidth="800" prefHeight="800">

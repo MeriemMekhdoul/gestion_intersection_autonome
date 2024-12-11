@@ -1,4 +1,4 @@
-package univ.project.gestion_intersection_autonome.controllers;
+package univ.project.gestion_intersection_autonome.controleurs;
 
 import javafx.animation.TranslateTransition;
 import javafx.scene.image.Image;
@@ -10,11 +10,17 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Shape;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
-import univ.project.gestion_intersection_autonome.classes.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import univ.project.gestion_intersection_autonome.classes.Simulation;
+import univ.project.gestion_intersection_autonome.classes.Agents.Vehicule;
+import univ.project.gestion_intersection_autonome.classes.Enums.Direction;
+import univ.project.gestion_intersection_autonome.classes.Enums.TypeZone;
+import univ.project.gestion_intersection_autonome.classes.Terrain.Cellule;
+import univ.project.gestion_intersection_autonome.classes.Terrain.Terrain;
+import univ.project.gestion_intersection_autonome.classes.Terrain.Vector2D;
 
 import java.net.URL;
 import java.util.*;
